@@ -1,0 +1,25 @@
+@import './variables.scss';
+
+// Spacing
+
+.padding-list-xxs { padding: $space-list-xxs; }
+.padding-list-xs { padding: $space-list-xs; }
+.padding-list-s { padding: $space-list-s; }
+.padding-list-m { padding: $space-list-m; }
+.padding-list-l { padding: $space-list-l; }
+.padding-list-xl { padding: $space-list-xl; }
+
+// Materials
+
+.surface { background-color: $surface; }
+.surface-selection { background-color: $surface-selection; }
+
+// Resets
+
+.unanchor {
+  &, &:hover, &:visited, &:active {
+    color: unset;
+    text-decoration: unset;
+    cursor: default;
+  }
+}

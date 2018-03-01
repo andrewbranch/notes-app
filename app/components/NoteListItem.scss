@@ -1,0 +1,8 @@
+.note-list-item {
+  composes: surface padding-list-xs unanchor from '../styles/utils.scss';
+  display: flex;
+}
+
+.selected {
+  composes: surface-selection from '../styles/utils.scss';
+}

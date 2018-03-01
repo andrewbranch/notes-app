@@ -111,6 +111,7 @@
   ],
   "homepage": "https://github.com/irath96/electron-react-typescript-boilerplate#readme",
   "devDependencies": {
+    "@types/classnames": "^2.2.3",
     "@types/draft-js": "^0.10.20",
     "@types/enzyme": "^3.1.1",
     "@types/history": "^4.5.2",
@@ -165,6 +166,7 @@
     "webpack-merge": "^4.1.1"
   },
   "dependencies": {
+    "classnames": "^2.2.5",
     "draft-js": "^0.10.5",
     "electron-debug": "^1.1.0",
     "history": "^4.6.1",

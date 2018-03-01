@@ -4,7 +4,7 @@ import { History } from 'history';
 import { Provider } from 'react-redux';
 import { ConnectedRouter } from 'react-router-redux';
 import { Switch, Route } from 'react-router';
-import { Shell } from './Shell';
+import Shell from './Shell';
 
 interface RootProps {
   store: Redux.Store<any>;

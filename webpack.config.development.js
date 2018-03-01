@@ -81,7 +81,7 @@ module.exports = merge(baseConfig, {
               sourceMap: true,
               importLoaders: 1,
               localIdentName: '[name]__[local]__[hash:base64:5]',
-              camelCase: 'only'
+              camelCase: true
             }
           },
           {

@@ -2,7 +2,6 @@ import * as React from 'react';
 import { Styleable, Styles } from './types';
 import { cn } from './utils';
 const styles: Styles = require('./MasterDetailView.scss');
-console.log(styles);
 
 export interface MasterDetailViewProps extends Styleable {
   masterListItems: string[];
@@ -12,7 +11,7 @@ export interface MasterDetailViewProps extends Styleable {
 }
 
 export class MasterDetailView extends React.Component<MasterDetailViewProps> {
-  static DetailView: React.SFC<React.HTMLAttributes<HTMLDivElement>> = props => <div {...cn(props, styles.detailView)} />;
+  static DetailView: React.SFC<React.HTMLAttributes<HTMLDivElement>> = props => <div {...cn(props, styles.detail)} />;
 
   render() {
     const {

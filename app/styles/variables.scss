@@ -1,0 +1,24 @@
+// Colors
+
+$accent: #6EA4BF;
+$accent-dark: #28353B;
+
+$surface: white;
+$surface-selection: rgba($accent, 0.1);
+
+// Spacing
+
+$space-xxs: 4px;
+$space-xs: 8px;
+$space-s: 16px;
+$space-m: 20px;
+$space-l: 32px;
+$space-xl: 40px;
+
+$space-list-h: $space-s;
+$space-list-xxs: $space-xxs $space-list-h;
+$space-list-xs: $space-xs $space-list-h;
+$space-list-s: $space-s $space-list-h;
+$space-list-m: $space-m $space-list-h;
+$space-list-l: $space-l $space-list-h;
+$space-list-xl: $space-xl $space-list-h;
