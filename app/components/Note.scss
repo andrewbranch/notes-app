@@ -1,3 +1,6 @@
+@import '../styles/variables.scss';
+
 .note {
-  
+  white-space: pre;
+  padding: $space-m;
 }

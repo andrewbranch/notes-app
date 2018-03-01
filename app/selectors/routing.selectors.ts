@@ -1,5 +1,5 @@
 import { createSelector } from 'reselect';
-import { StoreShape } from '../reducers';
+import { StateShape } from '../reducers';
 
-export const locationSelector = (state: StoreShape) => state.routing.location;
+export const locationSelector = (state: StateShape) => state.routing.location;
 export const selectedNoteSelector = createSelector(locationSelector, location => location!.pathname.substring(1));

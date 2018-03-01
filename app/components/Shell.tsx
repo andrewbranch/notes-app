@@ -3,13 +3,14 @@ import { match } from 'react-router';
 import { connect, DispatchProp } from 'react-redux';
 import { MasterDetailView } from '../ui/MasterDetailView';
 import { Route, RouteComponentProps } from 'react-router-dom';
-import { Note } from './Note';
-import { NoteListItem } from './NoteListItem';
-import mapStateToProps from './Shell.selectors';
+import Note from './Note';
+import NoteListItem from './NoteListItem';
+import { shellSelector } from './Shell.selectors';
 const styles = require('./Shell.scss');
 
 export interface ShellProps extends RouteComponentProps<{}>, DispatchProp<{}> {
   selectedNote: string;
+  noteIds: string[];
 }
 
 /**
@@ -17,14 +18,16 @@ export interface ShellProps extends RouteComponentProps<{}>, DispatchProp<{}> {
  */
 export class Shell extends React.Component<ShellProps> {
   render() {
+    const { selectedNote, noteIds } = this.props;
+
     return (
       <div className={styles.shell}>
         <MasterDetailView
-          masterListItems={['1', '2', '3']}
+          masterListItems={noteIds}
           renderMasterListItem={(noteId, isSelected) => (
             <NoteListItem key={noteId} noteId={noteId} isSelected={isSelected} />
           )}
-          selectedMasterListItem={this.props.selectedNote}
+          selectedMasterListItem={selectedNote}
           detailView={
             <Route path="/:id" render={({ match }: { match: match<{ id: string }> }) => (
               <MasterDetailView.DetailView>
@@ -38,4 +41,4 @@ export class Shell extends React.Component<ShellProps> {
   }
 }
 
-export default connect(mapStateToProps)(Shell);
+export default connect(shellSelector)(Shell);

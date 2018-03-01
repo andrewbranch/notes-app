@@ -1,12 +1,12 @@
 import { combineReducers } from 'redux';
-import { routerReducer as routing, RouterState } from 'react-router-redux';
+import { routerReducer as routing } from 'react-router-redux';
+import { notesReducer as notes } from './notes';
+import { StateShape } from './types';
 
-export type StoreShape = {
-  routing: RouterState;
-};
-
-const rootReducer = combineReducers<StoreShape>({
-  routing
+const rootReducer = combineReducers<StateShape>({
+  routing,
+  notes
 });
 
+export { StateShape };
 export default rootReducer;

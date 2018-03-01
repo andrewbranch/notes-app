@@ -1,7 +1,9 @@
 import { createSelector } from 'reselect';
 import { selectedNoteSelector } from '../selectors/routing.selectors';
+import { noteIdsSelector } from '../selectors/notes.selectors';
 
-export default createSelector(
+export const shellSelector = createSelector(
   selectedNoteSelector,
-  (selectedNote) => ({ selectedNote })
+  noteIdsSelector,
+  (selectedNote, noteIds) => ({ selectedNote, noteIds })
 );
