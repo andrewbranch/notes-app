@@ -111,6 +111,7 @@
   ],
   "homepage": "https://github.com/irath96/electron-react-typescript-boilerplate#readme",
   "devDependencies": {
+    "@types/draft-js": "^0.10.20",
     "@types/enzyme": "^3.1.1",
     "@types/history": "^4.5.2",
     "@types/jest": "^22.0.0",
@@ -123,6 +124,7 @@
     "@types/react-router-dom": "^4.0.7",
     "@types/react-router-redux": "^5.0.2",
     "@types/redux-logger": "^3.0.0",
+    "@types/reselect": "^2.2.0",
     "@types/sinon": "^4.0.0",
     "asar": "^0.14.0",
     "boiler-room-custodian": "^0.6.2",
@@ -165,8 +167,8 @@
   "dependencies": {
     "draft-js": "^0.10.5",
     "electron-debug": "^1.1.0",
-    "font-awesome": "^4.7.0",
     "history": "^4.6.1",
+    "lodash": "^4.17.5",
     "react": "16.3.0-alpha.1",
     "react-dom": "^16.0.0",
     "react-redux": "^5.0.1",
@@ -175,6 +177,7 @@
     "react-router-redux": "5.0.0-alpha.9",
     "redux": "^3.6.0",
     "redux-thunk": "^2.1.0",
+    "reselect": "^3.0.1",
     "source-map-support": "^0.5.0"
   },
   "devEngines": {
