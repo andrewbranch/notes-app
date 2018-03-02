@@ -1,9 +1,9 @@
 import { createSelector } from 'reselect';
-import { selectedNoteSelector } from '../selectors/routing.selectors';
+import { selectedNoteIdSelector } from '../selectors/routing.selectors';
 import { noteIdsSelector } from '../selectors/notes.selectors';
 
 export const shellSelector = createSelector(
-  selectedNoteSelector,
+  selectedNoteIdSelector,
   noteIdsSelector,
   (selectedNote, noteIds) => ({ selectedNote, noteIds })
 );

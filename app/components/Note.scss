@@ -1,6 +1,8 @@
 @import '../styles/variables.scss';
 
 .note {
-  white-space: pre;
   padding: $space-m;
+  height: 100%;
+  box-sizing: border-box;
+  overflow: auto;
 }

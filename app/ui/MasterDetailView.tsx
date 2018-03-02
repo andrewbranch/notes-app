@@ -27,9 +27,7 @@ export class MasterDetailView extends React.Component<MasterDetailViewProps> {
         <div className={styles.master}>
           {masterListItems.map((key, index) => renderMasterListItem(key, selectedMasterListItem === key, index))}
         </div>
-        <div className={styles.detail}>
-          {detailView}
-        </div>
+        {detailView}
       </div>
     )
   }
