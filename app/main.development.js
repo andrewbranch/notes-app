@@ -47,7 +47,7 @@ app.on('ready', () =>
 
   mainWindow.loadURL(`file://${__dirname}/app.html`);
 
-  mainWindow.webContents.on('did-finish-load', () => {
+  mainWindow.webContents.once('did-finish-load', () => {
     mainWindow.show();
     mainWindow.focus();
   });
