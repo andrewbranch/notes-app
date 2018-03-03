@@ -6,7 +6,7 @@ import { default as DraftEditor } from 'draft-js-plugins-editor';
 import { connect } from 'react-redux';
 import { editorSelector } from './Editor.selectors';
 import * as editorActions from './Editor.actions';
-import { createCoreStylingPlugin } from './core.styling.plugin';
+import { createCoreStylingPlugin } from './core-styling-plugin';
 const coreStylingPlugin = createCoreStylingPlugin();
 
 export interface EditorProps {

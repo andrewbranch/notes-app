@@ -9,6 +9,10 @@
 .padding-list-l { padding: $space-list-l; }
 .padding-list-xl { padding: $space-list-xl; }
 
+// Borders & corners
+
+.rounded-sm { border-radius: 2px; }
+
 // Materials
 
 .surface { background-color: $surface; }

@@ -1,4 +1,5 @@
 import { SelectionState, ContentBlock, Entity, ContentState, Modifier } from 'draft-js';
+import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
 
 // Can be replaced with ReturnType<T> in TS 2.8
 try { var _ = Entity.mergeData('', {}); } catch {}
@@ -33,4 +34,11 @@ export const stripEntitiesFromBlock = (contentState: ContentState, blockOrKey: C
   });
 
   return newContentState;
+}
+
+export const createDecoratorStrategyMatchingEntityType = (type: string) => (contentBlock: ContentBlock, callback: DecoratorStrategyCallback, contentState: ContentState): void => {
+  contentBlock.findEntityRanges(character => {
+    const entityKey = character.getEntity();
+    return entityKey && contentState.getEntity(entityKey).getType() === type || false;
+  }, callback);
 }

@@ -1,16 +1,8 @@
-import { EditorState, ContentState, Modifier, SelectionState } from 'draft-js';
+import { EditorState, Modifier, SelectionState } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
-import { stripEntitiesFromBlock } from '../../utils/draft-utils';
-
-const stylingEntities = [{
-  name: 'inlineCode',
-  rawPattern: /`([^`]+)`/g,
-  format: (matchArray: RegExpMatchArray) => matchArray[1],
-  createEntity: (currentContent: ContentState) => currentContent.createEntity(
-    'core.styling.inlineCode',
-    'MUTABLE'
-  )
-}];
+import { stripEntitiesFromBlock } from '../../../utils/draft-utils';
+import { stylingEntities } from './entities';
+import { decorators } from './decorators';
 
 const processChange = (editorState: EditorState, insertedCharacter: string | null, isBackspace = false): EditorState => {
   const selectionState = editorState.getSelection()
@@ -90,5 +82,7 @@ export const createCoreStylingPlugin: () => Plugin = () => ({
     }
 
     return editorState;
-  }
+  },
+
+  decorators
 });

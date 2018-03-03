@@ -1,0 +1,9 @@
+@import '../../../../styles/variables.scss';
+
+.code {
+  composes: rounded-sm from '../../../../styles/utils.scss';
+  display: inline-block;
+  font-family: monaco, consolas, monospace;
+  font-size: 80%;
+  background-color: $warm-gray-5;
+}
