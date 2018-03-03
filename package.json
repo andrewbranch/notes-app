@@ -168,6 +168,7 @@
   "dependencies": {
     "classnames": "^2.2.5",
     "draft-js": "^0.10.5",
+    "draft-js-plugins-editor": "^2.0.4",
     "electron-debug": "^1.1.0",
     "history": "^4.6.1",
     "lodash": "^4.17.5",

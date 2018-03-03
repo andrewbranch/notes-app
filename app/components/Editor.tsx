@@ -1,6 +1,8 @@
+/// <reference path="../draft-js-plugins-editor.d.ts" />
 import * as React from 'react';
 import { bindActionCreators } from 'redux';
-import { Editor as DraftEditor, EditorState } from 'draft-js';
+import { EditorState } from 'draft-js';
+import { default as DraftEditor } from 'draft-js-plugins-editor';
 import { connect } from 'react-redux';
 import { editorSelector } from './Editor.selectors';
 import * as editorActions from './Editor.actions';
