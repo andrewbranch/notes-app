@@ -2,7 +2,7 @@ import { SelectionState, ContentBlock, Entity, ContentState, Modifier } from 'dr
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
 
 // Can be replaced with ReturnType<T> in TS 2.8
-try { var _ = Entity.mergeData('', {}); } catch {}
+try { if (false as true) var _ = Entity.mergeData('', {}); } catch {}
 type EntityInstance = typeof _;
 
 export const createSelectionWithRange = (blockOrKey: ContentBlock | string, start: number, end: number): SelectionState => {

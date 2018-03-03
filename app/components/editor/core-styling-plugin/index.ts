@@ -24,7 +24,11 @@ const processChange = (editorState: EditorState, insertedCharacter: string | nul
   // and we need to do it ourselves. In the case of `isBackspace`, the content has already
   // been updated in the `editorState` we were passed, so no need to do anything.
   if (insertedCharacter) {
-    contentState = Modifier.insertText(contentState, selectionState, insertedCharacter);
+    if (selectionState.isCollapsed()) {
+      contentState = Modifier.insertText(contentState, selectionState, insertedCharacter);
+    } else {
+      contentState = Modifier.replaceText(contentState, selectionState, insertedCharacter);
+    }
   }
 
   const newText = contentState.getBlockForKey(cursorPositionKey).getText();
