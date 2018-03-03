@@ -1,12 +1,6 @@
-/// <reference path="../draft-js-plugins-editor.d.ts" />
-import * as React from 'react';
-import { bindActionCreators } from 'redux';
 import { EditorState, ContentState, Modifier, SelectionState } from 'draft-js';
-import { default as DraftEditor, Plugin } from 'draft-js-plugins-editor';
-import { connect } from 'react-redux';
-import { editorSelector } from './Editor.selectors';
-import * as editorActions from './Editor.actions';
-import { stripEntitiesFromBlock } from '../utils/draft-utils';
+import { Plugin } from 'draft-js-plugins-editor';
+import { stripEntitiesFromBlock } from '../../utils/draft-utils';
 
 const stylingEntities = [{
   name: 'inlineCode',
@@ -79,7 +73,7 @@ const processChange = (editorState: EditorState, insertedCharacter: string | nul
   return newEditorState;
 }
 
-const plugin: Plugin = {
+export const createCoreStylingPlugin: () => Plugin = () => ({
   handleBeforeInput: (character, editorState, pluginProvider) => {
     const newEditorState = processChange(editorState, character);
     if (editorState !== newEditorState) {
@@ -97,28 +91,4 @@ const plugin: Plugin = {
 
     return editorState;
   }
-}
-
-export interface EditorProps {
-  editor: EditorState;
-  title: string;
-  noteId: string;
-}
-
-export class Editor extends React.PureComponent<EditorProps & typeof editorActions> {
-  updateEditorState = (editorState: EditorState) => {
-    const { noteId } = this.props;
-    this.props.updateEditor({ noteId, editorState });
-  }
-  render() {
-    return (
-      <DraftEditor
-        editorState={this.props.editor}
-        onChange={this.updateEditorState}
-        plugins={[plugin]}
-      />
-    );
-  }
-}
-
-export default connect(editorSelector, dispatch => bindActionCreators(editorActions, dispatch))(Editor);
+});
