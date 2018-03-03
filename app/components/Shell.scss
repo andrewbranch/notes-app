@@ -1,4 +1,19 @@
 .shell {
   width: 100vw;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.master-detail-view {
+  flex: 1 1 auto;
+}
+
+.debug-pane {
+  flex: 0 0 auto;
+  max-height: 200px;
+  overflow: auto;
+  > * {
+    margin: 0 !important;
+  }
 }

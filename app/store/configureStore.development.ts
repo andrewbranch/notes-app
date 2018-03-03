@@ -1,8 +1,10 @@
 import { createStore, applyMiddleware, compose } from 'redux';
+import * as Mousetrap from 'mousetrap';
 import thunk from 'redux-thunk';
 import { createHashHistory } from 'history';
 import { routerMiddleware, push } from 'react-router-redux';
 import { createLogger } from 'redux-logger';
+import { toggleEditorDebugger } from '../actions/window';
 import rootReducer from '../reducers';
 
 declare const window: Window & {
@@ -47,6 +49,11 @@ export = {
         store.replaceReducer(require('../reducers'))
       );
     }
+
+    Mousetrap.bind('command+shift+d', event => {
+      event.preventDefault();
+      store.dispatch(toggleEditorDebugger());
+    });
 
     return store;
   }

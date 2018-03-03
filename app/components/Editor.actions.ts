@@ -1,4 +1,4 @@
 import { EditorState } from 'draft-js';
-import { actionCreator } from '../actions/types';
+import { createActionCreator } from '../actions/helpers';
 
-export const updateEditor = actionCreator<{ noteId: string, editorState: EditorState }>('editor.update');
+export const updateEditor = createActionCreator<{ noteId: string, editorState: EditorState }>('editor.update');

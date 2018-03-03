@@ -2,6 +2,9 @@ declare module 'draft-js-plugins-editor' {
   import * as Draft from 'draft-js';
   import * as React from 'react';
 
+  export type DecoratorStrategyCallback = (start: number, end: number) => void;
+  export type DecoratorStrategy = (block: Draft.ContentBlock, callback: DecoratorStrategyCallback, contentState: Draft.ContentState) => void;
+
   export interface PluginProvider {
     getPlugins(): Plugin[];
     getProps(): EditorProps;
@@ -37,8 +40,8 @@ declare module 'draft-js-plugins-editor' {
     onChange?(editorState: Draft.EditorState): Draft.EditorState;
     willUnmount?(plugins: Plugin[]): void;
     decorators?: ({
-      strategy: (block: Draft.ContentBlock, callback: (start: number, end: number) => void, contentState: Draft.ContentState) => void;
-      component: Function;
+      strategy: DecoratorStrategy;
+      component: React.ComponentType<any>;
     } | Draft.CompositeDecorator)[];
     getAccessibilityProps?(): {
       ariaHasPopup: string;
