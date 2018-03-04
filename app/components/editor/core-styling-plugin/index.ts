@@ -1,6 +1,6 @@
 import { EditorState, Modifier, SelectionState } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
-import { stripEntitiesFromBlock } from '../../../utils/draft-utils';
+import { stripEntitiesFromBlock, getInsertedCharactersFromChange } from '../../../utils/draft-utils';
 import { stylingEntities } from './entities';
 import { decorators } from './decorators';
 
@@ -9,7 +9,7 @@ const processChange = (editorState: EditorState, insertedCharacter: string | nul
   const cursorPositionKey = selectionState.getStartKey();
   let contentState = editorState.getCurrentContent();
 
-  // Because a single character change could change all entities in a block,
+  // Because a single character change could change several entites in a block,
   // easiest thing to do is to delete them all and recreate them all.
   // This probably isn’t the most efficient thing, so we might need to
   // revisit this logic later if performance suffers.
@@ -18,18 +18,6 @@ const processChange = (editorState: EditorState, insertedCharacter: string | nul
     cursorPositionKey,
     entity => entity.getType().startsWith('core.styling')
   );
-
-  // Insert character manually:
-  // If we’re inserting a character in `handleBeforeInput`, the text hasn’t yet been updated,
-  // and we need to do it ourselves. In the case of `isBackspace`, the content has already
-  // been updated in the `editorState` we were passed, so no need to do anything.
-  if (insertedCharacter) {
-    if (selectionState.isCollapsed()) {
-      contentState = Modifier.insertText(contentState, selectionState, insertedCharacter);
-    } else {
-      contentState = Modifier.replaceText(contentState, selectionState, insertedCharacter);
-    }
-  }
 
   const newText = contentState.getBlockForKey(cursorPositionKey).getText();
 
@@ -52,40 +40,26 @@ const processChange = (editorState: EditorState, insertedCharacter: string | nul
 
   let newEditorState = EditorState.push(editorState, contentState, 'apply-entity');
   if (newEditorState !== editorState) {
-    // If we manually inserted a character, we need to move the selection forward by one character.
-    if (insertedCharacter) {
-      const newCursorPosition = selectionState.getAnchorOffset() + 1;
-      newEditorState = EditorState.forceSelection(newEditorState, selectionState.merge({
-        anchorOffset: newCursorPosition,
-        focusOffset: newCursorPosition
-      }) as SelectionState);
-    } else {
-      // If we were processing a backspace, we just need to put the selection state back how it was
-      // before applying the entity.
-      newEditorState = EditorState.forceSelection(newEditorState, selectionState);
-    }
+    // If we’ve done anything here, reset selection back to what it was before.
+    newEditorState = EditorState.forceSelection(newEditorState, selectionState);
   }
 
   return newEditorState;
 }
 
-export const createCoreStylingPlugin: () => Plugin = () => ({
-  handleBeforeInput: (character, editorState, pluginProvider) => {
-    const newEditorState = processChange(editorState, character);
-    if (editorState !== newEditorState) {
-      pluginProvider.setEditorState(newEditorState);
-      return 'handled';
-    }
-
-    return 'not-handled';
-  },
-
+export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plugin = getEditorState => ({
   onChange: editorState => {
-    if (editorState.getLastChangeType() === 'backspace-character') {
-      return processChange(editorState, null, true);
+    const changeType = editorState.getLastChangeType();
+    switch (changeType) {
+      case 'delete-character':
+      case 'remove-range':
+      case 'backspace-character': return processChange(editorState, null, true);
+      case 'insert-characters':
+        const oldEditorState = getEditorState();
+        const insertedCharacters = getInsertedCharactersFromChange(oldEditorState, editorState);
+        return processChange(editorState, insertedCharacters);
+      default: return editorState;
     }
-
-    return editorState;
   },
 
   decorators

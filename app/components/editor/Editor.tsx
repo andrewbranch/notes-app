@@ -7,7 +7,6 @@ import { connect } from 'react-redux';
 import { editorSelector } from './Editor.selectors';
 import * as editorActions from './Editor.actions';
 import { createCoreStylingPlugin } from './core-styling-plugin';
-const coreStylingPlugin = createCoreStylingPlugin();
 
 export interface EditorProps {
   editor: EditorState;
@@ -16,7 +15,9 @@ export interface EditorProps {
 }
 
 export class Editor extends React.PureComponent<EditorProps & typeof editorActions> {
-  updateEditorState = (editorState: EditorState) => {
+  private coreStylingPlugin = createCoreStylingPlugin(() => this.props.editor);
+
+  private updateEditorState = (editorState: EditorState) => {
     const { noteId } = this.props;
     this.props.updateEditor({ noteId, editorState });
   }
@@ -25,7 +26,7 @@ export class Editor extends React.PureComponent<EditorProps & typeof editorActio
       <DraftEditor
         editorState={this.props.editor}
         onChange={this.updateEditorState}
-        plugins={[coreStylingPlugin]}
+        plugins={[this.coreStylingPlugin]}
       />
     );
   }
