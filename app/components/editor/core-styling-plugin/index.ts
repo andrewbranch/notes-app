@@ -1,41 +1,39 @@
-import { EditorState, Modifier, SelectionState } from 'draft-js';
+import { EditorState, Modifier } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
-import { stripEntitiesFromBlock, getInsertedCharactersFromChange } from '../../../utils/draft-utils';
+import { stripEntitiesFromBlock, createSelectionWithRange } from '../../../utils/draft-utils';
 import { stylingEntities } from './entities';
 import { decorators } from './decorators';
 
-const processChange = (editorState: EditorState, insertedCharacter: string | null, isBackspace = false): EditorState => {
-  const selectionState = editorState.getSelection()
-  const cursorPositionKey = selectionState.getStartKey();
+const processChange = (editorState: EditorState, affectedBlocks: string[] = [editorState.getSelection().getStartKey()]): EditorState => {
+  const selectionState = editorState.getSelection();
   let contentState = editorState.getCurrentContent();
 
   // Because a single character change could change several entites in a block,
   // easiest thing to do is to delete them all and recreate them all.
   // This probably isn’t the most efficient thing, so we might need to
   // revisit this logic later if performance suffers.
-  contentState = stripEntitiesFromBlock(
-    contentState,
-    cursorPositionKey,
-    entity => entity.getType().startsWith('core.styling')
-  );
+  affectedBlocks.forEach(blockKey => {
+    contentState = stripEntitiesFromBlock(
+      contentState,
+      blockKey,
+      entity => entity.getType().startsWith('core.styling')
+    );
 
-  const newText = contentState.getBlockForKey(cursorPositionKey).getText();
+    const newText = contentState.getBlockForKey(blockKey).getText();
 
-  // Go through each styling entity and reapply
-  stylingEntities.forEach(style => {
-    let matchArr;
-    do {
-      matchArr = style.rawPattern.exec(newText);
-      if (matchArr) {
-        contentState = style.createEntity(contentState);
-        const entityKey = contentState.getLastCreatedEntityKey();
-        const entitySelection = selectionState.merge({
-          anchorOffset: matchArr.index,
-          focusOffset: matchArr.index + matchArr[0].length
-        }) as SelectionState;
-        contentState = Modifier.applyEntity(contentState, entitySelection, entityKey);
-      }
-    } while (matchArr);
+    // Go through each styling entity and reapply
+    stylingEntities.forEach(style => {
+      let matchArr;
+      do {
+        matchArr = style.rawPattern.exec(newText);
+        if (matchArr) {
+          contentState = style.createEntity(contentState);
+          const entityKey = contentState.getLastCreatedEntityKey();
+          const entitySelection = createSelectionWithRange(blockKey, matchArr.index, matchArr.index + matchArr[0].length);
+          contentState = Modifier.applyEntity(contentState, entitySelection, entityKey);
+        }
+      } while (matchArr);
+    });
   });
 
   let newEditorState = EditorState.push(editorState, contentState, 'apply-entity');
@@ -53,11 +51,15 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
     switch (changeType) {
       case 'delete-character':
       case 'remove-range':
-      case 'backspace-character': return processChange(editorState, null, true);
+      case 'backspace-character': return processChange(editorState);
+      case 'split-block': return processChange(editorState, [
+        getEditorState().getSelection().getStartKey(),
+        editorState.getSelection().getStartKey()
+      ]);
       case 'insert-characters':
-        const oldEditorState = getEditorState();
-        const insertedCharacters = getInsertedCharactersFromChange(oldEditorState, editorState);
-        return processChange(editorState, insertedCharacters);
+        // const oldEditorState = getEditorState();
+        // const insertedCharacters = getInsertedCharactersFromChange(oldEditorState, editorState);
+        return processChange(editorState);
       default: return editorState;
     }
   },
