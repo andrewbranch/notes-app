@@ -3,6 +3,7 @@ import { Plugin } from 'draft-js-plugins-editor';
 import { stripEntitiesFromBlock, createSelectionWithRange } from '../../../utils/draft-utils';
 import { stylingEntities } from './entities';
 import { decorators } from './decorators';
+import { shouldProcessChanges } from './shouldProcessChange';
 
 const processChange = (editorState: EditorState, affectedBlocks: string[] = [editorState.getSelection().getStartKey()]): EditorState => {
   const selectionState = editorState.getSelection();
@@ -48,20 +49,22 @@ const processChange = (editorState: EditorState, affectedBlocks: string[] = [edi
 export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plugin = getEditorState => ({
   onChange: editorState => {
     const changeType = editorState.getLastChangeType();
-    switch (changeType) {
-      case 'delete-character':
-      case 'remove-range':
-      case 'backspace-character': return processChange(editorState);
-      case 'split-block': return processChange(editorState, [
-        getEditorState().getSelection().getStartKey(),
-        editorState.getSelection().getStartKey()
-      ]);
-      case 'insert-characters':
-        // const oldEditorState = getEditorState();
-        // const insertedCharacters = getInsertedCharactersFromChange(oldEditorState, editorState);
-        return processChange(editorState);
-      default: return editorState;
+    const oldEditorState = getEditorState();
+    if (shouldProcessChanges(changeType, oldEditorState, editorState)) {
+      switch (changeType) {
+        case 'delete-character':
+        case 'remove-range':
+        case 'backspace-character': return processChange(editorState);
+        case 'split-block': return processChange(editorState, [
+          oldEditorState.getSelection().getStartKey(),
+          editorState.getSelection().getStartKey()
+        ]);
+        case 'insert-characters':
+          return processChange(editorState);
+      }
     }
+
+    return editorState;
   },
 
   decorators

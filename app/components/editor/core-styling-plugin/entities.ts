@@ -1,5 +1,7 @@
 import { ContentState } from 'draft-js';
 
+export const TRIGGER_CHARACTERS = ['`'];
+
 export const stylingEntities = [{
   name: 'inlineCode',
   rawPattern: /`([^`]+)`/g,
