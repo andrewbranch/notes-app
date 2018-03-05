@@ -129,4 +129,9 @@ export const getAdjacentCharacters = (contentState: ContentState, selectionState
     text.slice(focusOffset - 1, focusOffset),
     text.slice(focusOffset, focusOffset + 1)
   ];
-}
+};
+
+export const performUnUndoableEdits = (editorState: EditorState, performEdits: (disabledUndoEditorState: EditorState) => EditorState): EditorState => {
+  const disabledUndoEditorState = EditorState.set(editorState, { allowUndo: false });
+  return EditorState.set(performEdits(disabledUndoEditorState), { allowUndo: true });
+};

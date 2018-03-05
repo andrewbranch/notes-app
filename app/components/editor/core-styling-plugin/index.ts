@@ -1,6 +1,6 @@
 import { EditorState } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
-import { mapBlocksInSelection, stripStylesFromBlock } from '../../../utils/draft-utils';
+import { mapBlocksInSelection, stripStylesFromBlock, performUnUndoableEdits } from '../../../utils/draft-utils';
 import { decorators } from './decorators';
 import { shouldReprocessInlineStyles } from './shouldProcessChanges';
 import { styles } from './styles';
@@ -34,10 +34,12 @@ const recreateStylesInBlocks = (editorState: EditorState, affectedBlocks: string
     });
   });
 
-  return EditorState.forceSelection(
-    EditorState.push(editorState, contentState, 'change-inline-style'),
-    selection
-  );
+  return performUnUndoableEdits(editorState, disabledUndoEditorState => {
+    return EditorState.forceSelection(
+      EditorState.push(disabledUndoEditorState, contentState, 'change-inline-style'),
+      selection
+    );
+  });
 };
 
 export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plugin = getEditorState => ({
