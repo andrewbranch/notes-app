@@ -7,5 +7,5 @@ export const noteIdsSelector = createSelector(notesSelector, notes => Object.key
 export const selectedNoteSelector = createSelector(
   notesSelector,
   selectedNoteIdSelector,
-  (notes, selectedNoteId) => notes[selectedNoteId]
+  (notes, selectedNoteId) => selectedNoteId ? notes[selectedNoteId] : null
 );

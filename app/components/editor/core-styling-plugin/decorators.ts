@@ -1,8 +1,3 @@
-import { Decorator } from 'draft-js-plugins-editor';
-import { createDecoratorStrategyMatchingEntityType } from '../../../utils/draft-utils';
-import { Code } from './components/Code';
+import { Decorator } from 'draft-js-plugins-editor';;
 
-export const decorators: Decorator[] = [{
-  strategy: createDecoratorStrategyMatchingEntityType('core.styling.inlineCode'),
-  component: Code
-}];
+export const decorators: Decorator[] = [];

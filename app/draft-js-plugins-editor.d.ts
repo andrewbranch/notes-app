@@ -20,6 +20,25 @@ declare module 'draft-js-plugins-editor' {
   }
 
   export interface Plugin {
+    placeholder?: string;
+    textAlignment?: any;
+    customStyleMap?: { [key: string]: React.CSSProperties };
+    readOnly?: boolean;
+    spellCheck?: boolean;
+    stripPastedStyles?: boolean;
+    tabIndex?: number;
+    autoCapitalize?: string;
+    autoComplete?: string;
+    autoCorrect?: string;
+    ariaActiveDescendantID?: string;
+    ariaAutoComplete?: string;
+    ariaControls?: string;
+    ariaDescribedBy?: string;
+    ariaExpanded?: boolean;
+    ariaLabel?: string;
+    ariaMultiline?: boolean;
+    webDriverTestID?: string;
+    blockRenderMap?: any
     blockRendererFn?(block: Draft.ContentBlock, pluginProvider: PluginProvider): any;
     blockStyleFn?(block: Draft.ContentBlock, pluginProvider: PluginProvider): string;
     customStyleFn?(style: Draft.DraftInlineStyle): Object;

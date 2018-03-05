@@ -12,7 +12,7 @@ import { convertToRaw } from 'draft-js';
 const styles = require('./Shell.scss');
 
 export interface ShellProps extends RouteComponentProps<{}>, DispatchProp<{}> {
-  selectedNote: NoteType;
+  selectedNote: NoteType | null;
   noteIds: string[];
   showEditorDebugger: boolean;
 }
@@ -32,7 +32,7 @@ export class Shell extends React.Component<ShellProps> {
           renderMasterListItem={(noteId, isSelected) => (
             <NoteListItem key={noteId} noteId={noteId} isSelected={isSelected} />
           )}
-          selectedMasterListItem={selectedNote.id}
+          selectedMasterListItem={selectedNote ? selectedNote.id : null}
           detailView={
             <Route path="/:id" render={({ match }: { match: match<{ id: string }> }) => (
               <MasterDetailView.DetailView>
@@ -43,7 +43,7 @@ export class Shell extends React.Component<ShellProps> {
         />
         {showEditorDebugger ? (
           <div className={styles.debugPane}>
-            <JSONTree data={convertToRaw(selectedNote.editor.getCurrentContent())} />
+            <JSONTree data={selectedNote ? convertToRaw(selectedNote.editor.getCurrentContent()) : {}} />
           </div>
         ) : null}
       </div>

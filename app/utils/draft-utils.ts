@@ -1,4 +1,4 @@
-import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState } from 'draft-js';
+import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
 
 // Can be replaced with ReturnType<T> in TS 2.8
@@ -38,6 +38,18 @@ export const stripEntitiesFromBlock = (contentState: ContentState, blockOrKey: C
   return newContentState;
 };
 
+export const stripStylesFromBlock = (contentState: ContentState, blockOrKey: ContentBlock | string, styleFilter: (styleName: string) => boolean): ContentState => {
+  const block = typeof blockOrKey === 'string' ? contentState.getBlockForKey(blockOrKey): blockOrKey;
+  const newCharacters = block.getCharacterList().map(character => {
+    return character!.getStyle().reduce((char, style) => {
+      return styleFilter(style!) ? CharacterMetadata.removeStyle(char!, style!) : char!;
+    }, character!);
+  })
+
+  const newBlock = block.set('characterList', newCharacters) as ContentBlock;
+  return contentState.setIn(['blockMap', block.getKey()], newBlock) as ContentState;
+};
+
 export const createDecoratorStrategyMatchingEntityType = (type: string) => (contentBlock: ContentBlock, callback: DecoratorStrategyCallback, contentState: ContentState): void => {
   contentBlock.findEntityRanges(character => {
     const entityKey = character.getEntity();
@@ -45,25 +57,35 @@ export const createDecoratorStrategyMatchingEntityType = (type: string) => (cont
   }, callback);
 };
 
-export const getTextFromSelection = (editorState: EditorState, blockDelimiter = '\n'): string => {
+export const forEachBlockInSelection = (editorState: EditorState, callback: (block: ContentBlock, start: number, end: number) => void): void => {
   const selection = editorState.getSelection();
   const contentState = editorState.getCurrentContent();
   const startKey = selection.getStartKey();
   const endKey = selection.getEndKey();
-  const text = [];
   let block = contentState.getBlockForKey(startKey);
   let blockKey = block.getKey();
   do {
-    text.push(block.getText().slice(
+    callback(
+      block,
       blockKey === startKey ? selection.getStartOffset() : 0,
-      blockKey === endKey ? selection.getEndOffset() : undefined
-    ));
+      blockKey === endKey ? selection.getEndOffset() : block.getLength()
+    );
   } while (blockKey !== endKey && (() => {
     block = contentState.getBlockAfter(blockKey);
     return blockKey = block.getKey();
   })());
+}
 
-  return text.join(blockDelimiter);
+export const mapBlocksInSelection = <T>(editorState: EditorState, callback: (block: ContentBlock, start: number, end: number) => T): T[] => {
+  const arr: T[] = [];
+  forEachBlockInSelection(editorState, (block, start, end) => arr.push(callback(block, start, end)));
+  return arr;
+}
+
+export const getTextFromSelection = (editorState: EditorState, blockDelimiter = '\n'): string => {
+  return mapBlocksInSelection(editorState, (block, start, end) => {
+    return block.getText().slice(start, end);
+  }).join(blockDelimiter);
 }
 
 export const getInsertedCharactersFromChange = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): string => {
@@ -99,3 +121,12 @@ export const getDeletedCharactersFromChange = (changeType: EditorChangeType, old
 
   return '';
 };
+
+export const getAdjacentCharacters = (contentState: ContentState, selectionState: SelectionState): [string, string] => {
+  const focusOffset = selectionState.getFocusOffset();
+  const text = contentState.getBlockForKey(selectionState.getFocusKey()).getText();
+  return [
+    text.slice(focusOffset - 1, focusOffset),
+    text.slice(focusOffset, focusOffset + 1)
+  ];
+}
