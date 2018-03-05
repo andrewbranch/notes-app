@@ -42,3 +42,5 @@ export const styles: ExpandableInlineStyleDefinition[] = [{
     borderRadius: 2
   }
 }];
+
+export const isCoreStyle = (styleKey: string) => styleKey.startsWith('core.styling');

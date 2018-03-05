@@ -1,5 +1,7 @@
 import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
+import { constant } from 'lodash';
+import { Map } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
 if (false as true) var _ = Entity.mergeData('', {});
@@ -134,4 +136,28 @@ export const getAdjacentCharacters = (contentState: ContentState, selectionState
 export const performUnUndoableEdits = (editorState: EditorState, performEdits: (disabledUndoEditorState: EditorState) => EditorState): EditorState => {
   const disabledUndoEditorState = EditorState.set(editorState, { allowUndo: false });
   return EditorState.set(performEdits(disabledUndoEditorState), { allowUndo: true });
+};
+
+export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, aroundIndex: number): [number, number] => {
+  const characters = block.getCharacterList();
+  let start = aroundIndex;
+  let end = aroundIndex;
+  while (start > 0 && characters.get(start).hasStyle(styleKey)) start--;
+  while (end < characters.size && characters.get(end).hasStyle(styleKey)) end++;
+  return [start + 1, end + 1];
+};
+
+export const getContiguousStyleRangesNearCursor = (block: ContentBlock, focusOffset: number, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, [number, number]> => {
+  const stylesAtCursor = block.getInlineStyleAt(focusOffset);
+  const stylesAdjacentToCursor = block.getInlineStyleAt(focusOffset - 1).subtract(stylesAtCursor);
+  return stylesAtCursor.union(stylesAdjacentToCursor).reduce((ranges, style) => {
+    if (styleKeyFilter(style!)) {
+      return ranges!.set(style!, getContiguousStyleRange(
+        block,
+        style!,
+        stylesAdjacentToCursor.contains(style!) ? focusOffset - 1 : focusOffset
+      ));
+    }
+    return ranges!;
+  }, Map<string, [number, number]>());
 };

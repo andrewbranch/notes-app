@@ -1,9 +1,10 @@
 import { EditorState } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
-import { mapBlocksInSelection, stripStylesFromBlock, performUnUndoableEdits } from '../../../utils/draft-utils';
+import { Set } from 'immutable';
+import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearCursor } from '../../../utils/draft-utils';
 import { decorators } from './decorators';
 import { shouldReprocessInlineStyles } from './shouldProcessChanges';
-import { styles } from './styles';
+import { styles, isCoreStyle } from './styles';
 
 const recreateStylesInBlocks = (editorState: EditorState, affectedBlocks: string[] = [editorState.getSelection().getStartKey()]): EditorState => {
   let contentState = editorState.getCurrentContent();
@@ -47,35 +48,52 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
     const changeType = editorState.getLastChangeType();
     const oldEditorState = getEditorState();
     const oldContent = oldEditorState.getCurrentContent();
-    const newContent = editorState.getCurrentContent();
+    const oldSelection = oldEditorState.getSelection();
+    const newSelection = editorState.getSelection();
+    const newFocusKey = newSelection.getFocusKey();
+    let newContent = editorState.getCurrentContent();
+    
+    let newEditorState = editorState;
     if (oldContent !== newContent && shouldReprocessInlineStyles(changeType, oldEditorState, editorState)) {
       switch (changeType) {
         case 'delete-character':
         case 'remove-range':
-        case 'backspace-character': return recreateStylesInBlocks(editorState);
-        case 'split-block': return recreateStylesInBlocks(editorState, [
-          oldEditorState.getSelection().getStartKey(),
-          editorState.getSelection().getStartKey()
-        ]);
+        case 'backspace-character':
+          newEditorState = recreateStylesInBlocks(editorState);
+          break;
+        case 'split-block':
+          newEditorState = recreateStylesInBlocks(editorState, [
+            oldSelection.getStartKey(),
+            newFocusKey
+          ]);
+          break;
         case 'insert-characters':
-          return recreateStylesInBlocks(editorState);
+          newEditorState = recreateStylesInBlocks(editorState);
+          break;
       }
-    } else {
-      // Selection changed only
-      const selection = editorState.getSelection();
-      mapBlocksInSelection(editorState, (block, start, end) => {
-        block.findEntityRanges(value => {
-          const entityKey = value.getEntity();
-          return entityKey && newContent.getEntity(entityKey).getType().startsWith('core.styling') || false;
-        }, (start, end) => {
-          if (selection.hasEdgeWithin(block.getKey(), start, end)) {
-            // const entity = block.getEntityAt(start);
-          }
-        });
-      });
     }
 
-    return editorState;
+    newContent = newEditorState.getCurrentContent();
+    const oldStyleRangesInFocus = getContiguousStyleRangesNearCursor(
+      oldContent.getBlockForKey(oldSelection.getFocusKey()),
+      oldSelection.getFocusOffset(),
+      isCoreStyle
+    );
+    
+    const newStyleRangesInFocus = getContiguousStyleRangesNearCursor(
+      newContent.getBlockForKey(newFocusKey),
+      newSelection.getFocusOffset(),
+      isCoreStyle
+    );
+
+    const oldStyleRangeKeys = Set(oldStyleRangesInFocus.keys());
+    const newStyleRangeKeys = Set(newStyleRangesInFocus.keys());
+    const rangesToExpand = newStyleRangeKeys.subtract(oldStyleRangeKeys);
+    const rangesToCollapse = oldStyleRangeKeys.subtract(newStyleRangeKeys);
+    rangesToExpand.forEach(style => console.log('EXPAND'));
+    rangesToCollapse.forEach(style => console.log('COLLAPSE'));
+
+    return newEditorState;
   },
 
   decorators,
