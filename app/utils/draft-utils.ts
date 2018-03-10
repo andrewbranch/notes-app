@@ -14,10 +14,10 @@ export const createSelectionWithRange = (blockOrKey: ContentBlock | string, star
   return SelectionState.createEmpty(blockKey).merge({ anchorOffset: start, focusOffset: end }) as SelectionState
 };
 
-export const createSelectionWithSelection = (selectionState: SelectionState, moveStart: number, moveEnd: number): SelectionState => {
+export const createSelectionWithSelection = (selectionState: SelectionState, moveAnchor: number, moveFocus: number): SelectionState => {
   return selectionState.merge({
-    anchorOffset: selectionState.getAnchorOffset() + moveStart,
-    focusOffset: selectionState.getFocusOffset() + moveEnd
+    anchorOffset: selectionState.getAnchorOffset() + moveAnchor,
+    focusOffset: selectionState.getFocusOffset() + moveFocus
   }) as SelectionState;
 };
 
@@ -40,15 +40,16 @@ export const stripEntitiesFromBlock = (contentState: ContentState, blockOrKey: C
   return newContentState;
 };
 
-export const stripStylesFromBlock = (contentState: ContentState, blockOrKey: ContentBlock | string, styleFilter: (styleName: string) => boolean): ContentState => {
+export const stripStylesFromBlock = (contentState: ContentState, blockOrKey: ContentBlock | string, styleFilter: (styleName: string) => boolean, start: number = 0, end?: number): ContentState => {
   const block = typeof blockOrKey === 'string' ? contentState.getBlockForKey(blockOrKey): blockOrKey;
-  const newCharacters = block.getCharacterList().map(character => {
+  const originalCharacters = block.getCharacterList()
+  const newCharacters = originalCharacters.slice(start, end).map(character => {
     return character!.getStyle().reduce((char, style) => {
       return styleFilter(style!) ? CharacterMetadata.removeStyle(char!, style!) : char!;
     }, character!);
-  })
+  });
 
-  const newBlock = block.set('characterList', newCharacters) as ContentBlock;
+  const newBlock = block.set('characterList', originalCharacters.slice(0, start).concat(newCharacters).concat(originalCharacters.slice(end || originalCharacters.size + 1))) as ContentBlock;
   return contentState.setIn(['blockMap', block.getKey()], newBlock) as ContentState;
 };
 
@@ -144,20 +145,33 @@ export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, a
   let end = aroundIndex;
   while (start > 0 && characters.get(start).hasStyle(styleKey)) start--;
   while (end < characters.size && characters.get(end).hasStyle(styleKey)) end++;
-  return [start + 1, end + 1];
+  return [start + 1, end];
 };
 
-export const getContiguousStyleRangesNearCursor = (block: ContentBlock, focusOffset: number, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, [number, number]> => {
-  const stylesAtCursor = block.getInlineStyleAt(focusOffset);
-  const stylesAdjacentToCursor = block.getInlineStyleAt(focusOffset - 1).subtract(stylesAtCursor);
-  return stylesAtCursor.union(stylesAdjacentToCursor).reduce((ranges, style) => {
+const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, [number, number][]> => {
+  const stylesAtOffset = block.getInlineStyleAt(offset);
+  const stylesAdjacentToOffset = block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset);
+  const text = styleKeyFilter.length > 1 ? block.getText() : '';
+  return stylesAtOffset.union(stylesAdjacentToOffset).reduce((ranges, style) => {
     if (styleKeyFilter(style!)) {
-      return ranges!.set(style!, getContiguousStyleRange(
+      return ranges!.set(style!, [getContiguousStyleRange(
         block,
         style!,
-        stylesAdjacentToCursor.contains(style!) ? focusOffset - 1 : focusOffset
-      ));
+        stylesAdjacentToOffset.contains(style!) ? offset - 1 : offset
+      )]);
     }
     return ranges!;
-  }, Map<string, [number, number]>());
+  }, Map<string, [number, number][]>());
+};
+
+export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, [number, number][]> => {
+  const stylesNearFocus = getContiguousStyleRangesNearOffset(content.getBlockForKey(selection.getFocusKey()), selection.getFocusOffset(), styleKeyFilter);
+  return selection.isCollapsed()
+    ? stylesNearFocus
+    : stylesNearFocus.mergeWith((a, b) => a!.concat(b!), getContiguousStyleRangesNearOffset(
+      content.getBlockForKey(selection.getAnchorKey()),
+      selection.getAnchorOffset(),
+      styleKeyFilter
+    ))
+  
 };

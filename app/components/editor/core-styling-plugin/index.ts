@@ -1,30 +1,36 @@
-import { EditorState } from 'draft-js';
+import { EditorState, Modifier } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
-import { Set } from 'immutable';
-import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearCursor } from '../../../utils/draft-utils';
+import { Set, OrderedSet } from 'immutable';
+import { values } from 'lodash';
+import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, createSelectionWithRange, createSelectionWithSelection } from '../../../utils/draft-utils';
 import { decorators } from './decorators';
 import { shouldReprocessInlineStyles } from './shouldProcessChanges';
-import { styles, isCoreStyle } from './styles';
+import { styles, isCoreStyle, CoreInlineStyleName } from './styles';
+const styleValues = values(styles);
 
 const recreateStylesInBlocks = (editorState: EditorState, affectedBlocks: string[] = [editorState.getSelection().getStartKey()]): EditorState => {
   let contentState = editorState.getCurrentContent();
   const selection = editorState.getSelection();
 
-  // Because a single character change could change several entites in a block,
-  // easiest thing to do is to delete them all and recreate them all.
-  // This probably isn’t the most efficient thing, so we might need to
-  // revisit this logic later if performance suffers.
   affectedBlocks.forEach(blockKey => {
-    contentState = stripStylesFromBlock(
+    getContiguousStyleRangesNearSelectionEdges(
       contentState,
-      blockKey,
-      styleName => styleName.startsWith('core.styling')
-    );
+      selection,
+      isCoreStyle
+    ).forEach((ranges, key) => {
+      contentState = stripStylesFromBlock(
+        contentState,
+        blockKey,
+        styleName => styleName === key,
+        ranges![0][0], // selection must be collapsed in this method
+        ranges![0][1]  //
+      );
+    })
 
     const newText = contentState.getBlockForKey(blockKey).getText();
 
     // Go through each styling entity and reapply
-    styles.forEach(style => {
+    styleValues.forEach(style => {
       let matchArr;
       do {
         matchArr = style.pattern.exec(newText);
@@ -74,31 +80,85 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
     }
 
     newContent = newEditorState.getCurrentContent();
-    const oldStyleRangesInFocus = getContiguousStyleRangesNearCursor(
-      oldContent.getBlockForKey(oldSelection.getFocusKey()),
-      oldSelection.getFocusOffset(),
-      isCoreStyle
-    );
-    
-    const newStyleRangesInFocus = getContiguousStyleRangesNearCursor(
-      newContent.getBlockForKey(newFocusKey),
-      newSelection.getFocusOffset(),
-      isCoreStyle
-    );
+    const blockInFocus = newContent.getBlockForKey(newSelection.getFocusKey()) 
+    const textInFocus = blockInFocus.getText();
+    const oldStyleRangesInFocus = getContiguousStyleRangesNearSelectionEdges(oldContent, oldSelection, isCoreStyle);
+    const newStyleRangesInFocus = getContiguousStyleRangesNearSelectionEdges(newContent, newSelection, isCoreStyle);
 
     const oldStyleRangeKeys = Set(oldStyleRangesInFocus.keys());
     const newStyleRangeKeys = Set(newStyleRangesInFocus.keys());
-    const rangesToExpand = newStyleRangeKeys.subtract(oldStyleRangeKeys);
-    const rangesToCollapse = oldStyleRangeKeys.subtract(newStyleRangeKeys);
-    rangesToExpand.forEach(style => console.log('EXPAND'));
-    rangesToCollapse.forEach(style => console.log('COLLAPSE'));
+
+    // Expand
+    newStyleRangeKeys.subtract(oldStyleRangeKeys).forEach((styleKey: CoreInlineStyleName) => {
+      const focusOffset = newSelection.getFocusOffset();
+      const anchorOffset = newSelection.getAnchorOffset();
+      const ranges = newStyleRangesInFocus.get(styleKey);
+      let shiftFocus = 0;
+      let shiftAnchor = 0;
+      ranges.forEach((range, index) => {
+        const text = textInFocus.slice(range[0], range[1]);
+        const pattern = styles[styleKey].pattern;
+        pattern.lastIndex = 0;
+        if (!pattern.test(text)) {
+          const newText = styles[styleKey].expand(text);
+          newContent = Modifier.replaceText(
+            newContent,
+            createSelectionWithRange(blockInFocus, range[0], range[1]),
+            newText,
+            OrderedSet([styleKey])
+          );
+
+          newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
+          shiftFocus += styles[styleKey].mapSelectionIndexFromCollapsed(focusOffset - range[0], text);
+          shiftAnchor += styles[styleKey].mapSelectionIndexFromCollapsed(anchorOffset - range[0], text);
+        }
+      });
+      
+      newEditorState = EditorState.forceSelection(
+        newEditorState,
+        createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
+      );
+    });
+
+    // Collapse
+    oldStyleRangeKeys.subtract(newStyleRangeKeys).forEach((styleKey: CoreInlineStyleName) => {
+      const focusOffset = newSelection.getFocusOffset();
+      const anchorOffset = newSelection.getAnchorOffset();
+      const ranges = oldStyleRangesInFocus.get(styleKey);
+      let shiftFocus = 0;
+      let shiftAnchor = 0;
+      ranges.forEach((range, index) => {
+        const text = textInFocus.slice(range[0], range[1]);
+        const pattern = styles[styleKey].pattern;
+        pattern.lastIndex = 0;
+        const match = pattern.exec(text);
+        if (match) {
+          const newText = styles[styleKey].collapse(match);
+          newContent = Modifier.replaceText(
+            newContent,
+            createSelectionWithRange(blockInFocus, range[0], range[1]),
+            newText,
+            OrderedSet([styleKey])
+          );
+
+          newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
+          shiftFocus += styles[styleKey].mapSelectionIndexFromExpanded(focusOffset - range[0], text);
+          shiftAnchor += styles[styleKey].mapSelectionIndexFromExpanded(anchorOffset - range[0], text);
+        }
+      });
+
+      newEditorState = EditorState.forceSelection(
+        newEditorState,
+        createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
+      );
+    });
 
     return newEditorState;
   },
 
   decorators,
 
-  customStyleMap: styles.reduce((map, style) => ({
+  customStyleMap: styleValues.reduce((map, style) => ({
     ...map,
     [style.name]: style.styleAttributes
   }), {})
