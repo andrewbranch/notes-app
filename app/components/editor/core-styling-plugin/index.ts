@@ -1,7 +1,7 @@
 import { EditorState, Modifier } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
 import { Set, OrderedSet } from 'immutable';
-import { values } from 'lodash';
+import { values, isEqual } from 'lodash';
 import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, createSelectionWithRange, createSelectionWithSelection } from '../../../utils/draft-utils';
 import { decorators } from './decorators';
 import { shouldReprocessInlineStyles } from './shouldProcessChanges';
@@ -80,70 +80,74 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
     }
 
     newContent = newEditorState.getCurrentContent();
-    const blockInFocus = newContent.getBlockForKey(newSelection.getFocusKey()) 
-    const textInFocus = blockInFocus.getText();
+    let blockInFocus = newContent.getBlockForKey(newSelection.getFocusKey()) 
+    let textInFocus = blockInFocus.getText();
     const oldStyleRangesInFocus = getContiguousStyleRangesNearSelectionEdges(oldContent, oldSelection, isCoreStyle);
     const newStyleRangesInFocus = getContiguousStyleRangesNearSelectionEdges(newContent, newSelection, isCoreStyle);
 
-    const oldStyleRangeKeys = Set(oldStyleRangesInFocus.keys());
-    const newStyleRangeKeys = Set(newStyleRangesInFocus.keys());
-
     // Expand
-    newStyleRangeKeys.subtract(oldStyleRangeKeys).forEach((styleKey: CoreInlineStyleName) => {
+    newStyleRangesInFocus.forEach((ranges, styleKey: CoreInlineStyleName) => {
+      const oldRanges = oldStyleRangesInFocus.get(styleKey);
       const focusOffset = newSelection.getFocusOffset();
       const anchorOffset = newSelection.getAnchorOffset();
-      const ranges = newStyleRangesInFocus.get(styleKey);
       let shiftFocus = 0;
       let shiftAnchor = 0;
-      ranges.forEach((range, index) => {
-        const text = textInFocus.slice(range[0], range[1]);
-        const pattern = styles[styleKey].pattern;
-        pattern.lastIndex = 0;
-        if (!pattern.test(text)) {
-          const newText = styles[styleKey].expand(text);
-          newContent = Modifier.replaceText(
-            newContent,
-            createSelectionWithRange(blockInFocus, range[0], range[1]),
-            newText,
-            OrderedSet([styleKey])
-          );
+      ranges!.forEach((range, index) => {
+        if (!oldRanges || !oldRanges.find(oldRange => isEqual(oldRange, range))) {
+          const text = textInFocus.slice(range[0], range[1]);
+          const pattern = styles[styleKey].pattern;
+          pattern.lastIndex = 0;
+          if (!pattern.test(text)) {
+            const newText = styles[styleKey].expand(text);
+            newContent = Modifier.replaceText(
+              newContent,
+              createSelectionWithRange(blockInFocus, range[0], range[1]),
+              newText,
+              OrderedSet([styleKey])
+            );
 
-          newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
-          shiftFocus += styles[styleKey].mapSelectionIndexFromCollapsed(focusOffset - range[0], text);
-          shiftAnchor += styles[styleKey].mapSelectionIndexFromCollapsed(anchorOffset - range[0], text);
+            newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
+            shiftFocus += styles[styleKey].mapSelectionIndexFromCollapsed(focusOffset - range[0], text);
+            shiftAnchor += styles[styleKey].mapSelectionIndexFromCollapsed(anchorOffset - range[0], text);
+          }
         }
       });
-      
+        
       newEditorState = EditorState.forceSelection(
         newEditorState,
         createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
       );
     });
 
+    newContent = newEditorState.getCurrentContent();
+    blockInFocus = newContent.getBlockForKey(newSelection.getFocusKey()) 
+    textInFocus = blockInFocus.getText();
     // Collapse
-    oldStyleRangeKeys.subtract(newStyleRangeKeys).forEach((styleKey: CoreInlineStyleName) => {
+    oldStyleRangesInFocus.forEach((ranges, styleKey: CoreInlineStyleName) => {
+      const newRanges = newStyleRangesInFocus.get(styleKey);
       const focusOffset = newSelection.getFocusOffset();
       const anchorOffset = newSelection.getAnchorOffset();
-      const ranges = oldStyleRangesInFocus.get(styleKey);
       let shiftFocus = 0;
       let shiftAnchor = 0;
-      ranges.forEach((range, index) => {
-        const text = textInFocus.slice(range[0], range[1]);
-        const pattern = styles[styleKey].pattern;
-        pattern.lastIndex = 0;
-        const match = pattern.exec(text);
-        if (match) {
-          const newText = styles[styleKey].collapse(match);
-          newContent = Modifier.replaceText(
-            newContent,
-            createSelectionWithRange(blockInFocus, range[0], range[1]),
-            newText,
-            OrderedSet([styleKey])
-          );
+      ranges!.forEach((range, index) => {
+        if (!newRanges || !newRanges.find(newRange => isEqual(newRange, range))) {
+          const text = textInFocus.slice(range[0], range[1]);
+          const pattern = styles[styleKey].pattern;
+          pattern.lastIndex = 0;
+          const match = pattern.exec(text);
+          if (match) {
+            const newText = styles[styleKey].collapse(match);
+            newContent = Modifier.replaceText(
+              newContent,
+              createSelectionWithRange(blockInFocus, range[0], range[1]),
+              newText,
+              OrderedSet([styleKey])
+            );
 
-          newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
-          shiftFocus += styles[styleKey].mapSelectionIndexFromExpanded(focusOffset - range[0], text);
-          shiftAnchor += styles[styleKey].mapSelectionIndexFromExpanded(anchorOffset - range[0], text);
+            newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
+            shiftFocus += styles[styleKey].mapSelectionIndexFromExpanded(focusOffset - range[0], text);
+            shiftAnchor += styles[styleKey].mapSelectionIndexFromExpanded(anchorOffset - range[0], text);
+          }
         }
       });
 
