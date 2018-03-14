@@ -143,7 +143,7 @@ export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, a
   const characters = block.getCharacterList();
   let start = aroundIndex;
   let end = aroundIndex;
-  while (start > 0 && characters.get(start).hasStyle(styleKey)) start--;
+  while (start >= 0 && characters.get(start).hasStyle(styleKey)) start--;
   while (end < characters.size && characters.get(end).hasStyle(styleKey)) end++;
   return [start + 1, end];
 };
