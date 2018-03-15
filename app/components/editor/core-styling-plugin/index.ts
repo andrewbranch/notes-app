@@ -112,8 +112,8 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
         }
       });
       
-      const shiftAnchor = (sum(expansions.slice(0, anchorOffset)) || 0);
-      const shiftFocus = (sum(expansions.slice(0, focusOffset)) || 0);
+      const shiftAnchor = (sum(expansions.slice(0, anchorOffset + 1)) || 0);
+      const shiftFocus = (sum(expansions.slice(0, focusOffset + 1)) || 0);
       newEditorState = EditorState.forceSelection(
         newEditorState,
         createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
@@ -131,7 +131,9 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
       const anchorOffset = newSelection.getAnchorOffset();
       ranges!.forEach((range, index) => {
         if (!newRanges || !newRanges.find(newRange => isEqual(newRange, range))) {
-          const text = textInFocus.slice(range[0], range[1]);
+          const lowerBound = range[0] + (sum(expansions.slice(0, range[0] + 1)) || 0);
+          const upperBound = range[1] + (sum(expansions.slice(0, range[1] + 1)) || 0);
+          const text = textInFocus.slice(lowerBound, upperBound);
           const pattern = styles[styleKey].pattern;
           pattern.lastIndex = 0;
           const match = pattern.exec(text);
@@ -139,20 +141,20 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
             const newText = styles[styleKey].collapse(match);
             newContent = Modifier.replaceText(
               newContent,
-              createSelectionWithRange(blockInFocus, range[0], range[1]),
+              createSelectionWithRange(blockInFocus, lowerBound, upperBound),
               newText,
               OrderedSet([styleKey])
             );
 
             newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
-            collapsions[range[0]] = (collapsions[range[0]] || 0) + styles[styleKey].decoratorLength;
-            collapsions[range[1]] = (collapsions[range[1]] || 0) + styles[styleKey].decoratorLength;
+            collapsions[lowerBound] = (collapsions[lowerBound] || 0) + styles[styleKey].decoratorLength;
+            collapsions[upperBound] = (collapsions[upperBound] || 0) + styles[styleKey].decoratorLength;
           }
         }
       });
 
-      const shiftAnchor = -(sum(collapsions.slice(0, anchorOffset)) || 0);
-      const shiftFocus = -(sum(collapsions.slice(0, focusOffset)) || 0);
+      const shiftAnchor = -(sum(collapsions.slice(0, anchorOffset + 1)) || 0);
+      const shiftFocus = -(sum(collapsions.slice(0, focusOffset + 1)) || 0);
       newEditorState = EditorState.forceSelection(
         newEditorState,
         createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
