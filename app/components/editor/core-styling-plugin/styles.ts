@@ -2,6 +2,7 @@ import * as React from 'react';
 import { ContentState, Modifier, ContentBlock } from 'draft-js';
 import { createSelectionWithRange } from '../../../utils/draft-utils';
 import { Styles } from '../../../ui/types';
+import { values } from 'lodash';
 const styleVariables: Styles = require('../../../styles/variables.scss');
 
 export type CoreInlineStyleName = 'core.styling.inlineCode';
@@ -47,4 +48,5 @@ export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefiniti
   }
 };
 
+export const styleValues = values(styles);
 export const isCoreStyle = (styleKey: string) => styleKey.startsWith('core.styling');
