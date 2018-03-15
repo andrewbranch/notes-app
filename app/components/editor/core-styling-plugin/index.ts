@@ -80,8 +80,8 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
     }
 
     newContent = newEditorState.getCurrentContent();
-    let blockInFocus = newContent.getBlockForKey(newSelection.getFocusKey()) 
-    let textInFocus = blockInFocus.getText();
+    const newBlockInFocus = newContent.getBlockForKey(newSelection.getFocusKey()) 
+    const newTextInFocus = newBlockInFocus.getText();
     const oldStyleRangesInFocus = getContiguousStyleRangesNearSelectionEdges(oldContent, oldSelection, isCoreStyle);
     const newStyleRangesInFocus = getContiguousStyleRangesNearSelectionEdges(newContent, newSelection, isCoreStyle);
 
@@ -91,16 +91,17 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
       const oldRanges = oldStyleRangesInFocus.get(styleKey);
       const focusOffset = newSelection.getFocusOffset();
       const anchorOffset = newSelection.getAnchorOffset();
+      const focusMovedBlock = oldSelection.getFocusKey() !== newSelection.getFocusKey();
       ranges!.forEach((range, index) => {
-        if (!oldRanges || !oldRanges.find(oldRange => rangesOverlap(oldRange, range))) {
-          const text = textInFocus.slice(range[0], range[1]);
+        if (!oldRanges || focusMovedBlock || !oldRanges.find(oldRange => rangesOverlap(oldRange, range))) {
+          const text = newTextInFocus.slice(range[0], range[1]);
           const pattern = styles[styleKey].pattern;
           pattern.lastIndex = 0;
           if (!pattern.test(text)) {
             const newText = styles[styleKey].expand(text);
             newContent = Modifier.replaceText(
               newContent,
-              createSelectionWithRange(blockInFocus, range[0], range[1]),
+              createSelectionWithRange(newBlockInFocus, range[0], range[1]),
               newText,
               OrderedSet([styleKey])
             );
@@ -119,47 +120,49 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
         createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
       );
     });
-
-    newContent = newEditorState.getCurrentContent();
-    blockInFocus = newContent.getBlockForKey(newSelection.getFocusKey()) 
-    textInFocus = blockInFocus.getText();
-    const collapsions: number[] = [];
+    
     // Collapse
-    oldStyleRangesInFocus.forEach((ranges, styleKey: CoreInlineStyleName) => {
-      const newRanges = newStyleRangesInFocus.get(styleKey);
-      const focusOffset = newSelection.getFocusOffset();
-      const anchorOffset = newSelection.getAnchorOffset();
-      ranges!.forEach((range, index) => {
-        if (!newRanges || !newRanges.find(newRange => rangesOverlap(newRange, range))) {
-          const lowerBound = range[0] + (sum(expansions.slice(0, range[0] + 1)) || 0);
-          const upperBound = range[1] + (sum(expansions.slice(0, range[1] + 1)) || 0);
-          const text = textInFocus.slice(lowerBound, upperBound);
-          const pattern = styles[styleKey].pattern;
-          pattern.lastIndex = 0;
-          const match = pattern.exec(text);
-          if (match) {
-            const newText = styles[styleKey].collapse(match);
-            newContent = Modifier.replaceText(
-              newContent,
-              createSelectionWithRange(blockInFocus, lowerBound, upperBound),
-              newText,
-              OrderedSet([styleKey])
-            );
+    const collapsions: number[] = [];
+    const oldBlockInFocus = newContent.getBlockForKey(oldSelection.getFocusKey());
+    if (oldBlockInFocus) {
+      const oldTextInFocus = oldBlockInFocus.getText();
+      oldStyleRangesInFocus.forEach((ranges, styleKey: CoreInlineStyleName) => {
+        const newRanges = newStyleRangesInFocus.get(styleKey);
+        const focusOffset = newSelection.getFocusOffset();
+        const anchorOffset = newSelection.getAnchorOffset();
+        const focusMovedBlock = oldSelection.getFocusKey() !== newSelection.getFocusKey();
+        ranges!.forEach((range, index) => {
+          if (!newRanges || focusMovedBlock || !newRanges.find(newRange => rangesOverlap(newRange, range))) {
+            const lowerBound = range[0] + (focusMovedBlock ? 0 : (sum(expansions.slice(0, range[0] + 1)) || 0));
+            const upperBound = range[1] + (focusMovedBlock ? 0 : (sum(expansions.slice(0, range[1] + 1)) || 0));
+            const text = oldTextInFocus.slice(lowerBound, upperBound);
+            const pattern = styles[styleKey].pattern;
+            pattern.lastIndex = 0;
+            const match = pattern.exec(text);
+            if (match) {
+              const newText = styles[styleKey].collapse(match);
+              newContent = Modifier.replaceText(
+                newContent,
+                createSelectionWithRange(oldBlockInFocus, lowerBound, upperBound),
+                newText,
+                OrderedSet([styleKey])
+              );
 
-            newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
-            collapsions[lowerBound] = (collapsions[lowerBound] || 0) + styles[styleKey].decoratorLength;
-            collapsions[upperBound] = (collapsions[upperBound] || 0) + styles[styleKey].decoratorLength;
+              newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
+              collapsions[lowerBound] = (collapsions[lowerBound] || 0) + styles[styleKey].decoratorLength;
+              collapsions[upperBound] = (collapsions[upperBound] || 0) + styles[styleKey].decoratorLength;
+            }
           }
-        }
-      });
+        });
 
-      const shiftAnchor = -(sum(collapsions.slice(0, anchorOffset + 1)) || 0);
-      const shiftFocus = -(sum(collapsions.slice(0, focusOffset + 1)) || 0);
-      newEditorState = EditorState.forceSelection(
-        newEditorState,
-        createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
-      );
-    });
+        const shiftAnchor = -(sum(collapsions.slice(0, anchorOffset + 1)) || 0);
+        const shiftFocus = -(sum(collapsions.slice(0, focusOffset + 1)) || 0);
+        newEditorState = EditorState.forceSelection(
+          newEditorState,
+          createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
+        );
+      });
+    }
 
     return newEditorState;
   },
