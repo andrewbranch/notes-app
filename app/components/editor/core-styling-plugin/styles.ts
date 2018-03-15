@@ -16,8 +16,7 @@ export interface InlineStyleDefinition {
 export interface ExpandableInlineStyleDefinition extends InlineStyleDefinition {
   collapse: (matchArray: RegExpMatchArray) => string;
   expand: (collapsedText: string) => string;
-  mapSelectionIndexFromCollapsed: (collapsedIndex: number, collapsedText: string) => number;
-  mapSelectionIndexFromExpanded: (expandedIndex: number, expandedText: string) => number;
+  decoratorLength: number;
 }
 
 export const TRIGGER_CHARACTERS = ['`'];
@@ -28,14 +27,7 @@ export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefiniti
     pattern: /`([^`]+)`/g,
     collapse: matchArray => matchArray[1],
     expand: collapsedText => `\`${collapsedText}\``,
-    mapSelectionIndexFromCollapsed: (collapsedIndex, collapsedText) => {
-      return collapsedIndex <= 0 ? 0 :
-        collapsedIndex >= collapsedText.length ? 2 :
-        1;
-    },
-    mapSelectionIndexFromExpanded: expandedIndex => {
-      return expandedIndex < 0 ? 0 : -2;
-    },
+    decoratorLength: 1,
     applyStyle: (contentState, blockOrKey, start, end) => {
       const blockKey = typeof blockOrKey === 'string' ? blockOrKey : blockOrKey.getKey();
       const styleSelection = createSelectionWithRange(

@@ -1,7 +1,7 @@
 import { EditorState, Modifier } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
 import { Set, OrderedSet } from 'immutable';
-import { values, isEqual } from 'lodash';
+import { values, isEqual, compact, sum } from 'lodash';
 import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, createSelectionWithRange, createSelectionWithSelection } from '../../../utils/draft-utils';
 import { decorators } from './decorators';
 import { shouldReprocessInlineStyles } from './shouldProcessChanges';
@@ -85,13 +85,12 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
     const oldStyleRangesInFocus = getContiguousStyleRangesNearSelectionEdges(oldContent, oldSelection, isCoreStyle);
     const newStyleRangesInFocus = getContiguousStyleRangesNearSelectionEdges(newContent, newSelection, isCoreStyle);
 
+    const expansions: number[] = [];
     // Expand
     newStyleRangesInFocus.forEach((ranges, styleKey: CoreInlineStyleName) => {
       const oldRanges = oldStyleRangesInFocus.get(styleKey);
       const focusOffset = newSelection.getFocusOffset();
       const anchorOffset = newSelection.getAnchorOffset();
-      let shiftFocus = 0;
-      let shiftAnchor = 0;
       ranges!.forEach((range, index) => {
         if (!oldRanges || !oldRanges.find(oldRange => isEqual(oldRange, range))) {
           const text = textInFocus.slice(range[0], range[1]);
@@ -107,12 +106,14 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
             );
 
             newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
-            shiftFocus += styles[styleKey].mapSelectionIndexFromCollapsed(focusOffset - range[0], text);
-            shiftAnchor += styles[styleKey].mapSelectionIndexFromCollapsed(anchorOffset - range[0], text);
+            expansions[range[0]] = (expansions[range[0]] || 0) + styles[styleKey].decoratorLength;
+            expansions[range[1]] = (expansions[range[1]] || 0) + styles[styleKey].decoratorLength;
           }
         }
       });
-        
+      
+      const shiftAnchor = (sum(expansions.slice(0, anchorOffset)) || 0);
+      const shiftFocus = (sum(expansions.slice(0, focusOffset)) || 0);
       newEditorState = EditorState.forceSelection(
         newEditorState,
         createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
@@ -122,13 +123,12 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
     newContent = newEditorState.getCurrentContent();
     blockInFocus = newContent.getBlockForKey(newSelection.getFocusKey()) 
     textInFocus = blockInFocus.getText();
+    const collapsions: number[] = [];
     // Collapse
     oldStyleRangesInFocus.forEach((ranges, styleKey: CoreInlineStyleName) => {
       const newRanges = newStyleRangesInFocus.get(styleKey);
       const focusOffset = newSelection.getFocusOffset();
       const anchorOffset = newSelection.getAnchorOffset();
-      let shiftFocus = 0;
-      let shiftAnchor = 0;
       ranges!.forEach((range, index) => {
         if (!newRanges || !newRanges.find(newRange => isEqual(newRange, range))) {
           const text = textInFocus.slice(range[0], range[1]);
@@ -145,12 +145,14 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
             );
 
             newEditorState = EditorState.push(newEditorState, newContent, 'insert-characters');
-            shiftFocus += styles[styleKey].mapSelectionIndexFromExpanded(focusOffset - range[0], text);
-            shiftAnchor += styles[styleKey].mapSelectionIndexFromExpanded(anchorOffset - range[0], text);
+            collapsions[range[0]] = (collapsions[range[0]] || 0) + styles[styleKey].decoratorLength;
+            collapsions[range[1]] = (collapsions[range[1]] || 0) + styles[styleKey].decoratorLength;
           }
         }
       });
 
+      const shiftAnchor = -(sum(collapsions.slice(0, anchorOffset)) || 0);
+      const shiftFocus = -(sum(collapsions.slice(0, focusOffset)) || 0);
       newEditorState = EditorState.forceSelection(
         newEditorState,
         createSelectionWithSelection(newSelection, shiftAnchor, shiftFocus)
