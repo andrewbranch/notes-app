@@ -2,7 +2,7 @@ import { EditorState, Modifier } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
 import { Set, OrderedSet } from 'immutable';
 import { values, isEqual, compact, sum } from 'lodash';
-import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, createSelectionWithRange, createSelectionWithSelection } from '../../../utils/draft-utils';
+import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, createSelectionWithRange, createSelectionWithSelection, rangesOverlap } from '../../../utils/draft-utils';
 import { decorators } from './decorators';
 import { shouldReprocessInlineStyles } from './shouldProcessChanges';
 import { styles, isCoreStyle, CoreInlineStyleName } from './styles';
@@ -92,7 +92,7 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
       const focusOffset = newSelection.getFocusOffset();
       const anchorOffset = newSelection.getAnchorOffset();
       ranges!.forEach((range, index) => {
-        if (!oldRanges || !oldRanges.find(oldRange => isEqual(oldRange, range))) {
+        if (!oldRanges || !oldRanges.find(oldRange => rangesOverlap(oldRange, range))) {
           const text = textInFocus.slice(range[0], range[1]);
           const pattern = styles[styleKey].pattern;
           pattern.lastIndex = 0;
@@ -130,7 +130,7 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
       const focusOffset = newSelection.getFocusOffset();
       const anchorOffset = newSelection.getAnchorOffset();
       ranges!.forEach((range, index) => {
-        if (!newRanges || !newRanges.find(newRange => isEqual(newRange, range))) {
+        if (!newRanges || !newRanges.find(newRange => rangesOverlap(newRange, range))) {
           const lowerBound = range[0] + (sum(expansions.slice(0, range[0] + 1)) || 0);
           const upperBound = range[1] + (sum(expansions.slice(0, range[1] + 1)) || 0);
           const text = textInFocus.slice(lowerBound, upperBound);

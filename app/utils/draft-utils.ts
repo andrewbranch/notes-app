@@ -172,6 +172,15 @@ export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState
       content.getBlockForKey(selection.getAnchorKey()),
       selection.getAnchorOffset(),
       styleKeyFilter
-    ))
-  
+    ));
+};
+
+const rangesOverlapUnidirectionally = (a: [number, number], b: [number, number]) => {
+  // a:  --------     a: -------
+  // b:     --------  b:   ---
+  return b[0] >= a[0] && b[0] < a[1];
+};
+
+export const rangesOverlap = (a: [number, number], b: [number, number]): boolean => {
+  return rangesOverlapUnidirectionally(a, b) || rangesOverlapUnidirectionally(b, a);
 };
