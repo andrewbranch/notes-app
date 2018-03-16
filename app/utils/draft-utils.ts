@@ -1,6 +1,6 @@
 import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
-import { constant } from 'lodash';
+import { constant, sum } from 'lodash';
 import { Map } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
@@ -148,24 +148,25 @@ export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, a
   return [start + 1, end];
 };
 
-const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, [number, number][]> => {
+export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, [string, number, number][]> => {
   const stylesAtOffset = block.getInlineStyleAt(offset);
   const stylesAdjacentToOffset = block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset);
   const text = styleKeyFilter.length > 1 ? block.getText() : '';
   return stylesAtOffset.union(stylesAdjacentToOffset).reduce((ranges, style) => {
     if (styleKeyFilter(style!)) {
-      return ranges!.set(style!, [getContiguousStyleRange(
+      return ranges!.set(style!, [[block.getKey(), ...getContiguousStyleRange(
         block,
         style!,
         stylesAdjacentToOffset.contains(style!) ? offset - 1 : offset
-      )]);
+      )] as [string, number, number]]);
     }
     return ranges!;
-  }, Map<string, [number, number][]>());
+  }, Map<string, [string, number, number][]>());
 };
 
-export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, [number, number][]> => {
-  const stylesNearFocus = getContiguousStyleRangesNearOffset(content.getBlockForKey(selection.getFocusKey()), selection.getFocusOffset(), styleKeyFilter);
+export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, [string, number, number][]> => {
+  const focusKey = selection.getFocusKey();
+  const stylesNearFocus = getContiguousStyleRangesNearOffset(content.getBlockForKey(focusKey), selection.getFocusOffset(), styleKeyFilter);
   return selection.isCollapsed()
     ? stylesNearFocus
     : stylesNearFocus.mergeWith((a, b) => a!.concat(b!), getContiguousStyleRangesNearOffset(
@@ -183,4 +184,62 @@ const rangesOverlapUnidirectionally = (a: [number, number], b: [number, number])
 
 export const rangesOverlap = (a: [number, number], b: [number, number]): boolean => {
   return rangesOverlapUnidirectionally(a, b) || rangesOverlapUnidirectionally(b, a);
+};
+
+export type InsertionEdit = {
+  type: 'insertion';
+  text: string;
+  blockKey: string;
+  offset: number;
+}
+
+export type DeletionEdit = {
+  type: 'deletion';
+  blockKey: string;
+  offset: number;
+  length: number;
+}
+
+export type SelectionEdit = {
+  type: 'selection';
+  anchorKey: string;
+  anchorOffset: number;
+  focusKey: string;
+  focusOffset: number;
+}
+
+export type Edit = InsertionEdit | DeletionEdit | SelectionEdit;
+
+export const performDependentEdits = (editorState: EditorState, edits: Edit[]) => {
+  const insertions: { [blockKey: string]: number[] } = {};
+  const deletions: { [blockKey: string]: number[] } = {};
+  return edits.reduce((nextEditorState, edit) => {
+    const content = nextEditorState.getCurrentContent();
+    switch (edit.type) {
+      case 'insertion':
+        return nextEditorState;
+      case 'deletion':
+        insertions[edit.blockKey] = insertions[edit.blockKey] || [0];
+        deletions[edit.blockKey] = deletions[edit.blockKey] || [0];
+        const block = content.getBlockForKey(edit.blockKey);
+        const offset = edit.offset + sum(insertions[edit.blockKey].slice(0, edit.offset + 1)) - sum(deletions[edit.blockKey].slice(0, edit.offset + 1));
+        deletions[edit.blockKey][edit.offset] = (deletions[edit.blockKey][edit.offset] || 0) + edit.length;
+        return EditorState.push(
+          nextEditorState,
+          Modifier.replaceText(content, createSelectionWithRange(edit.blockKey, offset, offset + edit.length), ''),
+          'remove-range'
+        );
+      case 'selection':
+        const anchorDelta = sum(insertions[edit.anchorKey].slice(0, edit.anchorOffset + 1)) - sum(deletions[edit.anchorKey].slice(0, edit.anchorOffset + 1));
+        const focusDelta = sum(insertions[edit.focusKey].slice(0, edit.focusOffset + 1)) - sum(deletions[edit.focusKey].slice(0, edit.focusOffset + 1));
+        return EditorState.forceSelection(
+          nextEditorState,
+          SelectionState.createEmpty(edit.anchorKey).merge({
+            anchorOffset: edit.anchorOffset + anchorDelta,
+            focusKey: edit.focusKey,
+            focusOffset: edit.focusOffset + focusDelta
+          }) as SelectionState
+        );
+    }
+  }, editorState);
 };

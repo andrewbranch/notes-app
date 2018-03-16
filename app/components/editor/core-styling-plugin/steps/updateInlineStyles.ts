@@ -64,8 +64,8 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
           nextContent,
           blockKey,
           styleName => styleName === key,
-          ranges![0][0], // selection must be collapsed in this method
-          ranges![0][1]  //
+          ranges![0][1], // selection must be collapsed in this method
+          ranges![0][2]  //
         );
       });
 

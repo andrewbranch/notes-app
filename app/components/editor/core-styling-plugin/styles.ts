@@ -49,4 +49,4 @@ export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefiniti
 };
 
 export const styleValues = values(styles);
-export const isCoreStyle = (styleKey: string) => styleKey.startsWith('core.styling');
+export const isCoreStyle = (styleKey: string): styleKey is CoreInlineStyleName => styleKey.startsWith('core.styling');
