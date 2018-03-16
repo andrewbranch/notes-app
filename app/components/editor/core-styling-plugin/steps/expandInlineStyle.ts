@@ -16,21 +16,10 @@ export const expandInlineStyle = (editorState: EditorState) => {
     ranges!.forEach(range => {
       const [blockKey, start, end] = range;
       const block = content.getBlockForKey(blockKey);
+      const collapsedText = block.getText().slice(start, end);
       style.pattern.lastIndex = 0;
-      if (!style.pattern.test(block.getText().slice(start, end))) {
-        edits.push({
-          type: 'insertion',
-          blockKey,
-          offset: start,
-          text: '`',
-          style: OrderedSet([styleKey])
-        }, {
-          type: 'insertion',
-          blockKey,
-          offset: end,
-          text: '`',
-          style: OrderedSet([styleKey])
-        });
+      if (!style.pattern.test(collapsedText)) {
+        edits.push(...style.expand({ blockKey, offset: start, style: OrderedSet([styleKey]) }, collapsedText));
       }
     });
   });

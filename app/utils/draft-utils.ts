@@ -191,14 +191,8 @@ export type InsertionEdit = {
   text: string;
   blockKey: string;
   offset: number;
+  deletionLength?: number;
   style?: OrderedSet<string>;
-}
-
-export type DeletionEdit = {
-  type: 'deletion';
-  blockKey: string;
-  offset: number;
-  length: number;
 }
 
 export type SelectionEdit = {
@@ -212,7 +206,7 @@ export type SelectionEdit = {
   adjustAnchorForInsertions?: 'leading' | 'trailing';
 }
 
-export type Edit = InsertionEdit | DeletionEdit | SelectionEdit;
+export type Edit = InsertionEdit | SelectionEdit;
 
 export const performDependentEdits = (editorState: EditorState, edits: Edit[]) => {
   const insertions: { [blockKey: string]: number[] } = {};
@@ -225,21 +219,11 @@ export const performDependentEdits = (editorState: EditorState, edits: Edit[]) =
         deletions[edit.blockKey] = deletions[edit.blockKey] || [0];
         const insertOffset = edit.offset + sum(insertions[edit.blockKey].slice(0, edit.offset + 1)) - sum(deletions[edit.blockKey].slice(0, edit.offset + 1));
         insertions[edit.blockKey][edit.offset] = (insertions[edit.blockKey][edit.offset] || 0) + edit.text.length;
+        deletions[edit.blockKey][edit.offset] = (deletions[edit.blockKey][edit.offset] || 0) + (edit.deletionLength || 0);
         return EditorState.push(
           nextEditorState,
-          Modifier.insertText(content, createSelectionWithRange(edit.blockKey, insertOffset, insertOffset), edit.text, edit.style),
-          'insert-characters'
-        );
-      case 'deletion':
-        insertions[edit.blockKey] = insertions[edit.blockKey] || [0];
-        deletions[edit.blockKey] = deletions[edit.blockKey] || [0];
-        const block = content.getBlockForKey(edit.blockKey);
-        const offset = edit.offset + sum(insertions[edit.blockKey].slice(0, edit.offset + 1)) - sum(deletions[edit.blockKey].slice(0, edit.offset + 1));
-        deletions[edit.blockKey][edit.offset] = (deletions[edit.blockKey][edit.offset] || 0) + edit.length;
-        return EditorState.push(
-          nextEditorState,
-          Modifier.replaceText(content, createSelectionWithRange(edit.blockKey, offset, offset + edit.length), ''),
-          'remove-range'
+          Modifier.replaceText(content, createSelectionWithRange(edit.blockKey, insertOffset, insertOffset + (edit.deletionLength || 0)), edit.text, edit.style),
+          edit.text.length ? 'insert-characters' : 'remove-range'
         );
       case 'selection':
         insertions[edit.anchorKey] = insertions[edit.anchorKey] || [0];
@@ -248,8 +232,8 @@ export const performDependentEdits = (editorState: EditorState, edits: Edit[]) =
         deletions[edit.focusKey] = deletions[edit.focusKey] || [0];
         const adjustFocusForInsertions = edit.adjustFocusForInsertions === 'leading' ? 0 : 1;
         const adjustAnchorForInsertions = edit.adjustAnchorForInsertions === 'leading' ? 0 : 1;
-        const anchorDelta = sum(insertions[edit.anchorKey].slice(0, edit.anchorOffset + adjustAnchorForInsertions)) - sum(deletions[edit.anchorKey].slice(0, edit.anchorOffset + 1));
-        const focusDelta = sum(insertions[edit.focusKey].slice(0, edit.focusOffset + adjustFocusForInsertions)) - sum(deletions[edit.focusKey].slice(0, edit.focusOffset + 1));
+        const anchorDelta = sum(insertions[edit.anchorKey].slice(0, edit.anchorOffset + adjustAnchorForInsertions)) - sum(deletions[edit.anchorKey].slice(0, edit.anchorOffset + adjustAnchorForInsertions));
+        const focusDelta = sum(insertions[edit.focusKey].slice(0, edit.focusOffset + adjustFocusForInsertions)) - sum(deletions[edit.focusKey].slice(0, edit.focusOffset + adjustFocusForInsertions));
         return EditorState.forceSelection(
           nextEditorState,
           SelectionState.createEmpty(edit.anchorKey).merge({

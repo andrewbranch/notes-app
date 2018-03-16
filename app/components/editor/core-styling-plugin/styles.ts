@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { ContentState, Modifier, ContentBlock } from 'draft-js';
-import { createSelectionWithRange } from '../../../utils/draft-utils';
+import { createSelectionWithRange, InsertionEdit } from '../../../utils/draft-utils';
 import { Styles } from '../../../ui/types';
 import { values } from 'lodash';
 const styleVariables: Styles = require('../../../styles/variables.scss');
@@ -15,8 +15,8 @@ export interface InlineStyleDefinition {
 }
 
 export interface ExpandableInlineStyleDefinition extends InlineStyleDefinition {
-  collapse: (matchArray: RegExpMatchArray) => string;
-  expand: (collapsedText: string) => string;
+  collapse: (edit: Pick<InsertionEdit, 'blockKey' | 'offset' | 'style'>, expandedText: string) => InsertionEdit[];
+  expand: (edit: Pick<InsertionEdit, 'blockKey' | 'offset' | 'style'>, collapsedText: string) => InsertionEdit[];
   decoratorLength: number;
 }
 
@@ -26,8 +26,31 @@ export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefiniti
   'core.styling.inlineCode': {
     name: 'core.styling.inlineCode',
     pattern: /`([^`]+)`/g,
-    collapse: matchArray => matchArray[1],
-    expand: collapsedText => `\`${collapsedText}\``,
+    // Collapse would be more accurately represented by two edits,
+    // each deleting a single backtick, but since collapse will
+    // never occur when the selection is within the style range,
+    // I don’t think it matters.
+    collapse: ({ blockKey, offset, style }, expandedText) => [{
+      type: 'insertion',
+      blockKey,
+      offset,
+      deletionLength: expandedText.length,
+      text: expandedText.slice(1, -1),
+      style
+    }],
+    expand: ({ blockKey, offset, style }, collapsedText) => [{
+      type: 'insertion',
+      blockKey,
+      offset,
+      text: '`',
+      style
+    }, {
+      type: 'insertion',
+      blockKey,
+      offset: offset + collapsedText.length,
+      text: '`',
+      style
+    }],
     decoratorLength: 1,
     applyStyle: (contentState, blockOrKey, start, end) => {
       const blockKey = typeof blockOrKey === 'string' ? blockOrKey : blockOrKey.getKey();

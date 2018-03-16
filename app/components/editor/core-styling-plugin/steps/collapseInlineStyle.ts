@@ -1,7 +1,8 @@
 import { EditorState } from 'draft-js';
 import { uniq, flatMap } from 'lodash';
-import { getContiguousStyleRangesNearSelectionEdges, DeletionEdit, performDependentEdits, Edit, performUnUndoableEdits } from '../../../../utils/draft-utils';
+import { getContiguousStyleRangesNearSelectionEdges, performDependentEdits, Edit, performUnUndoableEdits } from '../../../../utils/draft-utils';
 import { isCoreStyle, CoreInlineStyleName, styles } from '../styles';
+import { OrderedSet } from 'immutable';
 
 export const collapseInlineStyles = (editorState: EditorState) => {
   const content = editorState.getCurrentContent();
@@ -19,19 +20,10 @@ export const collapseInlineStyles = (editorState: EditorState) => {
           styleKeys.forEach(styleKey => {
             if (styleKey && isCoreStyle(styleKey)) {
               const style = styles[styleKey];
+              const expandedText = block.getText().slice(start, end);
               style.pattern.lastIndex = 0;
-              if (style.pattern.test(block.getText().slice(start, end))) {
-                blockEdits.push({
-                  type: 'deletion',
-                  blockKey,
-                  offset: start,
-                  length: style.decoratorLength
-                }, {
-                  type: 'deletion',
-                  blockKey,
-                  offset: end - style.decoratorLength,
-                  length: style.decoratorLength
-                });
+              if (style.pattern.test(expandedText)) {
+                blockEdits.push(...style.collapse({ blockKey, offset: start, style: OrderedSet([styleKey]) }, expandedText));
               }
             }
           });
