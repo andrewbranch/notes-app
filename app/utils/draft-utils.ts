@@ -1,6 +1,6 @@
 import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
-import { constant, sum } from 'lodash';
+import { constant, sum, isEqual } from 'lodash';
 import { Map, OrderedSet } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
@@ -169,7 +169,7 @@ export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState
   const stylesNearFocus = getContiguousStyleRangesNearOffset(content.getBlockForKey(focusKey), selection.getFocusOffset(), styleKeyFilter);
   return selection.isCollapsed()
     ? stylesNearFocus
-    : stylesNearFocus.mergeWith((a, b) => a!.concat(b!), getContiguousStyleRangesNearOffset(
+    : stylesNearFocus.mergeWith((a, b) => isEqual(a, b) ? a! : a!.concat(b!), getContiguousStyleRangesNearOffset(
       content.getBlockForKey(selection.getAnchorKey()),
       selection.getAnchorOffset(),
       styleKeyFilter
