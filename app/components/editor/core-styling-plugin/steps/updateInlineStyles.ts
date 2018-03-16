@@ -1,7 +1,7 @@
 import { EditorState } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
 import { values } from 'lodash';
-import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters } from '../../../../utils/draft-utils';
+import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset } from '../../../../utils/draft-utils';
 import { styles, styleValues, isCoreStyle, TRIGGER_CHARACTERS } from '../styles';
 
 const shouldReprocessInlineStyles = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): boolean => {
@@ -51,25 +51,27 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
   const focusKey = selection.getFocusKey();
   
   if (prevContent !== content && shouldReprocessInlineStyles(changeType, prevEditorState, editorState)) {
-    const affectedBlocks = changeType === 'split-block' ?  [prevSelection.getStartKey(), focusKey] : [focusKey];
+    const affectedPositions = changeType === 'split-block'
+      ? [{ block: focusKey, offset: selection.getStartOffset() }, { block: prevSelection.getStartKey(), offset: prevSelection.getStartOffset() }]
+      : [{ block: focusKey, offset: selection.getStartOffset() }];
     let nextContent = content;
 
-    affectedBlocks.forEach(blockKey => {
-      getContiguousStyleRangesNearSelectionEdges(
-        nextContent,
-        selection,
+    affectedPositions.forEach(position => {
+      getContiguousStyleRangesNearOffset(
+        nextContent.getBlockForKey(position.block),
+        position.offset,
         isCoreStyle
       ).forEach((ranges, key) => {
         nextContent = stripStylesFromBlock(
           nextContent,
-          blockKey,
+          position.block,
           styleName => styleName === key,
           ranges![0][1], // selection must be collapsed in this method
           ranges![0][2]  //
         );
       });
 
-      const newText = nextContent.getBlockForKey(blockKey).getText();
+      const newText = nextContent.getBlockForKey(position.block).getText();
 
       // Go through each styling entity and reapply
       styleValues.forEach(style => {
@@ -78,7 +80,7 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
         do {
           matchArr = style.pattern.exec(newText);
           if (matchArr) {
-            nextContent = style.applyStyle(nextContent, blockKey, matchArr.index, matchArr.index + matchArr[0].length);
+            nextContent = style.applyStyle(nextContent, position.block, matchArr.index, matchArr.index + matchArr[0].length);
           }
         } while (matchArr);
       });
