@@ -74,6 +74,7 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
       // Go through each styling entity and reapply
       styleValues.forEach(style => {
         let matchArr;
+        style.pattern.lastIndex = 0;
         do {
           matchArr = style.pattern.exec(newText);
           if (matchArr) {

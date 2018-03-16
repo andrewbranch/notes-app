@@ -1,7 +1,7 @@
 import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
 import { constant, sum } from 'lodash';
-import { Map } from 'immutable';
+import { Map, OrderedSet } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
 if (false as true) var _ = Entity.mergeData('', {});
@@ -191,6 +191,7 @@ export type InsertionEdit = {
   text: string;
   blockKey: string;
   offset: number;
+  style?: OrderedSet<string>;
 }
 
 export type DeletionEdit = {
@@ -217,7 +218,15 @@ export const performDependentEdits = (editorState: EditorState, edits: Edit[]) =
     const content = nextEditorState.getCurrentContent();
     switch (edit.type) {
       case 'insertion':
-        return nextEditorState;
+        insertions[edit.blockKey] = insertions[edit.blockKey] || [0];
+        deletions[edit.blockKey] = deletions[edit.blockKey] || [0];
+        const insertOffset = edit.offset + sum(insertions[edit.blockKey].slice(0, edit.offset + 1)) - sum(deletions[edit.blockKey].slice(0, edit.offset + 1));
+        insertions[edit.blockKey][edit.offset] = (insertions[edit.blockKey][edit.offset] || 0) + edit.text.length;
+        return EditorState.push(
+          nextEditorState,
+          Modifier.insertText(content, createSelectionWithRange(edit.blockKey, insertOffset, insertOffset), edit.text, edit.style),
+          'insert-characters'
+        );
       case 'deletion':
         insertions[edit.blockKey] = insertions[edit.blockKey] || [0];
         deletions[edit.blockKey] = deletions[edit.blockKey] || [0];
@@ -230,6 +239,10 @@ export const performDependentEdits = (editorState: EditorState, edits: Edit[]) =
           'remove-range'
         );
       case 'selection':
+        insertions[edit.anchorKey] = insertions[edit.anchorKey] || [0];
+        deletions[edit.anchorKey] = deletions[edit.anchorKey] || [0];
+        insertions[edit.focusKey] = insertions[edit.focusKey] || [0];
+        deletions[edit.focusKey] = deletions[edit.focusKey] || [0];
         const anchorDelta = sum(insertions[edit.anchorKey].slice(0, edit.anchorOffset + 1)) - sum(deletions[edit.anchorKey].slice(0, edit.anchorOffset + 1));
         const focusDelta = sum(insertions[edit.focusKey].slice(0, edit.focusOffset + 1)) - sum(deletions[edit.focusKey].slice(0, edit.focusOffset + 1));
         return EditorState.forceSelection(
