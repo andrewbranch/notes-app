@@ -54,7 +54,8 @@ export const expandInlineStyle = (editorState: EditorState) => {
       anchorKey,
       anchorOffset,
       adjustAnchorForInsertions,
-      adjustFocusForInsertions
+      adjustFocusForInsertions,
+      isBackward: selection.getIsBackward()
     });
   }
 

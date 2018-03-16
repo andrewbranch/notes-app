@@ -207,6 +207,7 @@ export type SelectionEdit = {
   anchorOffset: number;
   focusKey: string;
   focusOffset: number;
+  isBackward: boolean;
   adjustFocusForInsertions?: 'leading' | 'trailing';
   adjustAnchorForInsertions?: 'leading' | 'trailing';
 }
@@ -252,9 +253,11 @@ export const performDependentEdits = (editorState: EditorState, edits: Edit[]) =
         return EditorState.forceSelection(
           nextEditorState,
           SelectionState.createEmpty(edit.anchorKey).merge({
+            anchorKey: edit.anchorKey,
             anchorOffset: edit.anchorOffset + anchorDelta,
             focusKey: edit.focusKey,
-            focusOffset: edit.focusOffset + focusDelta
+            focusOffset: edit.focusOffset + focusDelta,
+            isBackward: edit.isBackward
           }) as SelectionState
         );
     }

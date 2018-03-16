@@ -45,7 +45,8 @@ export const collapseInlineStyles = (editorState: EditorState) => {
         focusKey: selection.getFocusKey(),
         focusOffset: selection.getFocusOffset(),
         anchorKey: selection.getAnchorKey(),
-        anchorOffset: selection.getAnchorOffset()
+        anchorOffset: selection.getAnchorOffset(),
+        isBackward: selection.getIsBackward()
       });
     }
 
