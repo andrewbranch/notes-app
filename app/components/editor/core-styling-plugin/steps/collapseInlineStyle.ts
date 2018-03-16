@@ -1,6 +1,6 @@
 import { EditorState } from 'draft-js';
 import { uniq, flatMap } from 'lodash';
-import { getContiguousStyleRangesNearSelectionEdges, DeletionEdit, performDependentEdits, Edit } from '../../../../utils/draft-utils';
+import { getContiguousStyleRangesNearSelectionEdges, DeletionEdit, performDependentEdits, Edit, performUnUndoableEdits } from '../../../../utils/draft-utils';
 import { isCoreStyle, CoreInlineStyleName, styles } from '../styles';
 
 export const collapseInlineStyles = (editorState: EditorState) => {
@@ -53,5 +53,5 @@ export const collapseInlineStyles = (editorState: EditorState) => {
     return blockEdits;
   });
 
-  return performDependentEdits(editorState, edits);
+  return performUnUndoableEdits(editorState, disabledUndoEditorState => performDependentEdits(disabledUndoEditorState, edits));
 };
