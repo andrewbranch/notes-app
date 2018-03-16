@@ -150,7 +150,7 @@ export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, a
 
 export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, [string, number, number][]> => {
   const stylesAtOffset = block.getInlineStyleAt(offset);
-  const stylesAdjacentToOffset = block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset);
+  const stylesAdjacentToOffset = offset > 0 ? block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset) : OrderedSet<string>();
   const text = styleKeyFilter.length > 1 ? block.getText() : '';
   return stylesAtOffset.union(stylesAdjacentToOffset).reduce((ranges, style) => {
     if (styleKeyFilter(style!)) {
