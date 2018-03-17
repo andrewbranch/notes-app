@@ -1,7 +1,6 @@
 import { EditorState } from 'draft-js';
 import { getContiguousStyleRangesNearSelectionEdges, Edit, InsertionEdit } from '../../../../utils/draft-utils';
 import { isCoreStyle, CoreInlineStyleName, styles } from '../styles';
-import { OrderedSet } from 'immutable';
 
 export const expandInlineStyle = (editorState: EditorState): Edit[] => {
   const content = editorState.getCurrentContent();
@@ -19,7 +18,8 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
       const collapsedText = block.getText().slice(start, end);
       style.pattern.lastIndex = 0;
       if (!style.pattern.test(collapsedText)) {
-        edits.push(...style.expand({ blockKey, offset: start, style: OrderedSet([styleKey]) }, collapsedText));
+        const styles = block.getInlineStyleAt(start);
+        edits.push(...style.expand({ blockKey, offset: start, style: styles }, collapsedText));
       }
     });
   });

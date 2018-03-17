@@ -1,47 +1,40 @@
 import { EditorState } from 'draft-js';
-import { uniq, flatMap } from 'lodash';
-import { Edit, hasEdgeWithin } from '../../../../utils/draft-utils';
-import { isCoreStyle, CoreInlineStyleName, styles } from '../styles';
-import { OrderedSet } from 'immutable';
+import { Edit, hasEdgeWithin, getContiguousStyleRangesNearSelectionEdges } from '../../../../utils/draft-utils';
+import { isCoreStyle, styles, CoreInlineStyleName } from '../styles';
 
-export const collapseInlineStyles = (editorState: EditorState): Edit[] => {
+export const collapseInlineStyles = (editorState: EditorState, prevEditorState: EditorState): Edit[] => {
   const content = editorState.getCurrentContent();
   const selection = editorState.getSelection();
+  const prevSelection = prevEditorState.getSelection();
   const focusKey = selection.getFocusKey();
   const anchorKey = selection.getAnchorKey();
-  return flatMap(content.getBlocksAsArray(), block => {
-    const blockEdits: Edit[] = [];
-    block.findStyleRanges(
-      character => character.getStyle().some(isCoreStyle),
-      (start, end) => {
-        const blockKey = block.getKey();
-        if (!hasEdgeWithin(selection, blockKey, start, end)) {
-          const styleKeys = block.getInlineStyleAt(start);
-          styleKeys.forEach(styleKey => {
-            if (styleKey && isCoreStyle(styleKey)) {
-              const style = styles[styleKey];
-              const expandedText = block.getText().slice(start, end);
-              style.pattern.lastIndex = 0;
-              if (style.pattern.test(expandedText)) {
-                blockEdits.push(...style.collapse({ blockKey, offset: start, style: OrderedSet([styleKey]) }, expandedText));
-              }
-            }
-          });
+  const edits: Edit[] = [];
+  getContiguousStyleRangesNearSelectionEdges(content, prevSelection, isCoreStyle).forEach((ranges, styleKey: CoreInlineStyleName) => {
+    const style = styles[styleKey];
+    ranges!.forEach(range => {
+      const [blockKey, start, end] = range;
+      if (!hasEdgeWithin(selection, blockKey, start, end)) {
+        const block = content.getBlockForKey(blockKey);
+        const expandedText = block.getText().slice(start, end);
+        style.pattern.lastIndex = 0;
+        if (style.pattern.test(expandedText)) {
+          const styles = block.getInlineStyleAt(start);
+          edits.push(...style.collapse({ blockKey, offset: start, style: styles }, expandedText));
         }
       }
-    );
-
-    if (blockEdits.length) {
-      blockEdits.push({
-        type: 'selection',
-        focusKey: selection.getFocusKey(),
-        focusOffset: selection.getFocusOffset(),
-        anchorKey: selection.getAnchorKey(),
-        anchorOffset: selection.getAnchorOffset(),
-        isBackward: selection.getIsBackward()
-      });
-    }
-
-    return blockEdits;
+    });
   });
+
+  if (edits.length) {
+    edits.push({
+      type: 'selection',
+      focusKey: selection.getFocusKey(),
+      focusOffset: selection.getFocusOffset(),
+      anchorKey: selection.getAnchorKey(),
+      anchorOffset: selection.getAnchorOffset(),
+      isBackward: selection.getIsBackward()
+    });
+  }
+
+  return edits;
 };

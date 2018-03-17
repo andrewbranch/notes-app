@@ -180,12 +180,17 @@ export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: 
 };
 
 export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, [string, number, number][]> => {
-  const focusKey = selection.getFocusKey();
-  const stylesNearFocus = getContiguousStyleRangesNearOffset(content.getBlockForKey(focusKey), selection.getFocusOffset(), styleKeyFilter);
-  return selection.isCollapsed()
+  // We intentionally allow separated `content` and `selection`, so if, say,
+  // you are looking at updated content at a previous selection, the blocks could be undefined.
+  const focusBlock: ContentBlock | undefined = content.getBlockForKey(selection.getFocusKey());
+  const anchorBlock: ContentBlock | undefined = content.getBlockForKey(selection.getAnchorKey());
+  const stylesNearFocus = focusBlock
+    ? getContiguousStyleRangesNearOffset(focusBlock, selection.getFocusOffset(), styleKeyFilter)
+    : Map<string, [string, number, number][]>();
+  return selection.isCollapsed() || !anchorBlock
     ? stylesNearFocus
     : stylesNearFocus.mergeWith((a, b) => isEqual(a, b) ? a! : a!.concat(b!), getContiguousStyleRangesNearOffset(
-      content.getBlockForKey(selection.getAnchorKey()),
+      anchorBlock,
       selection.getAnchorOffset(),
       styleKeyFilter
     ));

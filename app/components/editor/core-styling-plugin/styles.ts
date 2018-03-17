@@ -29,8 +29,14 @@ export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefiniti
     collapse: (edit, expandedText) => [{
       ...edit,
       type: 'insertion',
-      deletionLength: expandedText.length,
-      text: expandedText.slice(2, -2),
+      text: '',
+      deletionLength: 2
+    }, {
+      ...edit,
+      type: 'insertion',
+      offset: edit.offset + expandedText.length - 2,
+      text: '',
+      deletionLength: 2
     }],
     expand: (edit, collapsedText) => [{
       ...edit,
@@ -61,30 +67,27 @@ export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefiniti
   'core.styling.inlineCode': {
     name: 'core.styling.inlineCode',
     pattern: /`([^`]+)`/g,
-    // Collapse would be more accurately represented by two edits,
-    // each deleting a single backtick, but since collapse will
-    // never occur when the selection is within the style range,
-    // I don’t think it matters.
-    collapse: ({ blockKey, offset, style }, expandedText) => [{
+    collapse: (edit, expandedText) => [{
+      ...edit,
       type: 'insertion',
-      blockKey,
-      offset,
-      deletionLength: expandedText.length,
-      text: expandedText.slice(1, -1),
-      style
-    }],
-    expand: ({ blockKey, offset, style }, collapsedText) => [{
-      type: 'insertion',
-      blockKey,
-      offset,
-      text: '`',
-      style
+      deletionLength: 1,
+      text: ''
     }, {
+      ...edit,
       type: 'insertion',
-      blockKey,
-      offset: offset + collapsedText.length,
-      text: '`',
-      style
+      offset: edit.offset + expandedText.length - 1,
+      deletionLength: 1,
+      text: ''
+    }],
+    expand: (edit, collapsedText) => [{
+      ...edit,
+      type: 'insertion',
+      text: '`'
+    }, {
+      ...edit,
+      type: 'insertion',
+      offset: edit.offset + collapsedText.length,
+      text: '`'
     }],
     decoratorLength: 1,
     applyStyle: (contentState, blockOrKey, start, end) => {

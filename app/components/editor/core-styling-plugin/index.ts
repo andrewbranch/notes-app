@@ -35,7 +35,7 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
   onChange: editorState => {
     const prevEditorState = getEditorState();
     const editorStateWithNewStyles = updateInlineStyles(editorState, prevEditorState);
-    const collapseEdits = collapseInlineStyles(editorStateWithNewStyles);
+    const collapseEdits = collapseInlineStyles(editorStateWithNewStyles, prevEditorState);
     const expandEdits = expandInlineStyle(editorStateWithNewStyles);
     return performDependentEdits(editorStateWithNewStyles, [...collapseEdits, ...expandEdits]);
   },
