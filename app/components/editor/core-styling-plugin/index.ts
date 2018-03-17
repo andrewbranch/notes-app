@@ -5,7 +5,7 @@ import { updateInlineStyles } from './steps/updateInlineStyles';
 import { styleValues } from './styles';
 import { collapseInlineStyles } from './steps/collapseInlineStyle';
 import { expandInlineStyle } from './steps/expandInlineStyle';
-import { createSelectionWithRange, createSelectionWithSelection } from '../../../utils/draft-utils';
+import { createSelectionWithRange, createSelectionWithSelection, performUnUndoableEdits, performDependentEdits } from '../../../utils/draft-utils';
 
 export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plugin = getEditorState => ({
   handleBeforeInput: (chars, editorState, { setEditorState }) => {
@@ -35,9 +35,9 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
   onChange: editorState => {
     const prevEditorState = getEditorState();
     const editorStateWithNewStyles = updateInlineStyles(editorState, prevEditorState);
-    const editorStateWithCollapsedStyles = collapseInlineStyles(editorStateWithNewStyles);
-    const editorStateWithExpandedStyles = expandInlineStyle(editorStateWithCollapsedStyles);
-    return editorStateWithExpandedStyles;
+    const collapseEdits = collapseInlineStyles(editorStateWithNewStyles);
+    const expandEdits = expandInlineStyle(editorStateWithNewStyles);
+    return performDependentEdits(editorStateWithNewStyles, [...collapseEdits, ...expandEdits]);
   },
 
   decorators,

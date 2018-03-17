@@ -1,9 +1,9 @@
 import { EditorState } from 'draft-js';
-import { getContiguousStyleRangesNearSelectionEdges, Edit, performDependentEdits, InsertionEdit } from '../../../../utils/draft-utils';
+import { getContiguousStyleRangesNearSelectionEdges, Edit, InsertionEdit } from '../../../../utils/draft-utils';
 import { isCoreStyle, CoreInlineStyleName, styles } from '../styles';
 import { OrderedSet } from 'immutable';
 
-export const expandInlineStyle = (editorState: EditorState) => {
+export const expandInlineStyle = (editorState: EditorState): Edit[] => {
   const content = editorState.getCurrentContent();
   const selection = editorState.getSelection();
   const edits: Edit[] = [];
@@ -48,5 +48,5 @@ export const expandInlineStyle = (editorState: EditorState) => {
     });
   }
 
-  return performDependentEdits(editorState, edits);
+  return edits;
 };

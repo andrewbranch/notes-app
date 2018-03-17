@@ -25,6 +25,21 @@ export const createSelectionWithBlock = (block: ContentBlock): SelectionState =>
   SelectionState.createEmpty(block.getKey()).merge({ focusOffset: block.getLength() }) as SelectionState
 );
 
+// https://github.com/facebook/draft-js/issues/1700
+export const hasEdgeWithin = (selectionState: SelectionState, blockKey: string, start: number, end: number): boolean => {
+  if (selectionState.getFocusKey() !== selectionState.getAnchorKey()) {
+    return selectionState.hasEdgeWithin(blockKey, start, end);
+  }
+
+  if (selectionState.getFocusKey() !== blockKey) {
+    return false;
+  }
+
+  const focusOffset = selectionState.getFocusOffset();
+  const anchorOffset = selectionState.getAnchorOffset();
+  return focusOffset >= start && focusOffset <= end || anchorOffset >= start && anchorOffset <= end;
+};
+
 export const stripEntitiesFromBlock = (contentState: ContentState, blockOrKey: ContentBlock | string, entityFilter: (entity: EntityInstance) => boolean): ContentState => {
   const block = typeof blockOrKey === 'string' ? contentState.getBlockForKey(blockOrKey): blockOrKey;
   let newContentState = contentState;
@@ -193,6 +208,7 @@ export type InsertionEdit = {
   offset: number;
   deletionLength?: number;
   style?: OrderedSet<string>;
+  disableUndo?: true;
 }
 
 export type SelectionEdit = {
@@ -220,11 +236,12 @@ export const performDependentEdits = (editorState: EditorState, edits: Edit[]) =
         const insertOffset = edit.offset + sum(insertions[edit.blockKey].slice(0, edit.offset + 1)) - sum(deletions[edit.blockKey].slice(0, edit.offset + 1));
         insertions[edit.blockKey][edit.offset] = (insertions[edit.blockKey][edit.offset] || 0) + edit.text.length;
         deletions[edit.blockKey][edit.offset] = (deletions[edit.blockKey][edit.offset] || 0) + (edit.deletionLength || 0);
-        return EditorState.push(
+        const nextContent = Modifier.replaceText(content, createSelectionWithRange(edit.blockKey, insertOffset, insertOffset + (edit.deletionLength || 0)), edit.text, edit.style);
+        const changeType = edit.text.length ? 'insert-characters' : 'remove-range';
+        return edit.disableUndo ? performUnUndoableEdits(
           nextEditorState,
-          Modifier.replaceText(content, createSelectionWithRange(edit.blockKey, insertOffset, insertOffset + (edit.deletionLength || 0)), edit.text, edit.style),
-          edit.text.length ? 'insert-characters' : 'remove-range'
-        );
+          disabledUndo => EditorState.push(disabledUndo, nextContent, changeType)
+        ) : EditorState.push(nextEditorState, nextContent, changeType);
       case 'selection':
         insertions[edit.anchorKey] = insertions[edit.anchorKey] || [0];
         deletions[edit.anchorKey] = deletions[edit.anchorKey] || [0];

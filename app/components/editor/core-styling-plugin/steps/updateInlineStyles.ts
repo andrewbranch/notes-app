@@ -9,6 +9,10 @@ const shouldReprocessInlineStyles = (changeType: EditorChangeType, oldEditorStat
   const newSelection = newEditorState.getSelection();
   const oldSelection = oldEditorState.getSelection();
   const oldContent = oldEditorState.getCurrentContent();
+  if (oldContent === newContent) {
+    return false;
+  }
+
   switch (changeType) {
     case 'backspace-character':
     case 'delete-character':
@@ -50,7 +54,7 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
   const prevSelection = prevEditorState.getSelection();
   const focusKey = selection.getFocusKey();
   
-  if (prevContent !== content && shouldReprocessInlineStyles(changeType, prevEditorState, editorState)) {
+  if (shouldReprocessInlineStyles(changeType, prevEditorState, editorState)) {
     const affectedPositions = changeType === 'split-block'
       ? [{ block: focusKey, offset: selection.getStartOffset() }, { block: prevSelection.getStartKey(), offset: prevSelection.getStartOffset() }]
       : [{ block: focusKey, offset: selection.getStartOffset() }];
