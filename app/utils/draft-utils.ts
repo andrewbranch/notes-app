@@ -207,7 +207,7 @@ export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState
     : Map<string, Set<Range>>();
   return selection.isCollapsed() || !anchorBlock
     ? stylesNearFocus
-    : stylesNearFocus.merge(getContiguousStyleRangesNearOffset(
+    : stylesNearFocus.mergeWith((a, b) => a!.union(b!), getContiguousStyleRangesNearOffset(
       anchorBlock,
       selection.getAnchorOffset(),
       styleKeyFilter
