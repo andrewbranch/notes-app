@@ -1,13 +1,31 @@
 import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
 import { constant, sum, isEqual } from 'lodash';
-import { Map, OrderedSet } from 'immutable';
+import { Map, Set, OrderedSet } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
 if (false as true) var _ = Entity.mergeData('', {});
 export type EntityInstance = typeof _;
 if (false as true) var __ = (null as any as EditorState).getLastChangeType();
 export type EditorChangeType = typeof __;
+
+export interface Range {
+  readonly blockKey: string;
+  readonly start: number;
+  readonly end: number;
+  equals(range: Range): boolean;
+  hashCode(): number;
+  inspect?(): string;
+};
+
+const Range = (blockKey: string, start: number, end: number): Range => ({
+  blockKey,
+  start,
+  end,
+  equals: (range: Range) => range.blockKey === blockKey && range.start === start && range.end === end,
+  hashCode: () => parseInt(blockKey, 64) + start + end,
+  inspect: () => `Range { ${blockKey}, ${start}, ${end} }`
+});
 
 export const createSelectionWithRange = (blockOrKey: ContentBlock | string, start: number, end: number): SelectionState => {
   const blockKey = typeof blockOrKey === 'string' ? blockOrKey : blockOrKey.getKey();
@@ -154,46 +172,46 @@ export const performUnUndoableEdits = (editorState: EditorState, performEdits: (
   return EditorState.set(performEdits(disabledUndoEditorState), { allowUndo: true });
 };
 
-export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, aroundIndex: number): [number, number] => {
+export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, aroundIndex: number): Range => {
   const characters = block.getCharacterList();
   let start = aroundIndex;
   let end = aroundIndex;
   while (start >= 0 && characters.get(start).hasStyle(styleKey)) start--;
   while (end < characters.size && characters.get(end).hasStyle(styleKey)) end++;
-  return [start + 1, end];
+  return Range(block.getKey(), start + 1, end);
 };
 
-export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, [string, number, number][]> => {
+export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, Range> => {
   const stylesAtOffset = block.getInlineStyleAt(offset);
   const stylesAdjacentToOffset = offset > 0 ? block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset) : OrderedSet<string>();
   const text = styleKeyFilter.length > 1 ? block.getText() : '';
   return stylesAtOffset.union(stylesAdjacentToOffset).reduce((ranges, style) => {
     if (styleKeyFilter(style!)) {
-      return ranges!.set(style!, [[block.getKey(), ...getContiguousStyleRange(
+      return ranges!.set(style!, getContiguousStyleRange(
         block,
         style!,
         stylesAdjacentToOffset.contains(style!) ? offset - 1 : offset
-      )] as [string, number, number]]);
+      ));
     }
     return ranges!;
-  }, Map<string, [string, number, number][]>());
+  }, Map<string, Range>());
 };
 
-export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, [string, number, number][]> => {
+export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, Set<Range>> => {
   // We intentionally allow separated `content` and `selection`, so if, say,
   // you are looking at updated content at a previous selection, the blocks could be undefined.
   const focusBlock: ContentBlock | undefined = content.getBlockForKey(selection.getFocusKey());
   const anchorBlock: ContentBlock | undefined = content.getBlockForKey(selection.getAnchorKey());
   const stylesNearFocus = focusBlock
-    ? getContiguousStyleRangesNearOffset(focusBlock, selection.getFocusOffset(), styleKeyFilter)
-    : Map<string, [string, number, number][]>();
+    ? getContiguousStyleRangesNearOffset(focusBlock, selection.getFocusOffset(), styleKeyFilter).map(value => Set([value!])) as Map<string, Set<Range>>
+    : Map<string, Set<Range>>();
   return selection.isCollapsed() || !anchorBlock
     ? stylesNearFocus
-    : stylesNearFocus.mergeWith((a, b) => isEqual(a, b) ? a! : a!.concat(b!), getContiguousStyleRangesNearOffset(
+    : stylesNearFocus.merge(getContiguousStyleRangesNearOffset(
       anchorBlock,
       selection.getAnchorOffset(),
       styleKeyFilter
-    ));
+    ).map(value => Set([value!])));
 };
 
 const rangesOverlapUnidirectionally = (a: [number, number], b: [number, number]) => {

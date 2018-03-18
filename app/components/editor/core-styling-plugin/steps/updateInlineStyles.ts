@@ -1,8 +1,9 @@
 import { EditorState } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
-import { values } from 'lodash';
-import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset } from '../../../../utils/draft-utils';
-import { styles, styleValues, isCoreStyle, TRIGGER_CHARACTERS } from '../styles';
+import { values, constant } from 'lodash';
+import { OrderedSet, Map, is } from 'immutable';
+import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset, Range } from '../../../../utils/draft-utils';
+import { styles, styleValues, isCoreStyle, TRIGGER_CHARACTERS, CoreInlineStyleName } from '../styles';
 
 const shouldReprocessInlineStyles = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): boolean => {
   const newContent = newEditorState.getCurrentContent();
@@ -65,13 +66,13 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
         nextContent.getBlockForKey(position.block),
         position.offset,
         isCoreStyle
-      ).forEach((ranges, key) => {
+      ).forEach((range, key) => {
         nextContent = stripStylesFromBlock(
           nextContent,
           position.block,
           styleName => styleName === key,
-          ranges![0][1], // selection must be collapsed in this method
-          ranges![0][2]  //
+          range!.start,
+          range!.end
         );
       });
 
@@ -79,14 +80,31 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
 
       // Go through each styling entity and reapply
       styleValues.forEach(style => {
-        let matchArr;
-        style.pattern.lastIndex = 0;
-        do {
-          matchArr = style.pattern.exec(newText);
-          if (matchArr) {
-            nextContent = style.applyStyle(nextContent, position.block, matchArr.index, matchArr.index + matchArr[0].length);
+        let matchIndex = -1;
+        let lastValidMatch: { index: number; styleRanges: Map<string, Range> } | undefined;
+        while ((matchIndex = newText.indexOf(style.pattern, matchIndex + 1)) > -1) {
+          const block = nextContent.getBlockForKey(position.block);
+          const match = {
+            index: matchIndex,
+            styleRanges: getContiguousStyleRangesNearOffset(block, matchIndex, isCoreStyle)
+          };
+
+          if (
+            lastValidMatch &&
+            is(lastValidMatch.styleRanges, match.styleRanges) &&
+            match.styleRanges.every((_, styleKey: CoreInlineStyleName) => styles[styleKey].allowsNesting)
+          ) {
+            const start = lastValidMatch.index;
+            const end = match.index + style.pattern.length;
+            if (!style.allowsNesting) {
+              nextContent = stripStylesFromBlock(nextContent, block, constant(true), start, end);
+            }
+            nextContent = style.applyStyle(nextContent, block, start, end);
+            lastValidMatch = undefined;
+          } else {
+            lastValidMatch = match;
           }
-        } while (matchArr);
+        }
       });
     });
 

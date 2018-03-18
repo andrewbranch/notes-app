@@ -1,4 +1,6 @@
 import * as React from 'react';
+import * as memoize from 'memoizee';
+import { escapeRegExp, uniq } from 'lodash';
 import { ContentState, Modifier, ContentBlock } from 'draft-js';
 import { createSelectionWithRange, InsertionEdit } from '../../../utils/draft-utils';
 import { Styles } from '../../../ui/types';
@@ -9,64 +11,25 @@ export type CoreInlineStyleName = 'core.styling.bold' | 'core.styling.inlineCode
 
 export interface InlineStyleDefinition {
   name: CoreInlineStyleName;
-  pattern: RegExp;
+  pattern: string;
+  allowsNesting: boolean;
   applyStyle: (contentState: ContentState, blockOrKey: ContentBlock | string, start: number, end: number) => ContentState;
   styleAttributes: React.CSSProperties;
 }
 
+// TODO: these are no longer useful
 export interface ExpandableInlineStyleDefinition extends InlineStyleDefinition {
   collapse: (edit: Pick<InsertionEdit, 'blockKey' | 'offset' | 'style' | 'disableUndo'>, expandedText: string) => InsertionEdit[];
   expand: (edit: Pick<InsertionEdit, 'blockKey' | 'offset' | 'style' | 'disableUndo'>, collapsedText: string) => InsertionEdit[];
-  decoratorLength: number;
 }
 
 export const TRIGGER_CHARACTERS = ['`', '*'];
 
 export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefinition } = {
-  'core.styling.bold': {
-    name: 'core.styling.bold',
-    pattern: /\*\*([^*]+)\*\*/g,
-    collapse: (edit, expandedText) => [{
-      ...edit,
-      type: 'insertion',
-      text: '',
-      deletionLength: 2
-    }, {
-      ...edit,
-      type: 'insertion',
-      offset: edit.offset + expandedText.length - 2,
-      text: '',
-      deletionLength: 2
-    }],
-    expand: (edit, collapsedText) => [{
-      ...edit,
-      type: 'insertion',
-      text: '**',
-    }, {
-      ...edit,
-      type: 'insertion',
-      offset: edit.offset + collapsedText.length,
-      text: '**'
-    }],
-    decoratorLength: 1,
-    applyStyle: (contentState, blockOrKey, start, end) => {
-      const blockKey = typeof blockOrKey === 'string' ? blockOrKey : blockOrKey.getKey();
-      const styleSelection = createSelectionWithRange(
-        contentState.getBlockForKey(blockKey),
-        start,
-        end
-      );
-
-      return Modifier.applyInlineStyle(contentState, styleSelection, 'core.styling.bold');
-    },
-    styleAttributes: {
-      fontWeight: 'bold'
-    }
-  },
-
   'core.styling.inlineCode': {
     name: 'core.styling.inlineCode',
-    pattern: /`([^`]+)`/g,
+    pattern: '`',
+    allowsNesting: false,
     collapse: (edit, expandedText) => [{
       ...edit,
       type: 'insertion',
@@ -89,7 +52,6 @@ export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefiniti
       offset: edit.offset + collapsedText.length,
       text: '`'
     }],
-    decoratorLength: 1,
     applyStyle: (contentState, blockOrKey, start, end) => {
       const blockKey = typeof blockOrKey === 'string' ? blockOrKey : blockOrKey.getKey();
       const styleSelection = createSelectionWithRange(
@@ -106,8 +68,54 @@ export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefiniti
       backgroundColor: styleVariables.warmGray10,
       borderRadius: 2
     }
+  },
+
+  'core.styling.bold': {
+    name: 'core.styling.bold',
+    pattern: '**',
+    allowsNesting: true,
+    collapse: (edit, expandedText) => [{
+      ...edit,
+      type: 'insertion',
+      text: '',
+      deletionLength: 2
+    }, {
+      ...edit,
+      type: 'insertion',
+      offset: edit.offset + expandedText.length - 2,
+      text: '',
+      deletionLength: 2
+    }],
+    expand: (edit, collapsedText) => [{
+      ...edit,
+      type: 'insertion',
+      text: '**',
+    }, {
+      ...edit,
+      type: 'insertion',
+      offset: edit.offset + collapsedText.length,
+      text: '**'
+    }],
+    applyStyle: (contentState, blockOrKey, start, end) => {
+      const blockKey = typeof blockOrKey === 'string' ? blockOrKey : blockOrKey.getKey();
+      const styleSelection = createSelectionWithRange(
+        contentState.getBlockForKey(blockKey),
+        start,
+        end
+      );
+
+      return Modifier.applyInlineStyle(contentState, styleSelection, 'core.styling.bold');
+    },
+    styleAttributes: {
+      fontWeight: 'bold'
+    }
   }
 };
 
 export const styleValues = values(styles);
 export const isCoreStyle = (styleKey: string): styleKey is CoreInlineStyleName => styleKey.startsWith('core.styling');
+export const getPatternRegExp = memoize((styleKey: CoreInlineStyleName) => {
+  const escapedPattern = escapeRegExp(styles[styleKey].pattern);
+  const characters = escapeRegExp(uniq(styles[styleKey].pattern.split('')).join(''));
+  return new RegExp(`${escapedPattern}[^${characters}]+${escapedPattern}`, 'g');
+});
