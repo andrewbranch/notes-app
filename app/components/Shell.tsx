@@ -1,16 +1,20 @@
 import * as React from 'react';
+import JSONTree from 'react-json-tree';
 import { match } from 'react-router';
 import { connect, DispatchProp } from 'react-redux';
-import { MasterDetailView } from '../ui/MasterDetailView';
 import { Route, RouteComponentProps } from 'react-router-dom';
+import { MasterDetailView } from '../ui/MasterDetailView';
+import { Note as NoteType } from '../reducers/notes';
 import Note from './Note';
 import NoteListItem from './NoteListItem';
 import { shellSelector } from './Shell.selectors';
+import { convertToRaw } from 'draft-js';
 const styles = require('./Shell.scss');
 
 export interface ShellProps extends RouteComponentProps<{}>, DispatchProp<{}> {
-  selectedNote: string;
+  selectedNote: NoteType | null;
   noteIds: string[];
+  showEditorDebugger: boolean;
 }
 
 /**
@@ -18,16 +22,17 @@ export interface ShellProps extends RouteComponentProps<{}>, DispatchProp<{}> {
  */
 export class Shell extends React.Component<ShellProps> {
   render() {
-    const { selectedNote, noteIds } = this.props;
+    const { selectedNote, noteIds, showEditorDebugger } = this.props;
 
     return (
       <div className={styles.shell}>
         <MasterDetailView
+          className={styles.masterDetailView}
           masterListItems={noteIds}
           renderMasterListItem={(noteId, isSelected) => (
             <NoteListItem key={noteId} noteId={noteId} isSelected={isSelected} />
           )}
-          selectedMasterListItem={selectedNote}
+          selectedMasterListItem={selectedNote ? selectedNote.id : null}
           detailView={
             <Route path="/:id" render={({ match }: { match: match<{ id: string }> }) => (
               <MasterDetailView.DetailView>
@@ -36,6 +41,11 @@ export class Shell extends React.Component<ShellProps> {
             )} />
           }
         />
+        {showEditorDebugger ? (
+          <div className={styles.debugPane}>
+            <JSONTree data={selectedNote ? convertToRaw(selectedNote.editor.getCurrentContent()) : {}} />
+          </div>
+        ) : null}
       </div>
     );
   }

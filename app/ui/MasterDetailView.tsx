@@ -5,7 +5,7 @@ const styles: Styles = require('./MasterDetailView.scss');
 
 export interface MasterDetailViewProps extends Styleable {
   masterListItems: string[];
-  selectedMasterListItem: string;
+  selectedMasterListItem: string | null;
   renderMasterListItem: (listItem: string, isSelected: boolean, index: number) => JSX.Element;
   detailView: JSX.Element;
 }

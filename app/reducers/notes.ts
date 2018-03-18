@@ -1,6 +1,6 @@
 import { Reducer } from 'redux';
 import { EditorState, ContentState } from 'draft-js';
-import { updateEditor } from '../components/Editor.actions';
+import { updateEditor } from '../components/editor/Editor.actions';
 
 export interface Note {
   id: string;

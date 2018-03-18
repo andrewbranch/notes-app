@@ -6,6 +6,10 @@ $accent-dark: #28353B;
 $surface: white;
 $surface-selection: rgba($accent, 0.1);
 
+$warm-gray: #55412C;
+$warm-gray-5: rgba($warm-gray, 0.05);
+$warm-gray-10: rgba($warm-gray, 0.10);
+
 // Spacing
 
 $space-xxs: 4px;
@@ -22,3 +26,8 @@ $space-list-s: $space-s $space-list-h;
 $space-list-m: $space-m $space-list-h;
 $space-list-l: $space-l $space-list-h;
 $space-list-xl: $space-xl $space-list-h;
+
+:export {
+  warmGray5: $warm-gray-5;
+  warmGray10: $warm-gray-10;
+}

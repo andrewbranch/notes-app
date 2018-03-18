@@ -2,7 +2,7 @@ import * as React from 'react';
 import { connect, DispatchProp } from 'react-redux';
 import { noteSelector } from './Note.selectors';
 import { NotesState } from '../reducers/notes';
-import Editor from './Editor';
+import Editor from './editor/Editor';
 const styles = require('./Note.scss');
 
 export interface NoteProps extends DispatchProp<{}> {
