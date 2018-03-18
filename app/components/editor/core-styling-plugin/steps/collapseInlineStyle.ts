@@ -20,7 +20,21 @@ export const collapseInlineStyles = (editorState: EditorState, prevEditorState: 
         pattern.lastIndex = 0;
         if (pattern.test(expandedText)) {
           const styles = block.getInlineStyleAt(start);
-          edits.push(...style.collapse({ blockKey, offset: start, style: styles }, expandedText));
+          edits.push({
+            type: 'insertion',
+            blockKey,
+            offset: start,
+            style: styles,
+            deletionLength: style.pattern.length,
+            text: ''
+          }, {
+            type: 'insertion',
+            blockKey,
+            offset: start + expandedText.length - style.pattern.length,
+            style: styles,
+            deletionLength: style.pattern.length,
+            text: ''
+          });
         }
       }
     });

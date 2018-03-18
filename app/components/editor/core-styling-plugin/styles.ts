@@ -13,55 +13,17 @@ export interface InlineStyleDefinition {
   name: CoreInlineStyleName;
   pattern: string;
   allowsNesting: boolean;
-  applyStyle: (contentState: ContentState, blockOrKey: ContentBlock | string, start: number, end: number) => ContentState;
   styleAttributes: React.CSSProperties;
 }
 
-// TODO: these are no longer useful
-export interface ExpandableInlineStyleDefinition extends InlineStyleDefinition {
-  collapse: (edit: Pick<InsertionEdit, 'blockKey' | 'offset' | 'style' | 'disableUndo'>, expandedText: string) => InsertionEdit[];
-  expand: (edit: Pick<InsertionEdit, 'blockKey' | 'offset' | 'style' | 'disableUndo'>, collapsedText: string) => InsertionEdit[];
-}
 
 export const TRIGGER_CHARACTERS = ['`', '*'];
 
-export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefinition } = {
+export const styles: { [K in CoreInlineStyleName]: InlineStyleDefinition } = {
   'core.styling.inlineCode': {
     name: 'core.styling.inlineCode',
     pattern: '`',
     allowsNesting: false,
-    collapse: (edit, expandedText) => [{
-      ...edit,
-      type: 'insertion',
-      deletionLength: 1,
-      text: ''
-    }, {
-      ...edit,
-      type: 'insertion',
-      offset: edit.offset + expandedText.length - 1,
-      deletionLength: 1,
-      text: ''
-    }],
-    expand: (edit, collapsedText) => [{
-      ...edit,
-      type: 'insertion',
-      text: '`'
-    }, {
-      ...edit,
-      type: 'insertion',
-      offset: edit.offset + collapsedText.length,
-      text: '`'
-    }],
-    applyStyle: (contentState, blockOrKey, start, end) => {
-      const blockKey = typeof blockOrKey === 'string' ? blockOrKey : blockOrKey.getKey();
-      const styleSelection = createSelectionWithRange(
-        contentState.getBlockForKey(blockKey),
-        start,
-        end
-      );
-
-      return Modifier.applyInlineStyle(contentState, styleSelection, 'core.styling.inlineCode');
-    },
     styleAttributes: {
       fontFamily: 'monaco, consolas, monospace',
       fontSize: '80%',
@@ -74,38 +36,6 @@ export const styles: { [K in CoreInlineStyleName]: ExpandableInlineStyleDefiniti
     name: 'core.styling.bold',
     pattern: '**',
     allowsNesting: true,
-    collapse: (edit, expandedText) => [{
-      ...edit,
-      type: 'insertion',
-      text: '',
-      deletionLength: 2
-    }, {
-      ...edit,
-      type: 'insertion',
-      offset: edit.offset + expandedText.length - 2,
-      text: '',
-      deletionLength: 2
-    }],
-    expand: (edit, collapsedText) => [{
-      ...edit,
-      type: 'insertion',
-      text: '**',
-    }, {
-      ...edit,
-      type: 'insertion',
-      offset: edit.offset + collapsedText.length,
-      text: '**'
-    }],
-    applyStyle: (contentState, blockOrKey, start, end) => {
-      const blockKey = typeof blockOrKey === 'string' ? blockOrKey : blockOrKey.getKey();
-      const styleSelection = createSelectionWithRange(
-        contentState.getBlockForKey(blockKey),
-        start,
-        end
-      );
-
-      return Modifier.applyInlineStyle(contentState, styleSelection, 'core.styling.bold');
-    },
     styleAttributes: {
       fontWeight: 'bold'
     }
