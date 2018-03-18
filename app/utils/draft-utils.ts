@@ -1,7 +1,7 @@
 import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
-import { constant } from 'lodash';
-import { Map } from 'immutable';
+import { constant, sum, isEqual } from 'lodash';
+import { Map, OrderedSet } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
 if (false as true) var _ = Entity.mergeData('', {});
@@ -24,6 +24,21 @@ export const createSelectionWithSelection = (selectionState: SelectionState, mov
 export const createSelectionWithBlock = (block: ContentBlock): SelectionState => (
   SelectionState.createEmpty(block.getKey()).merge({ focusOffset: block.getLength() }) as SelectionState
 );
+
+// https://github.com/facebook/draft-js/issues/1700
+export const hasEdgeWithin = (selectionState: SelectionState, blockKey: string, start: number, end: number): boolean => {
+  if (selectionState.getFocusKey() !== selectionState.getAnchorKey()) {
+    return selectionState.hasEdgeWithin(blockKey, start, end);
+  }
+
+  if (selectionState.getFocusKey() !== blockKey) {
+    return false;
+  }
+
+  const focusOffset = selectionState.getFocusOffset();
+  const anchorOffset = selectionState.getAnchorOffset();
+  return focusOffset >= start && focusOffset <= end || anchorOffset >= start && anchorOffset <= end;
+};
 
 export const stripEntitiesFromBlock = (contentState: ContentState, blockOrKey: ContentBlock | string, entityFilter: (entity: EntityInstance) => boolean): ContentState => {
   const block = typeof blockOrKey === 'string' ? contentState.getBlockForKey(blockOrKey): blockOrKey;
@@ -148,28 +163,34 @@ export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, a
   return [start + 1, end];
 };
 
-const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, [number, number][]> => {
+export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, [string, number, number][]> => {
   const stylesAtOffset = block.getInlineStyleAt(offset);
-  const stylesAdjacentToOffset = block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset);
+  const stylesAdjacentToOffset = offset > 0 ? block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset) : OrderedSet<string>();
   const text = styleKeyFilter.length > 1 ? block.getText() : '';
   return stylesAtOffset.union(stylesAdjacentToOffset).reduce((ranges, style) => {
     if (styleKeyFilter(style!)) {
-      return ranges!.set(style!, [getContiguousStyleRange(
+      return ranges!.set(style!, [[block.getKey(), ...getContiguousStyleRange(
         block,
         style!,
         stylesAdjacentToOffset.contains(style!) ? offset - 1 : offset
-      )]);
+      )] as [string, number, number]]);
     }
     return ranges!;
-  }, Map<string, [number, number][]>());
+  }, Map<string, [string, number, number][]>());
 };
 
-export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, [number, number][]> => {
-  const stylesNearFocus = getContiguousStyleRangesNearOffset(content.getBlockForKey(selection.getFocusKey()), selection.getFocusOffset(), styleKeyFilter);
-  return selection.isCollapsed()
+export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, [string, number, number][]> => {
+  // We intentionally allow separated `content` and `selection`, so if, say,
+  // you are looking at updated content at a previous selection, the blocks could be undefined.
+  const focusBlock: ContentBlock | undefined = content.getBlockForKey(selection.getFocusKey());
+  const anchorBlock: ContentBlock | undefined = content.getBlockForKey(selection.getAnchorKey());
+  const stylesNearFocus = focusBlock
+    ? getContiguousStyleRangesNearOffset(focusBlock, selection.getFocusOffset(), styleKeyFilter)
+    : Map<string, [string, number, number][]>();
+  return selection.isCollapsed() || !anchorBlock
     ? stylesNearFocus
-    : stylesNearFocus.mergeWith((a, b) => a!.concat(b!), getContiguousStyleRangesNearOffset(
-      content.getBlockForKey(selection.getAnchorKey()),
+    : stylesNearFocus.mergeWith((a, b) => isEqual(a, b) ? a! : a!.concat(b!), getContiguousStyleRangesNearOffset(
+      anchorBlock,
       selection.getAnchorOffset(),
       styleKeyFilter
     ));
@@ -183,4 +204,68 @@ const rangesOverlapUnidirectionally = (a: [number, number], b: [number, number])
 
 export const rangesOverlap = (a: [number, number], b: [number, number]): boolean => {
   return rangesOverlapUnidirectionally(a, b) || rangesOverlapUnidirectionally(b, a);
+};
+
+export type InsertionEdit = {
+  type: 'insertion';
+  text: string;
+  blockKey: string;
+  offset: number;
+  deletionLength?: number;
+  style?: OrderedSet<string>;
+  disableUndo?: true;
+}
+
+export type SelectionEdit = {
+  type: 'selection';
+  anchorKey: string;
+  anchorOffset: number;
+  focusKey: string;
+  focusOffset: number;
+  isBackward: boolean;
+  adjustFocusForInsertions?: 'leading' | 'trailing';
+  adjustAnchorForInsertions?: 'leading' | 'trailing';
+}
+
+export type Edit = InsertionEdit | SelectionEdit;
+
+export const performDependentEdits = (editorState: EditorState, edits: Edit[]) => {
+  const insertions: { [blockKey: string]: number[] } = {};
+  const deletions: { [blockKey: string]: number[] } = {};
+  return edits.reduce((nextEditorState, edit) => {
+    const content = nextEditorState.getCurrentContent();
+    switch (edit.type) {
+      case 'insertion':
+        insertions[edit.blockKey] = insertions[edit.blockKey] || [0];
+        deletions[edit.blockKey] = deletions[edit.blockKey] || [0];
+        const insertOffset = edit.offset + sum(insertions[edit.blockKey].slice(0, edit.offset + 1)) - sum(deletions[edit.blockKey].slice(0, edit.offset + 1));
+        insertions[edit.blockKey][edit.offset] = (insertions[edit.blockKey][edit.offset] || 0) + edit.text.length;
+        deletions[edit.blockKey][edit.offset] = (deletions[edit.blockKey][edit.offset] || 0) + (edit.deletionLength || 0);
+        const nextContent = Modifier.replaceText(content, createSelectionWithRange(edit.blockKey, insertOffset, insertOffset + (edit.deletionLength || 0)), edit.text, edit.style);
+        const changeType = edit.text.length ? 'insert-characters' : 'remove-range';
+        return edit.disableUndo ? performUnUndoableEdits(
+          nextEditorState,
+          disabledUndo => EditorState.push(disabledUndo, nextContent, changeType)
+        ) : EditorState.push(nextEditorState, nextContent, changeType);
+      case 'selection':
+        insertions[edit.anchorKey] = insertions[edit.anchorKey] || [0];
+        deletions[edit.anchorKey] = deletions[edit.anchorKey] || [0];
+        insertions[edit.focusKey] = insertions[edit.focusKey] || [0];
+        deletions[edit.focusKey] = deletions[edit.focusKey] || [0];
+        const adjustFocusForInsertions = edit.adjustFocusForInsertions === 'leading' ? 0 : 1;
+        const adjustAnchorForInsertions = edit.adjustAnchorForInsertions === 'leading' ? 0 : 1;
+        const anchorDelta = sum(insertions[edit.anchorKey].slice(0, edit.anchorOffset + adjustAnchorForInsertions)) - sum(deletions[edit.anchorKey].slice(0, edit.anchorOffset + adjustAnchorForInsertions));
+        const focusDelta = sum(insertions[edit.focusKey].slice(0, edit.focusOffset + adjustFocusForInsertions)) - sum(deletions[edit.focusKey].slice(0, edit.focusOffset + adjustFocusForInsertions));
+        return EditorState.forceSelection(
+          nextEditorState,
+          SelectionState.createEmpty(edit.anchorKey).merge({
+            anchorKey: edit.anchorKey,
+            anchorOffset: edit.anchorOffset + anchorDelta,
+            focusKey: edit.focusKey,
+            focusOffset: edit.focusOffset + focusDelta,
+            isBackward: edit.isBackward
+          }) as SelectionState
+        );
+    }
+  }, editorState);
 };
