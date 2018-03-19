@@ -1,6 +1,6 @@
-import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions } from 'electron';
+import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions, ipcMain, IpcMessageEvent } from 'electron';
 import * as path from 'path';
-import { initDatabase } from './database';
+import { initDatabase, getNotes, extractNote } from './database';
 
 let menu: Menu;
 let template: MenuItemConstructorOptions[];
@@ -46,6 +46,13 @@ app.on('ready', async () => {
     app.quit();
   }
 
+  ipcMain.addListener('getNotes', (event: IpcMessageEvent) => {
+    event.sender.send('loadNotes', getNotes().reduce((hash, note) => ({
+      ...hash,
+      [note.id]: extractNote(note)
+    }), {}));
+  });
+
   mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
@@ -55,7 +62,7 @@ app.on('ready', async () => {
   const relativePathToApp = __dirname.endsWith('tmp') ? '../..' : '..';
   mainWindow.loadURL('file://' + path.resolve(__dirname, relativePathToApp, 'app/app.html'));
 
-  mainWindow.webContents.once('did-finish-load', () => {
+  mainWindow.webContents.once('did-finish-load', async () => {
     mainWindow!.show();
     mainWindow!.focus();
   });

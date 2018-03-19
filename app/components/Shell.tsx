@@ -4,7 +4,7 @@ import { match } from 'react-router';
 import { connect, DispatchProp } from 'react-redux';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import { MasterDetailView } from '../ui/MasterDetailView';
-import { Note as NoteType } from '../reducers/notes';
+import { Note as NoteType } from '../reducers/types';
 import Note from './Note';
 import NoteListItem from './NoteListItem';
 import { shellSelector } from './Shell.selectors';

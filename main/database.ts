@@ -11,6 +11,13 @@ import { seedNotes } from './seed';
 
 const appDataPath = path.resolve(app.getPath('appData'), 'Notes App');
 const mkdir = promisify(fs.mkdir);
+let notesCollection: RxDB.RxCollection<Note>;
+let notesResult: RxDB.RxDocument<Note>[];
+
+export function extractNote(noteDocument: RxDB.RxDocument<Note>): Note {
+  const { id, title, content } = noteDocument;
+  return { id, title, content };
+}
 
 export async function initDatabase() {
   RxDB.plugin(leveldb);
@@ -31,12 +38,28 @@ export async function initDatabase() {
     multiInstance: false
   });
 
-  const notes: RxDB.RxCollection<Note> = await db.collection({
+  notesCollection = await db.collection({
     name: 'notes',
     schema: noteSchema
   });
 
-  await seedNotes(notes);
+  await seedNotes(notesCollection);
+
+  // Load initial collection
+  loadNotes();
+
+  // Pre-load any updates
+  notesCollection.$.subscribe(() => {
+    loadNotes();
+  });
 
   return db;
+}
+
+async function loadNotes() {
+  notesResult = await notesCollection.find({}).exec();
+}
+
+export function getNotes() {
+  return notesResult;
 }

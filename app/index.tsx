@@ -2,10 +2,12 @@ import * as React from 'react';
 import { render } from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import { Root } from './components/Root';
+import { initIPC} from './ipc';
 import './app.global.scss';
 
 const { configureStore, history } = require('./store/configureStore');
 const store = configureStore();
+initIPC(store);
 
 render(
   <AppContainer>
