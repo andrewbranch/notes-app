@@ -37,16 +37,24 @@ const installExtensions = () => {
   return Promise.resolve([]);
 };
 
-app.on('ready', () =>
-  installExtensions()
-  .then(() => {
+app.on('ready', async () => {
+  await installExtensions();
+  try {
+    const db = await initDatabase();
+    console.dir(db);
+  } catch (error) {
+    console.trace(error);
+    app.quit();
+  }
+
   mainWindow = new BrowserWindow({
     show: false,
     width: 1024,
     height: 728
   });
 
-  mainWindow.loadURL(`file://${path.resolve(__dirname, '../app')}/app.html`);
+  const relativePathToApp = __dirname.endsWith('tmp') ? '../..' : '..';
+  mainWindow.loadURL('file://' + path.resolve(__dirname, relativePathToApp, 'app/app.html'));
 
   mainWindow.webContents.once('did-finish-load', () => {
     mainWindow!.show();
@@ -270,4 +278,4 @@ app.on('ready', () =>
     menu = Menu.buildFromTemplate(template);
     mainWindow!.setMenu(menu);
   }
-}));
+});
