@@ -10,9 +10,11 @@
     "url": "https://github.com/irath96"
   },
   "scripts": {
-    "postinstall": "npm rebuild --runtime=electron --target=1.6.6 --disturl=https://atom.io/download/atom-shell --build-from-source"
+    "postinstall": "npm rebuild --runtime=electron --target=1.8.4 --disturl=https://atom.io/download/atom-shell --build-from-source"
   },
   "license": "MIT",
   "dependencies": {
+    "leveldown": "^3.0.0",
+    "pouchdb-adapter-leveldb": "^6.4.3"
   }
 }

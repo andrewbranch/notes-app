@@ -2,7 +2,7 @@
   "extends": "../tsconfig-base.json",
   "compilerOptions": {
     "rootDir": ".",
-    "outDir": "../tmp",
+    "outDir": "./tmp",
     "sourceMap": false,
     "lib": [
       "es6",

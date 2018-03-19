@@ -39,6 +39,6 @@ app/style.css
 dist
 main.js
 *.map
-tmp
+main/tmp
 
 .idea
