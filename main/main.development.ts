@@ -1,8 +1,10 @@
-const { app, BrowserWindow, Menu, shell } = require('electron');
+import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions } from 'electron';
+import * as path from 'path';
+import { initDatabase } from './database';
 
-let menu;
-let template;
-let mainWindow = null;
+let menu: Menu;
+let template: MenuItemConstructorOptions[];
+let mainWindow: BrowserWindow | null;
 
 if (process.env.NODE_ENV === 'production') {
   const sourceMapSupport = require('source-map-support');
@@ -11,9 +13,8 @@ if (process.env.NODE_ENV === 'production') {
 
 if (process.env.NODE_ENV === 'development') {
   require('electron-debug')();
-  const path = require('path');
-  const p = path.join(__dirname, '..', 'app', 'node_modules');
-  require('module').globalPaths.push(p);
+  const rendererPath = path.join(__dirname, '..', 'app', 'node_modules');
+  require('module').globalPaths.push(rendererPath);
 }
 
 app.on('window-all-closed', () => {
@@ -45,11 +46,11 @@ app.on('ready', () =>
     height: 728
   });
 
-  mainWindow.loadURL(`file://${__dirname}/app.html`);
+  mainWindow.loadURL(`file://${path.resolve(__dirname, '../app')}/app.html`);
 
   mainWindow.webContents.once('did-finish-load', () => {
-    mainWindow.show();
-    mainWindow.focus();
+    mainWindow!.show();
+    mainWindow!.focus();
   });
 
   mainWindow.on('closed', () => {
@@ -57,16 +58,16 @@ app.on('ready', () =>
   });
 
   if (process.env.NODE_ENV === 'development') {
-    mainWindow.openDevTools();
+    (mainWindow as any).openDevTools();
     mainWindow.webContents.on('context-menu', (e, props) => {
       const { x, y } = props;
 
       Menu.buildFromTemplate([{
         label: 'Inspect element',
         click() {
-          mainWindow.inspectElement(x, y);
+          (mainWindow as any).inspectElement(x, y);
         }
-      }]).popup(mainWindow);
+      }]).popup(mainWindow!);
     });
   }
 
@@ -76,7 +77,7 @@ app.on('ready', () =>
       submenu: [{
         label: 'About ElectronReact',
         selector: 'orderFrontStandardAboutPanel:'
-      }, {
+      } as any, {
         type: 'separator'
       }, {
         label: 'Services',
@@ -138,25 +139,25 @@ app.on('ready', () =>
         label: 'Reload',
         accelerator: 'Command+R',
         click() {
-          mainWindow.webContents.reload();
+          mainWindow!.webContents.reload();
         }
       }, {
         label: 'Toggle Full Screen',
         accelerator: 'Ctrl+Command+F',
         click() {
-          mainWindow.setFullScreen(!mainWindow.isFullScreen());
+          mainWindow!.setFullScreen(!mainWindow!.isFullScreen());
         }
       }, {
         label: 'Toggle Developer Tools',
         accelerator: 'Alt+Command+I',
         click() {
-          mainWindow.toggleDevTools();
+          (mainWindow as any).toggleDevTools();
         }
       }] : [{
         label: 'Toggle Full Screen',
         accelerator: 'Ctrl+Command+F',
         click() {
-          mainWindow.setFullScreen(!mainWindow.isFullScreen());
+          mainWindow!.setFullScreen(!mainWindow!.isFullScreen());
         }
       }]
     }, {
@@ -212,7 +213,7 @@ app.on('ready', () =>
         label: '&Close',
         accelerator: 'Ctrl+W',
         click() {
-          mainWindow.close();
+          mainWindow!.close();
         }
       }]
     }, {
@@ -221,25 +222,25 @@ app.on('ready', () =>
         label: '&Reload',
         accelerator: 'Ctrl+R',
         click() {
-          mainWindow.webContents.reload();
+          mainWindow!.webContents.reload();
         }
       }, {
         label: 'Toggle &Full Screen',
         accelerator: 'F11',
         click() {
-          mainWindow.setFullScreen(!mainWindow.isFullScreen());
+          mainWindow!.setFullScreen(!mainWindow!.isFullScreen());
         }
       }, {
         label: 'Toggle &Developer Tools',
         accelerator: 'Alt+Ctrl+I',
         click() {
-          mainWindow.toggleDevTools();
+          (mainWindow as any).toggleDevTools();
         }
       }] : [{
         label: 'Toggle &Full Screen',
         accelerator: 'F11',
         click() {
-          mainWindow.setFullScreen(!mainWindow.isFullScreen());
+          mainWindow!.setFullScreen(!mainWindow!.isFullScreen());
         }
       }]
     }, {
@@ -267,6 +268,6 @@ app.on('ready', () =>
       }]
     }];
     menu = Menu.buildFromTemplate(template);
-    mainWindow.setMenu(menu);
+    mainWindow!.setMenu(menu);
   }
 }));

@@ -32,14 +32,13 @@ app/node_modules
 
 # App packaged
 release
-app/main.js
-app/main.js.map
+main/**/*.js
+main/**/*.js
 app/bundle.js
-app/bundle.js.map
 app/style.css
-app/style.css.map
 dist
 main.js
-main.js.map
+*.map
+tmp
 
 .idea
