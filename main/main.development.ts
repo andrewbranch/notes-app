@@ -41,7 +41,6 @@ app.on('ready', async () => {
   await installExtensions();
   try {
     const db = await initDatabase();
-    console.dir(db);
   } catch (error) {
     console.trace(error);
     app.quit();
