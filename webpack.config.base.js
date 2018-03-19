@@ -11,7 +11,15 @@ module.exports = {
   module: {
     loaders: [{
       test: /\.tsx?$/,
-      loaders: ['react-hot-loader/webpack', 'ts-loader'],
+      loaders: [
+        'react-hot-loader/webpack',
+        {
+          loader: 'ts-loader',
+          options: {
+            configFile: path.resolve(__dirname, 'app/tsconfig.json')
+          }
+        }
+      ],
       exclude: /node_modules/
     }, {
       test: /\.json$/,

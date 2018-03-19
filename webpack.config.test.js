@@ -7,7 +7,6 @@ module.exports = {
     libraryTarget: 'commonjs2'
   },
   module: {
-    // Use base + development loaders, but exclude 'babel-loader'
-    loaders: devConfig.module.loaders.slice(1)
+    loaders: devConfig.module.loaders
   }
 };

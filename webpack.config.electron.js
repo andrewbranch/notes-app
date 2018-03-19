@@ -2,6 +2,7 @@
  * Build config for electron 'Main Process' file
  */
 
+const path = require('path');
 const webpack = require('webpack');
 const merge = require('webpack-merge');
 const baseConfig = require('./webpack.config.base');
@@ -9,12 +10,29 @@ const baseConfig = require('./webpack.config.base');
 module.exports = merge(baseConfig, {
   devtool: 'source-map',
 
-  entry: ['./app/main.development'],
+  entry: ['./main/main.development.ts'],
+
+  resolve: {
+    extensions: ['ts']
+  },
+
+  module: {
+    loaders: [{
+      test: /\.ts$/,
+      use: {
+        loader: 'ts-loader',
+        options: {
+          configFile: path.resolve(__dirname, 'main/tsconfig.json'),
+          transpileOnly: true // TODO: this is freaking out
+        }
+      }
+    }]
+  },
 
   // 'main.js' in root
   output: {
     path: __dirname,
-    filename: './app/main.js'
+    filename: './main/main.js'
   },
 
   plugins: [

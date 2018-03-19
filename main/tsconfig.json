@@ -1,0 +1,22 @@
+{
+  "extends": "../tsconfig-base.json",
+  "compilerOptions": {
+    "rootDir": ".",
+    "outDir": "../tmp",
+    "sourceMap": false,
+    "lib": [
+      "es6",
+      "dom",
+      "scripthost"
+    ],
+  },
+  "files": [
+    "main.development.ts"
+  ],
+  "include": [
+    "./**/*.ts"
+  ],
+  "exclude": [
+    "../node_modules/**"
+  ]
+}
