@@ -63,3 +63,7 @@ async function loadNotes() {
 export function getNotes() {
   return notesResult;
 }
+
+export async function saveNote(id: string, patch: Partial<Note>) {
+  return notesCollection.findOne({ id }).update({ $set: patch });
+}
