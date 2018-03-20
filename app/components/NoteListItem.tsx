@@ -3,23 +3,19 @@ import * as classNames from 'classnames/bind';
 import { Link } from 'react-router-dom';
 import { connect, DispatchProp } from 'react-redux';
 import { NotesState } from '../reducers/types';
+import { NoteListItemProps } from './NoteListItem.d';
 import { noteListItemSelector } from './NoteListItem.selectors';
 const styles = require('./NoteListItem.scss');
 const cx = classNames.bind(styles);
 
-export interface NoteListItemProps extends DispatchProp<{}> {
-  noteId: string;
-  isSelected: boolean;
-  notes: NotesState;
-}
-
 export class NoteListItem extends React.PureComponent<NoteListItemProps> {
   render() {
-    const { noteId, isSelected, notes } = this.props;
-    const note = notes[noteId];
+    const { noteId, isSelected, noteTitle } = this.props;
     return (
       <Link to={'/' + noteId} className={cx(styles.noteListItem, { selected: isSelected })}>
-        {note.title}
+        <div className={styles.title}>
+          {noteTitle}
+        </div>
       </Link>
     );
   }

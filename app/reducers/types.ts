@@ -1,6 +1,9 @@
 import { EditorState, RawDraftContentState } from 'draft-js';
 import { RouterState } from 'react-router-redux';
 import { WindowState } from './window';
+import { DataTransferState } from './dataTransfer';
+
+export type DataTransferStatus = 'pending' | 'error' | 'complete';
 
 export interface Note {
   id: string;
@@ -9,16 +12,17 @@ export interface Note {
   editor: EditorState;
 }
 
-export type LazyNote = Pick<Note, 'id' | 'title' | 'content'> & {
+export type RawNote = Pick<Note, 'id' | 'content'> & {
   editor?: EditorState;
 }
 
 export type NotesState = {
-  [key: string]: LazyNote;
+  [key: string]: RawNote;
 };
 
 export type StateShape = {
   routing: RouterState;
   notes: NotesState;
   window: WindowState;
+  dataTransfer: DataTransferState;
 };

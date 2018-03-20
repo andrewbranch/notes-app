@@ -7,7 +7,6 @@ export async function seedNotes(notes: RxDB.RxCollection<Note>): Promise<void> {
   if (!await notes.findOne({ id: 'seed-1' }).exec()) {
     await notes.insert({
       id: 'seed-1',
-      title: 'Sample Note',
       content: sampleNoteContent as RawDraftContentState
     });
   }

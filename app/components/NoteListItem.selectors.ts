@@ -1,7 +1,7 @@
-import { createSelector } from "reselect";
-import { notesSelector } from "../selectors/notes.selectors";
+import { noteTitleSelector } from '../selectors/notes.selectors';
+import { StateShape } from '../reducers';
+import { UnconnectedNoteListItemProps } from './NoteListItem.d';
 
-export const noteListItemSelector = createSelector(
-  notesSelector,
-  notes => ({ notes })
-);
+export const noteListItemSelector = (state: StateShape, props: UnconnectedNoteListItemProps) => ({
+  noteTitle: noteTitleSelector(state, props.noteId)
+});

@@ -10,9 +10,6 @@ export const noteSchema: RxDB.RxJsonSchema = {
       type: 'string',
       primary: true
     },
-    title: {
-      type: 'string'
-    },
     content: {
       type: 'object',
       properties: {
@@ -71,5 +68,5 @@ export const noteSchema: RxDB.RxJsonSchema = {
       }
     }
   },
-  required: ['title', 'content']
+  required: ['content']
 };

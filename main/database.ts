@@ -15,8 +15,8 @@ let notesCollection: RxDB.RxCollection<Note>;
 let notesResult: RxDB.RxDocument<Note>[];
 
 export function extractNote(noteDocument: RxDB.RxDocument<Note>): Note {
-  const { id, title, content } = noteDocument;
-  return { id, title, content };
+  const { id, content } = noteDocument;
+  return { id, content };
 }
 
 export async function initDatabase() {

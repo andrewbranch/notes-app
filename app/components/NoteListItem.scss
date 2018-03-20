@@ -3,6 +3,10 @@
   display: flex;
 }
 
+.title {
+  composes: ellipsize from '../styles/utils.scss';
+}
+
 .selected {
   composes: surface-selection from '../styles/utils.scss';
 }

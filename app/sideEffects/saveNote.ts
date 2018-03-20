@@ -11,11 +11,10 @@ export const saveNote = debounce((state: StateShape, prevState: StateShape) => {
     const selectedNote = selectedNoteSelector(state);
     if (selectedNote && prevSelectedNote && prevSelectedNote !== selectedNote) {
       if (selectedNote.id === prevSelectedNote.id && selectedNote !== prevSelectedNote) {
-        const { title, editor } = selectedNote;
+        const { editor } = selectedNote;
         const content = editor.getCurrentContent();
         const prevContent = prevSelectedNote.editor.getCurrentContent();
         const patch = {
-          ...(title !== prevSelectedNote.title ? { title } : {}),
           ...(content !== prevContent ? { content: convertToRaw(content) } : {})
         };
 
