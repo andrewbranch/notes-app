@@ -15,7 +15,7 @@
     "build": "npm run build-main && npm run build-renderer",
     "start": "cross-env NODE_ENV=production electron ./main/main.js",
     "prestart-hot": "tsc -p main/tsconfig.json",
-    "start-hot": "cross-env HOT=1 NODE_ENV=development electron ./main/tmp/main.development",
+    "start-hot": "cross-env HOT=1 NODE_ENV=development electron ./main/tmp/main/main.development",
     "postinstall": "npm run build",
     "dev": "npm run hot-server -- --start-hot",
     "package": "npm run build && build --publish never",

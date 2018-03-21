@@ -5,9 +5,10 @@ import * as fs from 'fs';
 import leveldown from 'leveldown';
 import { promisify } from 'util';
 import { app } from 'electron';
-import { Note } from './types';
+import { Note } from '../interprocess/types';
 import { noteSchema } from './noteSchema';
-import { seedNotes, emptyContentState } from './seed';
+import { seedNotes } from './seed';
+import { emptyContentState } from '../interprocess/seed';
 
 const appDataPath = path.resolve(app.getPath('appData'), 'Notes App');
 const mkdir = promisify(fs.mkdir);

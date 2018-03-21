@@ -3,7 +3,7 @@ import { updateEditor } from '../components/editor/Editor.actions';
 import { NotesState } from './types';
 import { loadNotes } from '../actions/ipc';
 import { createNote, createNoteActionCreator } from '../actions/notes';
-import { emptyContentState } from '../../main/seed';
+import { emptyContentState } from '../../interprocess/seed';
 import { EditorState } from 'draft-js';
 
 const initialState: NotesState = {};

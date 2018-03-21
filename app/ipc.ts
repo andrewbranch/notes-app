@@ -1,12 +1,10 @@
-import { ipcRenderer, IpcMessageEvent } from 'electron';
+import { Store } from 'react-redux';
 import { loadNotes } from './actions/ipc';
 import { RawNote, StateShape } from './reducers/types';
-import { Store } from 'react-redux';
+import { fetchNotesIPC } from '../interprocess/ipcDefinitions';
 
 export const initIPC = (store: Store<StateShape>) => {
-  ipcRenderer.addListener('loadNotes', (event: IpcMessageEvent, notes: { [key: string]: RawNote }) => {
-    store.dispatch(loadNotes(notes));
+  fetchNotesIPC.send(undefined, (error, notes) => {
+    store.dispatch(loadNotes(notes!));
   });
-
-  ipcRenderer.send('getNotes');
 };

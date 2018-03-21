@@ -1,7 +1,8 @@
-import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions, ipcMain, IpcMessageEvent } from 'electron';
+import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions } from 'electron';
 import * as path from 'path';
 import { initDatabase, getNotes, extractNote, saveNote, createNote } from './database';
-import { Note } from './types';
+import { Note } from '../interprocess/types';
+import { fetchNotesIPC, updateNoteIPC, createNoteIPC } from '../interprocess/ipcDefinitions';
 
 let menu: Menu;
 let template: MenuItemConstructorOptions[];
@@ -47,22 +48,24 @@ app.on('ready', async () => {
     app.quit();
   }
 
-  ipcMain.addListener('getNotes', (event: IpcMessageEvent) => {
-    event.sender.send('loadNotes', getNotes().reduce((hash, note) => ({
+  
+  fetchNotesIPC.addListener((_, success) => {
+    console.log('Fetching notes');
+    success(getNotes().reduce((hash, note) => ({
       ...hash,
       [note.id]: extractNote(note)
     }), {}));
   });
 
-  ipcMain.addListener('saveNote', async (event: IpcMessageEvent, id: string, patch: Partial<Note>) => {
+  updateNoteIPC.addListener(async payload => {
     try {
-      saveNote(id, patch);
+      saveNote(payload.id, payload.patch);
     } catch (error) {
       console.trace(error);
     }
   });
 
-  ipcMain.addListener('createNote', async (event: IpcMessageEvent, id: string) => {
+  createNoteIPC.addListener(id => {
     try {
       createNote(id);
     } catch (error) {
@@ -76,7 +79,7 @@ app.on('ready', async () => {
     height: 728
   });
 
-  const relativePathToApp = __dirname.endsWith('tmp') ? '../..' : '..';
+  const relativePathToApp = __dirname.endsWith('tmp/main') ? '../../..' : '..';
   mainWindow.loadURL('file://' + path.resolve(__dirname, relativePathToApp, 'app/app.html'));
 
   mainWindow.webContents.once('did-finish-load', async () => {
