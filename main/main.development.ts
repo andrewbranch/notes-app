@@ -1,6 +1,6 @@
 import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions, ipcMain, IpcMessageEvent } from 'electron';
 import * as path from 'path';
-import { initDatabase, getNotes, extractNote, saveNote } from './database';
+import { initDatabase, getNotes, extractNote, saveNote, createNote } from './database';
 import { Note } from './types';
 
 let menu: Menu;
@@ -57,6 +57,14 @@ app.on('ready', async () => {
   ipcMain.addListener('saveNote', async (event: IpcMessageEvent, id: string, patch: Partial<Note>) => {
     try {
       saveNote(id, patch);
+    } catch (error) {
+      console.trace(error);
+    }
+  });
+
+  ipcMain.addListener('createNote', async (event: IpcMessageEvent, id: string) => {
+    try {
+      createNote(id);
     } catch (error) {
       console.trace(error);
     }

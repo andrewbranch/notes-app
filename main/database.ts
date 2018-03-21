@@ -7,7 +7,7 @@ import { promisify } from 'util';
 import { app } from 'electron';
 import { Note } from './types';
 import { noteSchema } from './noteSchema';
-import { seedNotes } from './seed';
+import { seedNotes, emptyContentState } from './seed';
 
 const appDataPath = path.resolve(app.getPath('appData'), 'Notes App');
 const mkdir = promisify(fs.mkdir);
@@ -66,4 +66,8 @@ export function getNotes() {
 
 export async function saveNote(id: string, patch: Partial<Note>) {
   return notesCollection.findOne({ id }).update({ $set: patch });
+}
+
+export async function createNote(id: string) {
+  return notesCollection.insert({ id, content: emptyContentState });
 }
