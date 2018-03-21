@@ -1,5 +1,3 @@
-// @ts-check
-
 import * as RxDB from 'rxdb';
 import * as leveldb from 'pouchdb-adapter-leveldb';
 import * as path from 'path';
@@ -7,52 +5,70 @@ import * as fs from 'fs';
 import leveldown from 'leveldown';
 import { promisify } from 'util';
 import { app } from 'electron';
-import { Note } from './types';
+import { Note } from '../interprocess/types';
+import { noteSchema } from './noteSchema';
+import { seedNotes } from './seed';
+import { emptyContentState } from '../interprocess/seed';
 
 const appDataPath = path.resolve(app.getPath('appData'), 'Notes App');
-const sampleNoteContent = {"blocks":[{"key":"3cq7l","text":"Let’s try saving this document note to a database.","type":"unstyled","depth":0,"inlineStyleRanges":[{"offset":22,"length":8,"style":"core.styling.strikethrough"},{"offset":41,"length":8,"style":"core.styling.italic"}],"entityRanges":[],"data":{}},{"key":"1tmgr","text":"Neat-o!","type":"unstyled","depth":0,"inlineStyleRanges":[{"offset":0,"length":7,"style":"core.styling.bold"}],"entityRanges":[],"data":{}},{"key":"89ujc","text":"","type":"unstyled","depth":0,"inlineStyleRanges":[],"entityRanges":[],"data":{}}],"entityMap":{}};
-const pathExists = promisify(fs.exists);
 const mkdir = promisify(fs.mkdir);
+let notesCollection: RxDB.RxCollection<Note>;
+let notesResult: RxDB.RxDocument<Note>[];
 
-const notesSchema: RxDB.RxJsonSchema = {
-  version: 0,
-  title: 'notes schema',
-  type: 'object',
-  properties: {
-    id: {
-      type: 'string',
-      primary: true
-    },
-    title: {
-      type: 'string'
-    },
-    content: {
-      type: 'object'
-    }
-  },
-  required: ['title', 'content']
+export function extractNote(noteDocument: RxDB.RxDocument<Note>): Note {
+  const { id, content } = noteDocument;
+  return { id, content };
 }
 
 export async function initDatabase() {
-  // RxDB.plugin(leveldb);
+  RxDB.plugin(leveldb);
+  fs.exists(appDataPath, async exists => {
+    if (!exists) {
+      try {
+        await mkdir(appDataPath);
+      } catch (error) {
+        console.trace(error);
+        app.quit();
+      }
+    }
+  });
 
-  // if (!await pathExists(appDataPath)) {
-  //   await mkdir(appDataPath);
-  // }
+  const db = await RxDB.create({
+    name: path.resolve(appDataPath, 'database'),
+    adapter: leveldown,
+    multiInstance: false
+  });
 
-  // const db = await RxDB.create({
-  //   name: path.resolve(appDataPath, 'database'),
-  //   adapter: leveldown,
-  //   multiInstance: false
-  // });
+  notesCollection = await db.collection({
+    name: 'notes',
+    schema: noteSchema
+  });
 
-  // const notes: RxDB.RxCollection<Note> = await db.collection({
-  //   name: 'notes',
-  //   schema: notesSchema
-  // });
+  await seedNotes(notesCollection);
 
-  // await notes.insert({
-  //   title: 'Sample Note',
-  //   content: sampleNoteContent
-  // });
+  // Load initial collection
+  loadNotes();
+
+  // Pre-load any updates
+  notesCollection.$.subscribe(() => {
+    loadNotes();
+  });
+
+  return db;
+}
+
+async function loadNotes() {
+  notesResult = await notesCollection.find({}).exec();
+}
+
+export function getNotes() {
+  return notesResult;
+}
+
+export async function saveNote(id: string, patch: Partial<Note>) {
+  return notesCollection.findOne({ id }).update({ $set: patch });
+}
+
+export async function createNote(id: string) {
+  return notesCollection.insert({ id, content: emptyContentState });
 }

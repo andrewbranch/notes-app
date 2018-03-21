@@ -1,6 +1,8 @@
 import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions } from 'electron';
 import * as path from 'path';
-import { initDatabase } from './database';
+import { initDatabase, getNotes, extractNote, saveNote, createNote } from './database';
+import { Note } from '../interprocess/types';
+import { fetchNotesIPC, updateNoteIPC, createNoteIPC } from '../interprocess/ipcDefinitions';
 
 let menu: Menu;
 let template: MenuItemConstructorOptions[];
@@ -41,11 +43,34 @@ app.on('ready', async () => {
   await installExtensions();
   try {
     const db = await initDatabase();
-    console.dir(db);
   } catch (error) {
     console.trace(error);
     app.quit();
   }
+
+  
+  fetchNotesIPC.addListener((_, success) => {
+    success(getNotes().reduce((hash, note) => ({
+      ...hash,
+      [note.id]: extractNote(note)
+    }), {}));
+  });
+
+  updateNoteIPC.addListener(async payload => {
+    try {
+      saveNote(payload.id, payload.patch);
+    } catch (error) {
+      console.trace(error);
+    }
+  });
+
+  createNoteIPC.addListener(id => {
+    try {
+      createNote(id);
+    } catch (error) {
+      console.trace(error);
+    }
+  });
 
   mainWindow = new BrowserWindow({
     show: false,
@@ -53,10 +78,10 @@ app.on('ready', async () => {
     height: 728
   });
 
-  const relativePathToApp = __dirname.endsWith('tmp') ? '../..' : '..';
+  const relativePathToApp = __dirname.endsWith('tmp/main') ? '../../..' : '..';
   mainWindow.loadURL('file://' + path.resolve(__dirname, relativePathToApp, 'app/app.html'));
 
-  mainWindow.webContents.once('did-finish-load', () => {
+  mainWindow.webContents.once('did-finish-load', async () => {
     mainWindow!.show();
     mainWindow!.focus();
   });

@@ -1,11 +1,11 @@
 {
   "extends": "../tsconfig-base.json",
   "compilerOptions": {
-    "rootDir": ".",
+    "rootDir": "..",
     "outDir": "./tmp",
     "sourceMap": false,
     "lib": [
-      "es6",
+      "es2017",
       "dom",
       "scripthost"
     ],

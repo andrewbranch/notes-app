@@ -16,5 +16,8 @@
   "dependencies": {
     "leveldown": "^3.0.0",
     "pouchdb-adapter-leveldb": "^6.4.3"
+  },
+  "devDependencies": {
+    "@types/uuid": "^3.4.3"
   }
 }

@@ -1,12 +1,15 @@
 import { createStore, applyMiddleware } from 'redux';
-import thunk from 'redux-thunk';
+import createSagaMiddleware from 'redux-saga';
 import { createBrowserHistory } from 'history';
 import { routerMiddleware } from 'react-router-redux';
 import rootReducer from '../reducers';
+import { rootSaga } from '../sagas';
 
+const sagaMiddleware = createSagaMiddleware();
 const history = createBrowserHistory();
 const router = routerMiddleware(history);
-const enhancer = applyMiddleware(thunk, router);
+const enhancer = applyMiddleware(router, sagaMiddleware);
+sagaMiddleware.run(rootSaga);
 
 export = {
   history,

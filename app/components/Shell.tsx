@@ -4,7 +4,7 @@ import { match } from 'react-router';
 import { connect, DispatchProp } from 'react-redux';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import { MasterDetailView } from '../ui/MasterDetailView';
-import { Note as NoteType } from '../reducers/notes';
+import { Note as NoteType, DataTransferStatus } from '../reducers/types';
 import Note from './Note';
 import NoteListItem from './NoteListItem';
 import { shellSelector } from './Shell.selectors';
@@ -15,6 +15,7 @@ export interface ShellProps extends RouteComponentProps<{}>, DispatchProp<{}> {
   selectedNote: NoteType | null;
   noteIds: string[];
   showEditorDebugger: boolean;
+  loadedNotesStatus: DataTransferStatus;
 }
 
 /**
@@ -22,30 +23,33 @@ export interface ShellProps extends RouteComponentProps<{}>, DispatchProp<{}> {
  */
 export class Shell extends React.Component<ShellProps> {
   render() {
-    const { selectedNote, noteIds, showEditorDebugger } = this.props;
+    const { selectedNote, noteIds, showEditorDebugger, loadedNotesStatus } = this.props;
 
     return (
       <div className={styles.shell}>
-        <MasterDetailView
-          className={styles.masterDetailView}
-          masterListItems={noteIds}
-          renderMasterListItem={(noteId, isSelected) => (
-            <NoteListItem key={noteId} noteId={noteId} isSelected={isSelected} />
-          )}
-          selectedMasterListItem={selectedNote ? selectedNote.id : null}
-          detailView={
-            <Route path="/:id" render={({ match }: { match: match<{ id: string }> }) => (
-              <MasterDetailView.DetailView>
-                <Note noteId={match.params.id} />
-              </MasterDetailView.DetailView>
-            )} />
-          }
-        />
-        {showEditorDebugger ? (
-          <div className={styles.debugPane}>
-            <JSONTree data={selectedNote ? convertToRaw(selectedNote.editor.getCurrentContent()) : {}} />
-          </div>
-        ) : null}
+        {loadedNotesStatus === 'complete' ? ([
+          <MasterDetailView
+            key="master-detail-view"
+            className={styles.masterDetailView}
+            masterListItems={noteIds}
+            renderMasterListItem={(noteId, isSelected) => (
+              <NoteListItem key={noteId} noteId={noteId} isSelected={isSelected} />
+            )}
+            selectedMasterListItem={selectedNote ? selectedNote.id : null}
+            detailView={
+              <Route path="/:id" render={({ match }: { match: match<{ id: string }> }) => (
+                <MasterDetailView.DetailView>
+                  <Note noteId={match.params.id} />
+                </MasterDetailView.DetailView>
+              )} />
+            }
+          />,
+          showEditorDebugger ? (
+            <div key="debug-pane" className={styles.debugPane}>
+              <JSONTree data={selectedNote ? convertToRaw(selectedNote.editor.getCurrentContent()) : {}} />
+            </div>
+          ) : null
+        ]) : null}
       </div>
     );
   }
