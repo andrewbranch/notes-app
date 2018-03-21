@@ -4,7 +4,7 @@ import { RawNote, StateShape } from './reducers/types';
 import { fetchNotesIPC } from '../interprocess/ipcDefinitions';
 
 export const initIPC = (store: Store<StateShape>) => {
-  fetchNotesIPC.send(undefined, (error, notes) => {
+  fetchNotesIPC.send().then(notes => {
     store.dispatch(loadNotes(notes!));
   });
 };

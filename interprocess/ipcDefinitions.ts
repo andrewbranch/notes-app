@@ -13,25 +13,28 @@ export type ResponseCallback<ResponsePayloadT, ErrorPayloadT> = (error: ErrorPay
 // TODO: TS 2.8 here
 function createIPCDefinition<PayloadT, ResponsePayloadT, ErrorPayloadT>(requestChannel: string, successChannel?: string, errorChannel?: string) {
   return {
-    send: (payload?: PayloadT, callback?: ResponseCallback<ResponsePayloadT, ErrorPayloadT>) => {
-      if (callback) {
-        const successCallback = (event: IpcMessageEvent, response: ResponsePayloadT) => callback(null, response, event);
-        const errorCallback = (event: IpcMessageEvent, error: ErrorPayloadT) => callback(error, null, event);
-        ipcRenderer.once(successChannel!, (event: IpcMessageEvent, response: ResponsePayloadT) => {
-          ipcRenderer.removeListener(errorChannel || '', errorCallback);
-          successCallback(event, response);
-        });
-        if (errorChannel) {
-          ipcRenderer.once(errorChannel, (event: IpcMessageEvent, error: ErrorPayloadT) => {
-            ipcRenderer.removeListener(successChannel!, successCallback);
-            errorCallback(event, error);
+    send: (payload?: PayloadT) => {
+      return new Promise<ResponsePayloadT | null>((resolve, reject) => {
+        if (successChannel) {
+          const successCallback = (event: IpcMessageEvent, response: ResponsePayloadT) => resolve(response);
+          const errorCallback = (event: IpcMessageEvent, error: ErrorPayloadT) => reject(error);
+          ipcRenderer.once(successChannel!, (event: IpcMessageEvent, response: ResponsePayloadT) => {
+            ipcRenderer.removeListener(errorChannel || '', errorCallback);
+            successCallback(event, response);
           });
+          if (errorChannel) {
+            ipcRenderer.once(errorChannel, (event: IpcMessageEvent, error: ErrorPayloadT) => {
+              ipcRenderer.removeListener(successChannel!, successCallback);
+              errorCallback(event, error);
+            });
+          }
         }
-      }
-      ipcRenderer.send(requestChannel, payload);
+
+        ipcRenderer.send(requestChannel, payload);
+        if (!successChannel) resolve(null);
+      });
     },
     addListener: (listener: ListenerFunction<PayloadT, ResponsePayloadT, ErrorPayloadT>) => {
-      console.log(`Adding listener for ${requestChannel}`);
       ipcMain.addListener(requestChannel, (event: IpcMessageEvent, payload: PayloadT) => {
         listener(
           payload,

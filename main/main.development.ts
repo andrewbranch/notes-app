@@ -50,7 +50,6 @@ app.on('ready', async () => {
 
   
   fetchNotesIPC.addListener((_, success) => {
-    console.log('Fetching notes');
     success(getNotes().reduce((hash, note) => ({
       ...hash,
       [note.id]: extractNote(note)

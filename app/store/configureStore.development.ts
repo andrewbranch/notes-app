@@ -1,10 +1,11 @@
 import { createStore, applyMiddleware, compose } from 'redux';
+import createSagaMiddleware from 'redux-saga';
 import * as Mousetrap from 'mousetrap';
-import thunk from 'redux-thunk';
 import { createHashHistory } from 'history';
 import { routerMiddleware, push } from 'react-router-redux';
 import { createLogger } from 'redux-logger';
 import { toggleEditorDebugger } from '../actions/window';
+import { rootSaga } from '../sagas';
 import rootReducer from '../reducers';
 
 declare const window: Window & {
@@ -26,6 +27,7 @@ const logger = (<any>createLogger)({
 
 const history = createHashHistory();
 const router = routerMiddleware(history);
+const sagaMiddleware = createSagaMiddleware();
 
 // If Redux DevTools Extension is installed use it, otherwise use Redux compose
 const composeEnhancers: typeof compose = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ ?
@@ -36,13 +38,14 @@ const composeEnhancers: typeof compose = window.__REDUX_DEVTOOLS_EXTENSION_COMPO
   compose;
 
 const enhancer = composeEnhancers(
-  applyMiddleware(thunk, router, logger)
+  applyMiddleware(router, sagaMiddleware, logger)
 );
 
 export = {
   history,
   configureStore(initialState: Object | void) {
     const store = createStore(rootReducer, initialState, enhancer);
+    sagaMiddleware.run(rootSaga);
 
     if (module.hot) {
       module.hot.accept('../reducers', () =>
