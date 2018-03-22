@@ -14,18 +14,18 @@ export interface EditorProps {
   noteId: string;
 }
 
-export class Editor extends React.PureComponent<EditorProps & typeof editorActions> {
+export class Editor extends React.Component<EditorProps & typeof editorActions> {
   private coreStylingPlugin = createCoreStylingPlugin(() => this.props.editor);
 
-  private updateEditorState = (editorState: EditorState) => {
-    const { noteId } = this.props;
-    this.props.updateEditor({ noteId, editorState });
+  private updateEditorState = (noteId: string, editorState: EditorState) => {
+    this.props.updateEditor({ noteId, editorState, time: Date.now() });
   }
+
   render() {
     return (
       <DraftEditor
         editorState={this.props.editor}
-        onChange={this.updateEditorState}
+        onChange={editorState => this.updateEditorState(this.props.noteId, editorState)}
         plugins={[this.coreStylingPlugin]}
       />
     );

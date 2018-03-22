@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions } from 'electron';
 import * as path from 'path';
 import { initDatabase, getNotes, extractNote, saveNote, createNote } from './database';
-import { Note } from '../interprocess/types';
+import { DBNote } from '../interprocess/types';
 import { fetchNotesIPC, updateNoteIPC, createNoteIPC } from '../interprocess/ipcDefinitions';
 
 let menu: Menu;

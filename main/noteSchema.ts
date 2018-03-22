@@ -66,7 +66,17 @@ export const noteSchema: RxDB.RxJsonSchema = {
           type: 'object'
         }
       }
+    },
+    isDeleted: {
+      type: 'boolean',
+      default: false
+    },
+    createdAt: {
+      type: 'number'
+    },
+    updatedAt: {
+      type: 'number'
     }
   },
-  required: ['content']
+  required: ['content', 'createdAt', 'updatedAt']
 };

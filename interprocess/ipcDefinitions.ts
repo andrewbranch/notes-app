@@ -1,5 +1,5 @@
 import { ipcRenderer, ipcMain, IpcMain, IpcRenderer, IpcMessageEvent } from 'electron';
-import { Note } from './types';
+import { DBNote, NoteTransaction } from './types';
 
 export type ListenerFunction<PayloadT, ResponsePayloadT, ErrorPayloadT> = (
   payload: PayloadT,
@@ -47,6 +47,6 @@ function createIPCDefinition<PayloadT, ResponsePayloadT, ErrorPayloadT>(requestC
   }
 };
 
-export const fetchNotesIPC = createIPCDefinition<void, { [key: string]: Note }, void>('fetchNotes', 'fetchedNotes');
-export const updateNoteIPC = createIPCDefinition<{ id: string, patch: Partial<Note> }, void, void>('updateNote');
-export const createNoteIPC = createIPCDefinition<string, void, void>('createNote');
+export const fetchNotesIPC = createIPCDefinition<void, { [key: string]: DBNote }, void>('fetchNotes', 'fetchedNotes');
+export const updateNoteIPC = createIPCDefinition<NoteTransaction, void, void>('updateNote');
+export const createNoteIPC = createIPCDefinition<NoteTransaction, void, void>('createNote');

@@ -19,7 +19,10 @@ export const notesReducer: Reducer<NotesState> = (state = initialState, action) 
       ...state,
       [action.payload.noteId]: {
         ...note,
-        editor: action.payload.editorState
+        editor: action.payload.editorState,
+        updatedAt: note.editor && note.editor.getCurrentContent() !== action.payload.editorState.getCurrentContent()
+          ? action.payload.time
+          : note.updatedAt
       }
     };
   }
@@ -27,10 +30,11 @@ export const notesReducer: Reducer<NotesState> = (state = initialState, action) 
   if (createNoteActionCreator.test(action)) {
     return {
       ...state,
-      [action.payload]: {
-        id: action.payload,
+      [action.payload.id]: {
+        ...action.payload,
         content: emptyContentState,
-        editor: EditorState.createEmpty()
+        editor: EditorState.createEmpty(),
+        isDeleted: false
       }
     };
   }
