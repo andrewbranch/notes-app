@@ -8,3 +8,5 @@ export const createNote = () => {
   const time = Date.now();
   return createNoteActionCreator({ id: uuid(), createdAt: time, updatedAt: time });
 };
+
+export const deleteNote = createActionCreator<string>('deleteNote');

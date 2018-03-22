@@ -7,12 +7,12 @@ import { Root } from './components/Root';
 import { initIPC } from './ipc';
 import './app.global.scss';
 import { StateShape } from './reducers';
+import { attachKeyboardHandlers } from './keybindings';
 
 const { configureStore, history } = require('./store/configureStore');
 const store: Store<StateShape> = configureStore();
 initIPC(store);
-
-let state = store.getState();
+attachKeyboardHandlers(store);
 
 render(
   <AppContainer>

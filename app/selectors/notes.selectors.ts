@@ -10,9 +10,15 @@ import { getNoteTitle } from '../utils/getNoteTitle';
 
 export const notesSelector = (state: StateShape) => state.notes;
 export const noteIdsSelector = createSelector(notesSelector, notes => Object.keys(notes));
-export const sortedNoteIdsSelector = createSelector(
+export const notDeletedNoteIdsSelector = createSelector(
   notesSelector,
   noteIdsSelector,
+  (notes, noteIds) => noteIds.filter(id => !notes[id].isDeleted)
+);
+
+export const sortedNoteIdsSelector = createSelector(
+  notesSelector,
+  notDeletedNoteIdsSelector,
   (notes, noteIds) => sortBy(noteIds, id => -notes[id].updatedAt)
 );
 
