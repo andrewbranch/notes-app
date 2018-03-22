@@ -7,9 +7,14 @@ import { createNoteActionCreator } from './actions/notes';
 import { updateEditor } from './components/editor/Editor.actions';
 import { selectedNoteSelector } from './selectors/notes.selectors';
 import { NoteTransaction, DBNote } from '../interprocess/types';
+import { deleteNote } from './components/Shell.actions';
 
 export function* createNoteSaga(action: ActionWithPayload<NoteTransaction>) {
   yield call(createNoteIPC.send, action.payload);
+}
+
+export function* deleteNoteSaga(action: ActionWithPayload<string>) {
+  yield call(updateNoteIPC.send, { id: action.payload, patch: { isDeleted: true } });
 }
 
 export function* listenForNoteUpdates() {
@@ -53,6 +58,7 @@ export function* updateNoteSaga() {
 export function* rootSaga() {
   yield all([
     takeEvery(createNoteActionCreator.type, createNoteSaga),
+    takeEvery(deleteNote.type, deleteNoteSaga),
     fork(listenForNoteUpdates)
   ]);
 }

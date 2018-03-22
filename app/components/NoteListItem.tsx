@@ -9,10 +9,20 @@ const styles = require('./NoteListItem.scss');
 const cx = classNames.bind(styles);
 
 export class NoteListItem extends React.PureComponent<NoteListItemProps> {
+  private onKeyDown: React.KeyboardEventHandler<HTMLElement> = event => {
+    if (event.key === 'Backspace') {
+      this.props.onDeleteNote(this.props.noteId);
+    }
+  }
+
   render() {
     const { noteId, isSelected, noteTitle } = this.props;
     return (
-      <Link to={'/' + noteId} className={cx(styles.noteListItem, { selected: isSelected })}>
+      <Link
+        to={'/' + noteId}
+        className={cx(styles.noteListItem, { selected: isSelected })}
+        onKeyDown={this.onKeyDown}
+      >
         <div className={styles.title}>
           {noteTitle}
         </div>
