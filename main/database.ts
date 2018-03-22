@@ -5,19 +5,19 @@ import * as fs from 'fs';
 import leveldown from 'leveldown';
 import { promisify } from 'util';
 import { app } from 'electron';
-import { Note } from '../interprocess/types';
+import { DBNote } from '../interprocess/types';
 import { noteSchema } from './noteSchema';
 import { seedNotes } from './seed';
 import { emptyContentState } from '../interprocess/seed';
 
 const appDataPath = path.resolve(app.getPath('appData'), 'Notes App');
 const mkdir = promisify(fs.mkdir);
-let notesCollection: RxDB.RxCollection<Note>;
-let notesResult: RxDB.RxDocument<Note>[];
+let notesCollection: RxDB.RxCollection<DBNote>;
+let notesResult: RxDB.RxDocument<DBNote>[];
 
-export function extractNote(noteDocument: RxDB.RxDocument<Note>): Note {
-  const { id, content } = noteDocument;
-  return { id, content };
+export function extractNote(noteDocument: RxDB.RxDocument<DBNote>): DBNote {
+  const { id, content, isDeleted, createdAt, updatedAt } = noteDocument;
+  return { id, content, isDeleted, createdAt, updatedAt };
 }
 
 export async function initDatabase() {
@@ -65,10 +65,19 @@ export function getNotes() {
   return notesResult;
 }
 
-export async function saveNote(id: string, patch: Partial<Note>) {
-  return notesCollection.findOne({ id }).update({ $set: patch });
+export async function saveNote(id: string, patch: Partial<DBNote>) {
+  return notesCollection.findOne({ id }).update({
+    $set: { updatedAt: Date.now(), ...patch }
+  });
 }
 
-export async function createNote(id: string) {
-  return notesCollection.insert({ id, content: emptyContentState });
+// TODO: TS 2.8 Omit type
+export async function createNote(note: Partial<DBNote>) {
+  const time = Date.now();
+  return notesCollection.insert({
+    content: emptyContentState,
+    createdAt: time,
+    updatedAt: time,
+    ...note
+  });
 }

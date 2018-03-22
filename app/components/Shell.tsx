@@ -1,14 +1,17 @@
 import * as React from 'react';
 import JSONTree from 'react-json-tree';
 import { match } from 'react-router';
+import { replace } from 'react-router-redux';
+import { bindActionCreators } from 'redux';
 import { connect, DispatchProp } from 'react-redux';
+import { convertToRaw } from 'draft-js';
 import { Route, RouteComponentProps } from 'react-router-dom';
 import { MasterDetailView } from '../ui/MasterDetailView';
 import { Note as NoteType, DataTransferStatus } from '../reducers/types';
 import Note from './Note';
 import NoteListItem from './NoteListItem';
 import { shellSelector } from './Shell.selectors';
-import { convertToRaw } from 'draft-js';
+import { deleteNote } from './Shell.actions';
 const styles = require('./Shell.scss');
 
 export interface ShellProps extends RouteComponentProps<{}>, DispatchProp<{}> {
@@ -22,6 +25,16 @@ export interface ShellProps extends RouteComponentProps<{}>, DispatchProp<{}> {
  * Lays out all visible components within the window
  */
 export class Shell extends React.Component<ShellProps> {
+  private deleteNote = (noteId: string) => {
+    const { dispatch, noteIds } = this.props;
+    const noteIndex = noteIds.indexOf(noteId);
+    const nextNoteId = noteIds[noteIndex + 1] || noteIds[noteIndex - 1];
+    const nextPath = nextNoteId ? `/${nextNoteId}` : '/';
+    // TODO: batch these two actions somehow
+    this.props.dispatch!(replace(nextPath));
+    this.props.dispatch!(deleteNote(noteId));
+  }
+
   render() {
     const { selectedNote, noteIds, showEditorDebugger, loadedNotesStatus } = this.props;
 
@@ -33,13 +46,13 @@ export class Shell extends React.Component<ShellProps> {
             className={styles.masterDetailView}
             masterListItems={noteIds}
             renderMasterListItem={(noteId, isSelected) => (
-              <NoteListItem key={noteId} noteId={noteId} isSelected={isSelected} />
+              <NoteListItem key={noteId} noteId={noteId} isSelected={isSelected} onDeleteNote={this.deleteNote} />
             )}
             selectedMasterListItem={selectedNote ? selectedNote.id : null}
             detailView={
-              <Route path="/:id" render={({ match }: { match: match<{ id: string }> }) => (
+              <Route path="/:id" render={() => (
                 <MasterDetailView.DetailView>
-                  <Note noteId={match.params.id} />
+                  {selectedNote ? <Note noteId={selectedNote.id} /> : null}
                 </MasterDetailView.DetailView>
               )} />
             }

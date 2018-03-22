@@ -5,6 +5,8 @@ import { loadNotes } from '../actions/ipc';
 import { createNote, createNoteActionCreator } from '../actions/notes';
 import { emptyContentState } from '../../interprocess/seed';
 import { EditorState } from 'draft-js';
+import { deleteNote } from '../components/Shell.actions';
+import { omit } from 'lodash';
 
 const initialState: NotesState = {};
 
@@ -19,7 +21,10 @@ export const notesReducer: Reducer<NotesState> = (state = initialState, action) 
       ...state,
       [action.payload.noteId]: {
         ...note,
-        editor: action.payload.editorState
+        editor: action.payload.editorState,
+        updatedAt: note.editor && note.editor.getCurrentContent() !== action.payload.editorState.getCurrentContent()
+          ? action.payload.time
+          : note.updatedAt
       }
     };
   }
@@ -27,10 +32,21 @@ export const notesReducer: Reducer<NotesState> = (state = initialState, action) 
   if (createNoteActionCreator.test(action)) {
     return {
       ...state,
-      [action.payload]: {
-        id: action.payload,
+      [action.payload.id]: {
+        ...action.payload,
         content: emptyContentState,
-        editor: EditorState.createEmpty()
+        editor: EditorState.createEmpty(),
+        isDeleted: false
+      }
+    };
+  }
+
+  if (deleteNote.test(action)) {
+    return {
+      ...state,
+      [action.payload]: {
+        ...state[action.payload],
+        isDeleted: true
       }
     };
   }

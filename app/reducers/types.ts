@@ -5,15 +5,18 @@ import { DataTransferState } from './dataTransfer';
 
 export type DataTransferStatus = 'pending' | 'error' | 'complete';
 
-export interface Note {
+export interface RawNote {
   id: string;
-  title: string;
   content: RawDraftContentState;
-  editor: EditorState;
+  createdAt: number;
+  updatedAt: number;
+  isDeleted: boolean;
+  editor?: EditorState;
 }
 
-export type RawNote = Pick<Note, 'id' | 'content'> & {
-  editor?: EditorState;
+export interface Note extends RawNote {
+  title: string;
+  editor: EditorState;
 }
 
 export type NotesState = {

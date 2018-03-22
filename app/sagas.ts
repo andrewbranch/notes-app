@@ -1,15 +1,20 @@
 import { EditorState, convertToRaw } from 'draft-js';
-import { delay } from 'redux-saga';
+import { delay, Task } from 'redux-saga';
 import { takeEvery, call, all, take, select, fork, cancel } from 'redux-saga/effects';
 import { createNoteIPC, updateNoteIPC } from '../interprocess/ipcDefinitions';
 import { ActionWithPayload } from './actions/helpers';
 import { createNoteActionCreator } from './actions/notes';
 import { updateEditor } from './components/editor/Editor.actions';
 import { selectedNoteSelector } from './selectors/notes.selectors';
-import { Task } from 'redux-saga';
+import { NoteTransaction, DBNote } from '../interprocess/types';
+import { deleteNote } from './components/Shell.actions';
 
-export function* createNoteSaga(action: ActionWithPayload<string>) {
+export function* createNoteSaga(action: ActionWithPayload<NoteTransaction>) {
   yield call(createNoteIPC.send, action.payload);
+}
+
+export function* deleteNoteSaga(action: ActionWithPayload<string>) {
+  yield call(updateNoteIPC.send, { id: action.payload, patch: { isDeleted: true } });
 }
 
 export function* listenForNoteUpdates() {
@@ -36,8 +41,9 @@ export function* updateNoteSaga() {
           const { editor } = selectedNote;
           const content = editor.getCurrentContent();
           const prevContent = prevSelectedNote.editor.getCurrentContent();
-          const patch = {
-            ...(content !== prevContent ? { content: convertToRaw(content) } : {})
+          const patch: Partial<DBNote> = {
+            ...(content !== prevContent ? { content: convertToRaw(content) } : {}),
+            updatedAt: Date.now()
           };
 
           if (Object.keys(patch).length) {
@@ -52,6 +58,7 @@ export function* updateNoteSaga() {
 export function* rootSaga() {
   yield all([
     takeEvery(createNoteActionCreator.type, createNoteSaga),
+    takeEvery(deleteNote.type, deleteNoteSaga),
     fork(listenForNoteUpdates)
   ]);
 }

@@ -1,5 +1,6 @@
 import * as memoize from 'memoizee';
 import createCachedSelector from 're-reselect';
+import { sortBy } from 'lodash';
 import { createSelector } from 'reselect';
 import { EditorState, convertFromRaw } from 'draft-js';
 import { StateShape } from '../reducers';
@@ -9,6 +10,17 @@ import { getNoteTitle } from '../utils/getNoteTitle';
 
 export const notesSelector = (state: StateShape) => state.notes;
 export const noteIdsSelector = createSelector(notesSelector, notes => Object.keys(notes));
+export const notDeletedNoteIdsSelector = createSelector(
+  notesSelector,
+  noteIdsSelector,
+  (notes, noteIds) => noteIds.filter(id => !notes[id].isDeleted)
+);
+
+export const sortedNoteIdsSelector = createSelector(
+  notesSelector,
+  notDeletedNoteIdsSelector,
+  (notes, noteIds) => sortBy(noteIds, id => -notes[id].updatedAt)
+);
 
 export const selectedRawNoteSelector = createSelector(
   notesSelector,
@@ -49,7 +61,7 @@ export const noteSelector = createCachedSelector(
   (note, title, editor): Note => ({ ...note, title, editor })
 )(
   (state, noteId) => noteId
-)
+);
 
 export const selectedNoteSelector = createSelector(
   (state: StateShape) => state,
