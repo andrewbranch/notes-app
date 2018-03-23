@@ -1,32 +1,30 @@
 import * as React from 'react';
 import * as classNames from 'classnames/bind';
-import { Link } from 'react-router-dom';
-import { connect, DispatchProp } from 'react-redux';
-import { NotesState } from '../reducers/types';
+import { connect } from 'react-redux';
+import { push } from 'react-router-redux';
 import { NoteListItemProps } from './NoteListItem.d';
 import { noteListItemSelector } from './NoteListItem.selectors';
 const styles = require('./NoteListItem.scss');
 const cx = classNames.bind(styles);
 
 export class NoteListItem extends React.PureComponent<NoteListItemProps> {
-  private onKeyDown: React.KeyboardEventHandler<HTMLElement> = event => {
-    if (event.key === 'Backspace') {
-      this.props.onDeleteNote(this.props.noteId);
-    }
+  private onClick: React.MouseEventHandler<HTMLElement> = () => {
+    this.props.dispatch!(push(`/${this.props.noteId}`));
   }
 
   render() {
-    const { noteId, isSelected, noteTitle } = this.props;
+    const { noteId, isSelected, noteTitle, dispatch, ...props } = this.props;
     return (
-      <Link
-        to={'/' + noteId}
+      <div
+        {...props}
+        tabIndex={undefined}
+        onClick={this.onClick}
         className={cx(styles.noteListItem, { selected: isSelected })}
-        onKeyDown={this.onKeyDown}
       >
         <div className={styles.title}>
           {noteTitle}
         </div>
-      </Link>
+      </div>
     );
   }
 }

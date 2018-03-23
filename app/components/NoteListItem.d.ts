@@ -1,12 +1,12 @@
+import * as React from 'react';
 import { DispatchProp } from 'react-redux';
 
-export interface UnconnectedNoteListItemProps {
+export interface UnconnectedNoteListItemProps extends React.HTMLAttributes<HTMLElement> {
   noteId: string;
   isSelected: boolean;
-  onDeleteNote: (id: string) => void;
 }
 
-export type NoteListItemProps = UnconnectedNoteListItemProps & {
+export type NoteListItemProps = UnconnectedNoteListItemProps & DispatchProp<{}> & {
   noteId: string;
   noteTitle: string;
 }

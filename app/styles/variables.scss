@@ -1,10 +1,12 @@
 // Colors
 
 $accent: #6EA4BF;
+$accent-medium: #6090A6;
 $accent-dark: #28353B;
 
 $surface: white;
-$surface-selection: rgba($accent, 0.1);
+$surface-selection: rgba($accent, 0.05);
+$list-item-selection: rgba($accent, 0.1);
 
 $warm-gray: #55412C;
 $warm-gray-5: rgba($warm-gray, 0.05);

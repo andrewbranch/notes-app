@@ -17,6 +17,7 @@
 
 .surface { background-color: $surface; }
 .surface-selection { background-color: $surface-selection; }
+.list-item-selection { background-color: $list-item-selection; }
 
 // Resets
 
@@ -26,6 +27,10 @@
     text-decoration: unset;
     cursor: default;
   }
+}
+
+.non-selectable {
+  user-select: none;
 }
 
 // Typography

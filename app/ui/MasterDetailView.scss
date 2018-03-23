@@ -1,3 +1,5 @@
+@import '../styles/variables.scss';
+
 .master-detail-view {
   display: flex;
 }
@@ -5,6 +7,12 @@
 .master {
   width: 200px;
   box-shadow: 1px 0 0 0 rgba(0, 0, 0, 0.1);
+  &:focus {
+    outline: none;
+    &.highlight-on-focus {
+      background-color: $surface-selection;
+    }
+  }
 }
 
 .detail {

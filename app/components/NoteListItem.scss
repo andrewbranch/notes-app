@@ -1,6 +1,11 @@
+@import '../styles/variables.scss';
+
 .note-list-item {
-  composes: surface padding-list-xs unanchor from '../styles/utils.scss';
+  composes: padding-list-xs non-selectable from '../styles/utils.scss';
   display: flex;
+  &:active {
+    background-color: $list-item-selection;
+  }
 }
 
 .title {
@@ -8,5 +13,9 @@
 }
 
 .selected {
-  composes: surface-selection from '../styles/utils.scss';
+  composes: list-item-selection from '../styles/utils.scss';
+  :focus & {
+    background-color: $accent-medium;
+    color: white;
+  }
 }

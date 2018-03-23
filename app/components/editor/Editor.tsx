@@ -17,15 +17,15 @@ export interface EditorProps {
 export class Editor extends React.Component<EditorProps & typeof editorActions> {
   private coreStylingPlugin = createCoreStylingPlugin(() => this.props.editor);
 
-  private updateEditorState = (noteId: string, editorState: EditorState) => {
-    this.props.updateEditor({ noteId, editorState, time: Date.now() });
+  private updateEditorState = (editorState: EditorState) => {
+    this.props.updateEditor({ noteId: this.props.noteId, editorState, time: Date.now() });
   }
 
   render() {
     return (
       <DraftEditor
         editorState={this.props.editor}
-        onChange={editorState => this.updateEditorState(this.props.noteId, editorState)}
+        onChange={this.updateEditorState}
         plugins={[this.coreStylingPlugin]}
       />
     );
