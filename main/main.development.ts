@@ -1,7 +1,6 @@
-import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions } from 'electron';
 import * as path from 'path';
+import { app, BrowserWindow, Menu, shell, MenuItemConstructorOptions } from 'electron';
 import { initDatabase, getNotes, extractNote, saveNote, createNote } from './database';
-import { DBNote } from '../interprocess/types';
 import { fetchNotesIPC, updateNoteIPC, createNoteIPC } from '../interprocess/ipcDefinitions';
 
 let menu: Menu;
@@ -42,7 +41,7 @@ const installExtensions = () => {
 app.on('ready', async () => {
   await installExtensions();
   try {
-    const db = await initDatabase();
+    await initDatabase();
   } catch (error) {
     console.trace(error);
     app.quit();

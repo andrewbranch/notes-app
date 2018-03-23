@@ -1,6 +1,5 @@
 import * as uuid from 'uuid/v4';
 import { createActionCreator } from './helpers';
-import { NoteTransaction } from '../../interprocess/types';
 import { RawNote } from '../reducers/types';
 
 export const createNoteActionCreator = createActionCreator<Pick<RawNote, 'id' | 'createdAt' | 'updatedAt'>>('notes.create');

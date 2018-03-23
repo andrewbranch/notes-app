@@ -1,12 +1,11 @@
 import { Reducer } from 'redux';
+import { EditorState } from 'draft-js';
 import { updateEditor } from '../components/editor/Editor.actions';
 import { NotesState } from './types';
 import { loadNotes } from '../actions/ipc';
-import { createNote, createNoteActionCreator } from '../actions/notes';
+import { createNoteActionCreator } from '../actions/notes';
 import { emptyContentState } from '../../interprocess/seed';
-import { EditorState } from 'draft-js';
 import { deleteNote } from '../components/Shell.actions';
-import { omit } from 'lodash';
 
 const initialState: NotesState = {};
 

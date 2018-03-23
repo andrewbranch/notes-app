@@ -1,8 +1,7 @@
 import { EditorState, Modifier } from 'draft-js';
-import { Plugin } from 'draft-js-plugins-editor';
-import { values, constant } from 'lodash';
-import { OrderedSet, Map, is } from 'immutable';
-import { stripStylesFromBlock, performUnUndoableEdits, getContiguousStyleRangesNearSelectionEdges, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset, Range, createSelectionWithRange } from '../../../../utils/draft-utils';
+import { constant } from 'lodash';
+import { Map, is } from 'immutable';
+import { stripStylesFromBlock, performUnUndoableEdits, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset, Range, createSelectionWithRange } from '../../../../utils/draft-utils';
 import { styles, styleValues, isCoreStyle, TRIGGER_CHARACTERS, CoreInlineStyleName } from '../styles';
 
 const shouldReprocessInlineStyles = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): boolean => {
@@ -51,7 +50,6 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
   const selection = editorState.getSelection();
 
   const changeType = editorState.getLastChangeType();
-  const prevContent = prevEditorState.getCurrentContent();
   const prevSelection = prevEditorState.getSelection();
   const focusKey = selection.getFocusKey();
   

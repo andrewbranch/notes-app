@@ -1,4 +1,4 @@
-import { EditorState, convertToRaw } from 'draft-js';
+import { convertToRaw } from 'draft-js';
 import { delay, Task } from 'redux-saga';
 import { takeEvery, call, all, take, select, fork, cancel } from 'redux-saga/effects';
 import { createNoteIPC, updateNoteIPC } from '../interprocess/ipcDefinitions';
@@ -28,7 +28,7 @@ export function* updateNoteSaga() {
   let task: Task | null = null;
   while (true) {
     const prevSelectedNote = yield select(selectedNoteSelector);
-    const action: ActionWithPayload<{ noteId: string, editorState: EditorState }> = yield take(updateEditor.type);
+    yield take(updateEditor.type);
     const selectedNote = yield select(selectedNoteSelector);
     if (task) {
       yield cancel(task);

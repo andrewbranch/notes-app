@@ -1,6 +1,6 @@
 import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
-import { constant, sum, isEqual } from 'lodash';
+import { constant, sum } from 'lodash';
 import { Map, Set, OrderedSet } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
@@ -184,7 +184,6 @@ export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, a
 export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, Range> => {
   const stylesAtOffset = block.getInlineStyleAt(offset);
   const stylesAdjacentToOffset = offset > 0 ? block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset) : OrderedSet<string>();
-  const text = styleKeyFilter.length > 1 ? block.getText() : '';
   return stylesAtOffset.union(stylesAdjacentToOffset).reduce((ranges, style) => {
     if (styleKeyFilter(style!)) {
       return ranges!.set(style!, getContiguousStyleRange(

@@ -1,8 +1,6 @@
 import * as React from 'react';
 import JSONTree from 'react-json-tree';
-import { match } from 'react-router';
 import { replace, push } from 'react-router-redux';
-import { bindActionCreators } from 'redux';
 import { connect, DispatchProp } from 'react-redux';
 import { convertToRaw } from 'draft-js';
 import { Route, RouteComponentProps } from 'react-router-dom';

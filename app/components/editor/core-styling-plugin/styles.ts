@@ -1,8 +1,6 @@
 import * as React from 'react';
 import * as memoize from 'memoizee';
 import { escapeRegExp, uniq, flatMap } from 'lodash';
-import { ContentState, Modifier, ContentBlock } from 'draft-js';
-import { createSelectionWithRange, InsertionEdit } from '../../../utils/draft-utils';
 import { Styles } from '../../../ui/types';
 import { values } from 'lodash';
 const styleVariables: Styles = require('../../../styles/variables.scss');

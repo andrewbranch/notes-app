@@ -1,11 +1,10 @@
-import * as memoize from 'memoizee';
 import createCachedSelector from 're-reselect';
 import { sortBy } from 'lodash';
 import { createSelector } from 'reselect';
 import { EditorState, convertFromRaw } from 'draft-js';
 import { StateShape } from '../reducers';
 import { selectedNoteIdSelector } from './routing.selectors';
-import { NotesState, Note, RawNote } from '../reducers/types';
+import { Note, RawNote } from '../reducers/types';
 import { getNoteTitle } from '../utils/getNoteTitle';
 
 export const notesSelector = (state: StateShape) => state.notes;

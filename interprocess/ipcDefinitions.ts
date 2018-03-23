@@ -1,4 +1,4 @@
-import { ipcRenderer, ipcMain, IpcMain, IpcRenderer, IpcMessageEvent } from 'electron';
+import { ipcRenderer, ipcMain, IpcMessageEvent } from 'electron';
 import { DBNote, NoteTransaction } from './types';
 
 export type ListenerFunction<PayloadT, ResponsePayloadT, ErrorPayloadT> = (
