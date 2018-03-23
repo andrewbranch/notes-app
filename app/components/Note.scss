@@ -1,8 +1,15 @@
 @import '../styles/variables.scss';
 
 .note {
-  padding: $space-m;
   height: 100%;
   box-sizing: border-box;
   overflow: auto;
+
+  :global(.DraftEditor-root), :global(.DraftEditor-editorContainer) {
+    height: 100%;
+  }
+  :global(.public-DraftEditor-content) {
+    height: 100%;
+    padding: $space-m;
+  }
 }
