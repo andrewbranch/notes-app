@@ -1,4 +1,6 @@
-import { ContentState, RawDraftContentState, ContentBlock, RawDraftContentBlock } from "draft-js";
+import { ContentState, RawDraftContentState, ContentBlock, RawDraftContentBlock, EditorState } from 'draft-js';
+import { collapseInlineStylesInBlock } from '../components/editor/core-styling-plugin/steps/collapseInlineStyle';
+import { performDependentEdits } from './draft-utils';
 
 const defaultNoteTitle = 'Untitled note';
 
@@ -8,5 +10,14 @@ const blockHasContents = (block: ContentBlock | RawDraftContentBlock) => !!getBl
 export const getNoteTitle = (content: ContentState | RawDraftContentState): string => {
   const blocks: (ContentBlock | RawDraftContentBlock)[] = content instanceof ContentState ? content.getBlocksAsArray() : content.blocks;
   const firstNonEmptyBlock = blocks.find(blockHasContents);
+  if (firstNonEmptyBlock instanceof ContentBlock) {
+    // This is lame, we need to create a dummy editor state or change `performDependentEdits`
+    const dummyEditorState = EditorState.createWithContent(ContentState.createFromBlockArray([firstNonEmptyBlock]));
+    return performDependentEdits(
+      dummyEditorState,
+      collapseInlineStylesInBlock(firstNonEmptyBlock)
+    ).getCurrentContent().getFirstBlock().getText();
+  }
+
   return firstNonEmptyBlock ? getBlockText(firstNonEmptyBlock) : defaultNoteTitle;
 };
