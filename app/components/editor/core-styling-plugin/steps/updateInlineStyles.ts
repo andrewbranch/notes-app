@@ -4,13 +4,13 @@ import { Map, is } from 'immutable';
 import { stripStylesFromBlock, performUnUndoableEdits, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset, Range, createSelectionWithRange, getContiguousStyleRangesAtOffset } from '../../../../utils/draft-utils';
 import { expandableStyles, expandableStyleValues, isExpandableStyle, TRIGGER_CHARACTERS, CoreExpandableStyleName } from '../styles';
 
-const shouldReprocessInlineStyles = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): boolean => {
+function shouldReprocessInlineStyles(changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): [boolean, { insertedCharacters: string, deletedCharacters: string, adjacentCharacters: [string, string] } | null] {
   const newContent = newEditorState.getCurrentContent();
   const newSelection = newEditorState.getSelection();
   const oldSelection = oldEditorState.getSelection();
   const oldContent = oldEditorState.getCurrentContent();
   if (oldContent === newContent) {
-    return false;
+    return [false, null];
   }
 
   switch (changeType) {
@@ -21,27 +21,33 @@ const shouldReprocessInlineStyles = (changeType: EditorChangeType, oldEditorStat
       const deletedCharacters = getDeletedCharactersFromChange(changeType, oldEditorState, newEditorState);
       const insertedCharacters = getInsertedCharactersFromChange(changeType, oldEditorState, newEditorState);
       const adjacentCharacters = getAdjacentCharacters(oldContent, oldSelection);
-      return TRIGGER_CHARACTERS.some(c => (
-        insertedCharacters.includes(c)
-        || deletedCharacters.includes(c)
-        || adjacentCharacters.indexOf(c) > -1)
-      );
+      return [
+        TRIGGER_CHARACTERS.some(c => (
+          insertedCharacters.includes(c)
+          || deletedCharacters.includes(c)
+          || adjacentCharacters.includes(c)
+        )), {
+          insertedCharacters,
+          deletedCharacters,
+          adjacentCharacters
+        }
+      ];
 
     case 'split-block':
       const startBlock = oldContent.getBlockForKey(oldSelection.getStartKey());
       const startSplitStyle = startBlock.getInlineStyleAt(oldSelection.getStartOffset());
       if (startSplitStyle.some(style => style!.startsWith('core.styling'))) {
-        return true;
+        return [true, null];
       }
       const endBlock = newContent.getBlockForKey(newSelection.getStartKey());
       const endSplitStyle = endBlock.getInlineStyleAt(newSelection.getStartOffset());
       if (endSplitStyle.some(style => style!.startsWith('core.styling'))) {
-        return true;
+        return [true, null];
       }
-      return false;
+      return [false, null];
 
     default:
-      return true;
+      return [true, null];
   }
 };
 
@@ -52,8 +58,9 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
   const changeType = editorState.getLastChangeType();
   const prevSelection = prevEditorState.getSelection();
   const focusKey = selection.getFocusKey();
+  const [shouldReprocess] = shouldReprocessInlineStyles(changeType, prevEditorState, editorState);
   
-  if (shouldReprocessInlineStyles(changeType, prevEditorState, editorState)) {
+  if (shouldReprocess) {
     const affectedPositions = changeType === 'split-block'
       ? [{ block: focusKey, offset: selection.getStartOffset() }, { block: prevSelection.getStartKey(), offset: prevSelection.getStartOffset() }]
       : [{ block: focusKey, offset: selection.getStartOffset() }];
@@ -81,11 +88,6 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
         let matchIndex = -1;
         let lastValidMatch: { index: number; styleRanges: Map<string, Range> } | undefined;
         while ((matchIndex = newText.indexOf(style.pattern, matchIndex + 1)) > -1) {
-          const nextCharacter = newText.slice(matchIndex + style.pattern.length, matchIndex + style.pattern.length + 1) || null;
-          if (nextCharacter && style.pattern.includes(nextCharacter)) {
-            continue;
-          }
-
           const block = nextContent.getBlockForKey(position.block);
           const match = {
             index: matchIndex,
@@ -94,11 +96,13 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
 
           if (
             lastValidMatch &&
+            match.index - lastValidMatch.index > 1 && // Zero-length ranges are not allowed
             is(lastValidMatch.styleRanges, match.styleRanges) &&
             match.styleRanges.every((_, styleKey: CoreExpandableStyleName) => expandableStyles[styleKey].allowsNesting)
           ) {
             const start = lastValidMatch.index;
             const end = match.index + style.pattern.length;
+
             if (!style.allowsNesting) {
               nextContent = stripStylesFromBlock(nextContent, block, constant(true), start, end);
             }
