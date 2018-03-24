@@ -6,7 +6,7 @@ import { ActionWithPayload } from './actions/helpers';
 import { createNoteActionCreator } from './actions/notes';
 import { updateEditor } from './components/editor/Editor.actions';
 import { selectedNoteSelector } from './selectors/notes.selectors';
-import { NoteTransaction, DBNote } from '../interprocess/types';
+import { NoteTransaction } from '../interprocess/types';
 import { deleteNote } from './components/Shell.actions';
 import { Note } from './reducers/types';
 import { performDependentEdits } from './utils/draft-utils';
@@ -45,18 +45,17 @@ export function* updateNoteSaga() {
           const content = editor.getCurrentContent();
           const selection = editor.getSelection();
           const prevContent = prevSelectedNote.editor.getCurrentContent();
-          const patch: Partial<DBNote> = {
-            ...(content !== prevContent ? {
-              content: convertToRaw(performDependentEdits(
-                editor,
-                collapseInlineStyleRangesAtSelectionEdges(content, selection)
-              ).getCurrentContent()),
-              updatedAt: Date.now()
-            } : {}),
-          };
-
-          if (Object.keys(patch).length) {
-            yield call(updateNoteIPC.send, { id: selectedNote.id, patch });
+          if (content !== prevContent) {
+            yield call(updateNoteIPC.send, {
+              id: selectedNote.id,
+              patch: {
+                content: convertToRaw(performDependentEdits(
+                  editor,
+                  collapseInlineStyleRangesAtSelectionEdges(content, selection)
+                ).getCurrentContent()),
+                updatedAt: Date.now()
+              }
+            });
           }
         }
       }
