@@ -2,7 +2,7 @@ import { EditorState, Modifier } from 'draft-js';
 import { constant } from 'lodash';
 import { Map, is } from 'immutable';
 import { stripStylesFromBlock, performUnUndoableEdits, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset, Range, createSelectionWithRange } from '../../../../utils/draft-utils';
-import { expandableStyles, expandableStyleValues, isExpandableStyle, TRIGGER_CHARACTERS, CoreExpandableStyleName, isCoreStyle } from '../styles';
+import { expandableStyles, expandableStyleValues, isExpandableStyle, TRIGGER_CHARACTERS, CoreExpandableStyleName } from '../styles';
 
 const shouldReprocessInlineStyles = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): boolean => {
   const newContent = newEditorState.getCurrentContent();
@@ -63,12 +63,12 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
       getContiguousStyleRangesNearOffset(
         nextContent.getBlockForKey(position.block),
         position.offset,
-        isCoreStyle
+        isExpandableStyle
       ).forEach((range, key) => {
         nextContent = stripStylesFromBlock(
           nextContent,
           position.block,
-          styleName => styleName === key,
+          styleName => styleName === key || styleName === 'core.styling.decorator',
           range!.start,
           range!.end
         );
