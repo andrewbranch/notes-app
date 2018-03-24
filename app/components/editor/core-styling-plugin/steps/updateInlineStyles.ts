@@ -81,6 +81,11 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
         let matchIndex = -1;
         let lastValidMatch: { index: number; styleRanges: Map<string, Range> } | undefined;
         while ((matchIndex = newText.indexOf(style.pattern, matchIndex + 1)) > -1) {
+          const nextCharacter = newText.slice(matchIndex + 1, matchIndex + 2) || null;
+          if (nextCharacter && style.pattern.includes(nextCharacter)) {
+            continue;
+          }
+
           const block = nextContent.getBlockForKey(position.block);
           const match = {
             index: matchIndex,
