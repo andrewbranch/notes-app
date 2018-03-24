@@ -41,7 +41,6 @@ export function collapseInlineStyleRangesAtSelectionEdges(content: ContentState,
     });
   });
 
-  console.log(edits);
   return edits;
 };
 

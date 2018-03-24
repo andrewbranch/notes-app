@@ -5,7 +5,7 @@ import { Styles } from '../../../ui/types';
 import { values } from 'lodash';
 const styleVariables: Styles = require('../../../styles/variables.scss');
 
-export type CoreInlineStyleName = 'core.styling.inlineCode' | 'core.styling.bold' | 'core.styling.italic' | 'core.styling.underline' | 'core.styling.strikethrough';
+export type CoreInlineStyleName = 'core.styling.inlineCode' | 'BOLD' | 'ITALIC' | 'UNDERLINE' | 'STRIKETHROUGH';
 
 export interface InlineStyleDefinition {
   name: CoreInlineStyleName;
@@ -27,8 +27,8 @@ export const styles: { [K in CoreInlineStyleName]: InlineStyleDefinition } = {
     }
   },
 
-  'core.styling.bold': {
-    name: 'core.styling.bold',
+  'BOLD': {
+    name: 'BOLD',
     pattern: '**',
     allowsNesting: true,
     styleAttributes: {
@@ -36,8 +36,8 @@ export const styles: { [K in CoreInlineStyleName]: InlineStyleDefinition } = {
     }
   },
 
-  'core.styling.italic': {
-    name: 'core.styling.italic',
+  'ITALIC': {
+    name: 'ITALIC',
     pattern: '_',
     allowsNesting: true,
     styleAttributes: {
@@ -45,8 +45,8 @@ export const styles: { [K in CoreInlineStyleName]: InlineStyleDefinition } = {
     }
   },
 
-  'core.styling.underline': {
-    name: 'core.styling.underline',
+  'UNDERLINE': {
+    name: 'UNDERLINE',
     pattern: '__',
     allowsNesting: true,
     styleAttributes: {
@@ -54,8 +54,8 @@ export const styles: { [K in CoreInlineStyleName]: InlineStyleDefinition } = {
     }
   },
 
-  'core.styling.strikethrough': {
-    name: 'core.styling.strikethrough',
+  'STRIKETHROUGH': {
+    name: 'STRIKETHROUGH',
     pattern: '~',
     allowsNesting: true,
     styleAttributes: {
@@ -64,9 +64,10 @@ export const styles: { [K in CoreInlineStyleName]: InlineStyleDefinition } = {
   }
 };
 
+const inlineStyleKeys = Object.keys(styles);
 export const styleValues = values(styles);
 export const TRIGGER_CHARACTERS = uniq(flatMap(styleValues, s => s.pattern.split('')));
-export const isCoreStyle = (styleKey: string): styleKey is CoreInlineStyleName => styleKey.startsWith('core.styling');
+export const isCoreStyle = (styleKey: string): styleKey is CoreInlineStyleName => inlineStyleKeys.includes(styleKey);
 export const getPatternRegExp = memoize((styleKey: CoreInlineStyleName) => {
   const escapedPattern = escapeRegExp(styles[styleKey].pattern);
   const characters = escapeRegExp(uniq(styles[styleKey].pattern.split('')).join(''));
