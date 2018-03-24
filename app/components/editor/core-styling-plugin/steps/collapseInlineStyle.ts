@@ -1,9 +1,9 @@
 import { EditorState, ContentBlock, SelectionState, ContentState } from 'draft-js';
 import { Edit, hasEdgeWithin, getContiguousStyleRangesNearSelectionEdges } from '../../../../utils/draft-utils';
-import { isCoreStyle, styles, CoreInlineStyleName, getPatternRegExp } from '../styles';
+import { isExpandableStyle, expandableStyles, CoreExpandableStyleName, getPatternRegExp } from '../styles';
 
-const collapseRange = (block: ContentBlock, styleKey: CoreInlineStyleName, start: number, end: number): Edit[] => {
-  const style = styles[styleKey];
+const collapseRange = (block: ContentBlock, styleKey: CoreExpandableStyleName, start: number, end: number): Edit[] => {
+  const style = expandableStyles[styleKey];
   const blockKey = block.getKey();
   const expandedText = block.getText().slice(start, end);
   const pattern = getPatternRegExp(styleKey);
@@ -31,7 +31,7 @@ const collapseRange = (block: ContentBlock, styleKey: CoreInlineStyleName, start
 
 export function collapseInlineStyleRangesAtSelectionEdges(content: ContentState, prevSelection: SelectionState, currentSelection?: SelectionState): Edit[] {
   const edits: Edit[] = [];
-  getContiguousStyleRangesNearSelectionEdges(content, prevSelection, isCoreStyle).forEach((ranges, styleKey: CoreInlineStyleName) => {
+  getContiguousStyleRangesNearSelectionEdges(content, prevSelection, isExpandableStyle).forEach((ranges, styleKey: CoreExpandableStyleName) => {
     ranges!.forEach(range => {
       const { blockKey, start, end } = range!;
       if (!currentSelection || !hasEdgeWithin(currentSelection, blockKey, start, end)) {
@@ -66,10 +66,12 @@ export const collapseInlineStyles = (editorState: EditorState, prevEditorState: 
 
 export const collapseInlineStylesInBlock = (block: ContentBlock): Edit[] => {
   const edits: Edit[] = [];
-  block.findStyleRanges(character => character.getStyle().some(isCoreStyle), (start, end) => {
+  block.findStyleRanges(character => character.getStyle().some(isExpandableStyle), (start, end) => {
     const styles = block.getInlineStyleAt(start);
-    styles.forEach((style: CoreInlineStyleName) => {
-      edits.push(...collapseRange(block, style, start, end));
+    styles.forEach((style: string) => {
+      if (isExpandableStyle(style)) {
+        edits.push(...collapseRange(block, style, start, end));
+      }
     });
   });
 

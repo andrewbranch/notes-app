@@ -2,7 +2,7 @@ import { EditorState, Modifier } from 'draft-js';
 import { constant } from 'lodash';
 import { Map, is } from 'immutable';
 import { stripStylesFromBlock, performUnUndoableEdits, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset, Range, createSelectionWithRange } from '../../../../utils/draft-utils';
-import { styles, styleValues, isCoreStyle, TRIGGER_CHARACTERS, CoreInlineStyleName } from '../styles';
+import { expandableStyles, expandableStyleValues, isExpandableStyle, TRIGGER_CHARACTERS, CoreExpandableStyleName, isCoreStyle } from '../styles';
 
 const shouldReprocessInlineStyles = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): boolean => {
   const newContent = newEditorState.getCurrentContent();
@@ -77,7 +77,7 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
       const newText = nextContent.getBlockForKey(position.block).getText();
 
       // Go through each styling entity and reapply
-      styleValues.forEach(style => {
+      expandableStyleValues.forEach(style => {
         let matchIndex = -1;
         let lastValidMatch: { index: number; styleRanges: Map<string, Range> } | undefined;
         while ((matchIndex = newText.indexOf(style.pattern, matchIndex + 1)) > -1) {
@@ -89,13 +89,13 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
           const block = nextContent.getBlockForKey(position.block);
           const match = {
             index: matchIndex,
-            styleRanges: getContiguousStyleRangesNearOffset(block, matchIndex, isCoreStyle)
+            styleRanges: getContiguousStyleRangesNearOffset(block, matchIndex, isExpandableStyle)
           };
 
           if (
             lastValidMatch &&
             is(lastValidMatch.styleRanges, match.styleRanges) &&
-            match.styleRanges.every((_, styleKey: CoreInlineStyleName) => styles[styleKey].allowsNesting)
+            match.styleRanges.every((_, styleKey: CoreExpandableStyleName) => expandableStyles[styleKey].allowsNesting)
           ) {
             const start = lastValidMatch.index;
             const end = match.index + style.pattern.length;
@@ -104,7 +104,15 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
             }
             
             const styleSelection = createSelectionWithRange(block, start, end);
+            const decoratorSelection = [
+              createSelectionWithRange(block, start, start + style.pattern.length),
+              createSelectionWithRange(block, end - style.pattern.length, end)
+            ];
             nextContent = Modifier.applyInlineStyle(nextContent, styleSelection, style.name);
+            nextContent = decoratorSelection.reduce(
+              (content, selection) => Modifier.applyInlineStyle(content, selection, 'core.styling.decorator'),
+              nextContent
+            );
             lastValidMatch = undefined;
           } else {
             lastValidMatch = match;

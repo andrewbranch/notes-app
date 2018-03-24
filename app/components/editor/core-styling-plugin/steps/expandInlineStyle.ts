@@ -1,6 +1,6 @@
 import { EditorState } from 'draft-js';
 import { getContiguousStyleRangesNearSelectionEdges, Edit, InsertionEdit } from '../../../../utils/draft-utils';
-import { isCoreStyle, CoreInlineStyleName, styles, getPatternRegExp } from '../styles';
+import { isExpandableStyle, CoreExpandableStyleName, expandableStyles, getPatternRegExp } from '../styles';
 
 export const expandInlineStyle = (editorState: EditorState): Edit[] => {
   const content = editorState.getCurrentContent();
@@ -9,9 +9,9 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
   getContiguousStyleRangesNearSelectionEdges(
     content,
     selection,
-    isCoreStyle
-  ).forEach((ranges, styleKey: CoreInlineStyleName) => {
-    const style = styles[styleKey];
+    isExpandableStyle
+  ).forEach((ranges, styleKey: CoreExpandableStyleName) => {
+    const style = expandableStyles[styleKey];
     ranges!.forEach(range => {
       const { blockKey, start, end } = range!;
       const block = content.getBlockForKey(blockKey);
@@ -24,13 +24,13 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
           type: 'insertion',
           blockKey,
           offset: start,
-          style: styles,
+          style: styles.add('core.styling.decorator'),
           text: style.pattern
         }, {
           type: 'insertion',
           blockKey,
           offset: start + collapsedText.length,
-          style: styles,
+          style: styles.add('core.styling.decorator'),
           text: style.pattern
         });
       }
