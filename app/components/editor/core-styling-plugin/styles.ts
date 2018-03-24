@@ -28,8 +28,7 @@ export const expandableStyles: { [K in CoreExpandableStyleName]: ExpandableStyle
     styleAttributes: {
       fontFamily: 'monaco, consolas, monospace',
       fontSize: '80%',
-      backgroundColor: styleVariables.warmGray10,
-      borderRadius: 2
+      backgroundColor: styleVariables.warmGray10
     }
   },
 
@@ -75,8 +74,7 @@ export const staticStyles: { [K in CoreStaticStyleName]: CoreStyleDefinition } =
     name: 'core.styling.decorator',
     allowsNesting: false,
     styleAttributes: {
-      opacity: 0.5,
-      fontSize: '80%'
+      color: 'rgba(0, 0, 0, 0.3)'
     }
   }
 };
@@ -90,6 +88,7 @@ export const TRIGGER_CHARACTERS = uniq(flatMap(expandableStyleValues, s => s.pat
 export const isStaticStyle = (styleKey: string): styleKey is CoreStaticStyleName => staticStyleKeys.includes(styleKey)
 export const isCoreStyle = (styleKey: string): boolean => styleKey.startsWith('core.styling') || isExpandableStyle(styleKey);
 export const isExpandableStyle = (styleKey: string): styleKey is CoreExpandableStyleName => expandableStyleKeys.includes(styleKey);
+export const isStyleDecorator = (styleKey: string): styleKey is 'core.styling.decorator' => styleKey === 'core.styling.decorator';
 export const getPatternRegExp = memoize((styleKey: CoreExpandableStyleName) => {
   const escapedPattern = escapeRegExp(expandableStyles[styleKey].pattern);
   const characters = escapeRegExp(uniq(expandableStyles[styleKey].pattern.split('')).join(''));
