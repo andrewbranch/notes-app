@@ -1,6 +1,6 @@
 import { EditorState, ContentBlock, SelectionState, ContentState } from 'draft-js';
-import { Edit, hasEdgeWithin, getContiguousStyleRangesNearSelectionEdges, getContiguousStyleRangesNearOffset } from '../../../../utils/draft-utils';
-import { isStyleDecorator, isExpandableStyle } from '../styles';
+import { Edit, hasEdgeWithin, getContiguousStyleRangesNearSelectionEdges } from '../../../../utils/draft-utils';
+import { isStyleDecorator, isExpandableStyle, CoreExpandableStyleName, expandableStyles, getPatternRegExp } from '../styles';
 
 const deleteRange = (block: ContentBlock, start: number, end: number): Edit => {
   const blockKey = block.getKey();
@@ -15,16 +15,21 @@ const deleteRange = (block: ContentBlock, start: number, end: number): Edit => {
 
 export function collapseInlineStyleRangesAtSelectionEdges(content: ContentState, prevSelection: SelectionState, currentSelection?: SelectionState): Edit[] {
   const edits: Edit[] = [];
-  getContiguousStyleRangesNearSelectionEdges(content, prevSelection, isExpandableStyle).forEach(ranges => {
+  getContiguousStyleRangesNearSelectionEdges(content, prevSelection, isExpandableStyle).forEach((ranges, styleKey: CoreExpandableStyleName) => {
     ranges!.forEach(range => {
       const { blockKey, start, end } = range!;
       if (!currentSelection || !hasEdgeWithin(currentSelection, blockKey, start, end)) {
         const block = content.getBlockForKey(blockKey);
-        getContiguousStyleRangesNearOffset(block, start, isStyleDecorator).toList().concat(
-          getContiguousStyleRangesNearOffset(block, end, isStyleDecorator)
-        ).forEach(styleDecoratorRange => {
-          edits.push(deleteRange(block, styleDecoratorRange!.start, styleDecoratorRange!.end));
-        });
+        const style = expandableStyles[styleKey];
+        const expandedText = block.getText().slice(start, end);
+        const pattern = getPatternRegExp(styleKey);
+        pattern.lastIndex = 0;
+        if (pattern.test(expandedText)) {
+          edits.push(
+            deleteRange(block, start, start + style.pattern.length),
+            deleteRange(block, end - style.pattern.length, end)
+          );
+        }
       }
     });
   });

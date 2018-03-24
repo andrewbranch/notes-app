@@ -181,6 +181,20 @@ export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, a
   return Range(block.getKey(), start + 1, end);
 };
 
+export const getContiguousStyleRangesAtOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, Range> => {
+  const stylesAtOffset = block.getInlineStyleAt(offset);
+  return stylesAtOffset.reduce((ranges, style) => {
+    if (styleKeyFilter(style!)) {
+      return ranges!.set(style!, getContiguousStyleRange(
+        block,
+        style!,
+        offset
+      ));
+    }
+    return ranges!;
+  }, Map<string, Range>());
+};
+
 export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, Range> => {
   const stylesAtOffset = block.getInlineStyleAt(offset);
   const stylesAdjacentToOffset = offset > 0 ? block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset) : OrderedSet<string>();

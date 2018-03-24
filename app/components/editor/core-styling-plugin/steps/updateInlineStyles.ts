@@ -1,7 +1,7 @@
 import { EditorState, Modifier } from 'draft-js';
 import { constant } from 'lodash';
 import { Map, is } from 'immutable';
-import { stripStylesFromBlock, performUnUndoableEdits, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset, Range, createSelectionWithRange } from '../../../../utils/draft-utils';
+import { stripStylesFromBlock, performUnUndoableEdits, EditorChangeType, getDeletedCharactersFromChange, getInsertedCharactersFromChange, getAdjacentCharacters, getContiguousStyleRangesNearOffset, Range, createSelectionWithRange, getContiguousStyleRangesAtOffset } from '../../../../utils/draft-utils';
 import { expandableStyles, expandableStyleValues, isExpandableStyle, TRIGGER_CHARACTERS, CoreExpandableStyleName } from '../styles';
 
 const shouldReprocessInlineStyles = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): boolean => {
@@ -89,7 +89,7 @@ export const updateInlineStyles = (editorState: EditorState, prevEditorState: Ed
           const block = nextContent.getBlockForKey(position.block);
           const match = {
             index: matchIndex,
-            styleRanges: getContiguousStyleRangesNearOffset(block, matchIndex, isExpandableStyle)
+            styleRanges: getContiguousStyleRangesAtOffset(block, matchIndex, isExpandableStyle)
           };
 
           if (
