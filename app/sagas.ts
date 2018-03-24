@@ -8,6 +8,9 @@ import { updateEditor } from './components/editor/Editor.actions';
 import { selectedNoteSelector } from './selectors/notes.selectors';
 import { NoteTransaction, DBNote } from '../interprocess/types';
 import { deleteNote } from './components/Shell.actions';
+import { Note } from './reducers/types';
+import { performDependentEdits } from './utils/draft-utils';
+import { collapseInlineStyleRangesAtSelectionEdges } from './components/editor/core-styling-plugin/steps/collapseInlineStyle';
 
 export function* createNoteSaga(action: ActionWithPayload<NoteTransaction>) {
   yield call(createNoteIPC.send, action.payload);
@@ -27,9 +30,9 @@ export function* listenForNoteUpdates() {
 export function* updateNoteSaga() {
   let task: Task | null = null;
   while (true) {
-    const prevSelectedNote = yield select(selectedNoteSelector);
+    const prevSelectedNote: Note | null = yield select(selectedNoteSelector);
     yield take(updateEditor.type);
-    const selectedNote = yield select(selectedNoteSelector);
+    const selectedNote: Note | null = yield select(selectedNoteSelector);
     if (task) {
       yield cancel(task);
     }
@@ -40,10 +43,16 @@ export function* updateNoteSaga() {
         if (selectedNote.id === prevSelectedNote.id && selectedNote !== prevSelectedNote) {
           const { editor } = selectedNote;
           const content = editor.getCurrentContent();
+          const selection = editor.getSelection();
           const prevContent = prevSelectedNote.editor.getCurrentContent();
           const patch: Partial<DBNote> = {
-            ...(content !== prevContent ? { content: convertToRaw(content) } : {}),
-            updatedAt: Date.now()
+            ...(content !== prevContent ? {
+              content: convertToRaw(performDependentEdits(
+                editor,
+                collapseInlineStyleRangesAtSelectionEdges(content, selection)
+              ).getCurrentContent()),
+              updatedAt: Date.now()
+            } : {}),
           };
 
           if (Object.keys(patch).length) {

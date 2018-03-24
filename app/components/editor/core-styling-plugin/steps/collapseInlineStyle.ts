@@ -1,4 +1,4 @@
-import { EditorState, ContentBlock } from 'draft-js';
+import { EditorState, ContentBlock, SelectionState, ContentState } from 'draft-js';
 import { Edit, hasEdgeWithin, getContiguousStyleRangesNearSelectionEdges } from '../../../../utils/draft-utils';
 import { isCoreStyle, styles, CoreInlineStyleName, getPatternRegExp } from '../styles';
 
@@ -29,21 +29,28 @@ const collapseRange = (block: ContentBlock, styleKey: CoreInlineStyleName, start
   return [];
 }
 
-export const collapseInlineStyles = (editorState: EditorState, prevEditorState: EditorState): Edit[] => {
-  const content = editorState.getCurrentContent();
-  const selection = editorState.getSelection();
-  const prevSelection = prevEditorState.getSelection();
+export function collapseInlineStyleRangesAtSelectionEdges(content: ContentState, prevSelection: SelectionState, currentSelection?: SelectionState): Edit[] {
   const edits: Edit[] = [];
   getContiguousStyleRangesNearSelectionEdges(content, prevSelection, isCoreStyle).forEach((ranges, styleKey: CoreInlineStyleName) => {
     ranges!.forEach(range => {
       const { blockKey, start, end } = range!;
-      if (!hasEdgeWithin(selection, blockKey, start, end)) {
+      if (!currentSelection || !hasEdgeWithin(currentSelection, blockKey, start, end)) {
         const block = content.getBlockForKey(blockKey);
         edits.push(...collapseRange(block, styleKey, start, end));
       }
     });
   });
 
+  console.log(edits);
+  return edits;
+};
+
+export const collapseInlineStyles = (editorState: EditorState, prevEditorState: EditorState): Edit[] => {
+  const content = editorState.getCurrentContent();
+  const selection = editorState.getSelection();
+  const prevSelection = prevEditorState.getSelection();
+  
+  const edits = collapseInlineStyleRangesAtSelectionEdges(content, prevSelection, selection);
   if (edits.length) {
     edits.push({
       type: 'selection',
