@@ -1,7 +1,7 @@
 import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
 import { constant, sum } from 'lodash';
-import { Map, Set, OrderedSet } from 'immutable';
+import { Map, Set, OrderedSet, Iterable, List } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
 if (false as true) var _ = Entity.mergeData('', {});
@@ -118,10 +118,15 @@ export const mapBlocksInSelection = <T>(editorState: EditorState, callback: (blo
   return arr;
 }
 
-export const getTextFromSelection = (editorState: EditorState, blockDelimiter = '\n'): string => {
-  return mapBlocksInSelection(editorState, (block, start, end) => {
-    return block.getText().slice(start, end);
-  }).join(blockDelimiter);
+export const getTextFromSelection = (editorState: EditorState, blockDelimiter = '\n'): [string, Iterable<number, CharacterMetadata>] => {
+  const text: string[] = [];
+  let characters: Iterable<number, CharacterMetadata> = List<CharacterMetadata>();
+  forEachBlockInSelection(editorState, (block, start, end) => {
+    text.push(block.getText().slice(start, end));
+    characters = characters.concat(block.getCharacterList().slice(start, end));
+  });
+
+  return [text.join(blockDelimiter), characters];
 }
 
 export const getInsertedCharactersFromChange = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): string => {
@@ -138,24 +143,34 @@ export const getInsertedCharactersFromChange = (changeType: EditorChangeType, ol
   return '';
 };
 
-export const getDeletedCharactersFromChange = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): string => {
-  // backspace-character and delete-character:
+export const getDeletedCharactersFromChange = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): [string, Iterable<number, CharacterMetadata>] => {
+  // backspace-character:
   //   single block, collapsed selection
-  //   slice block text from old selection start to new selection start
+  //   slice old block text from old selection start to new selection start
+  //
+  // delete-character:
+  //   single block, collapsed constant selection
+  //   slice old block text from selection start to selection start + 1
   //
   // remove-range and insert-characters with non-collapsed selection
   //   1+ blocks, non-collapsed selection
   //   deleted characters are the entirety of the old selected text
   //
   const oldSelection = oldEditorState.getSelection();
-  if (changeType === 'backspace-character' || changeType === 'delete-character') {
+  if (changeType === 'backspace-character') {
     const block = oldEditorState.getCurrentContent().getBlockForKey(oldSelection.getStartKey());
-    return block.getText().slice(...[oldSelection.getStartOffset(), newEditorState.getSelection().getStartOffset()].sort());
+    const deletedCharacterRange = [oldSelection.getStartOffset(), newEditorState.getSelection().getStartOffset()];
+    return [block.getText().slice(...deletedCharacterRange), block.getCharacterList().slice(...deletedCharacterRange)];
+  } else if (changeType === 'delete-character') {
+    const block = oldEditorState.getCurrentContent().getBlockForKey(oldSelection.getStartKey());
+    const selectionOffset = oldSelection.getStartOffset();
+    const deletedCharacterRange = [selectionOffset, selectionOffset + 1];
+    return [block.getText().slice(...deletedCharacterRange), block.getCharacterList().slice(...deletedCharacterRange)];
   } else if (changeType === 'remove-range' || changeType === 'insert-characters' && !oldSelection.isCollapsed()) {
     return getTextFromSelection(oldEditorState);
   }
 
-  return '';
+  return ['', List<CharacterMetadata>()];
 };
 
 export const getAdjacentCharacters = (contentState: ContentState, selectionState: SelectionState): [string, string] => {
