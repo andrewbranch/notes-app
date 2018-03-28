@@ -91,6 +91,5 @@ export const isExpandableStyle = (styleKey: string): styleKey is CoreExpandableS
 export const isStyleDecorator = (styleKey: string): styleKey is 'core.styling.decorator' => styleKey === 'core.styling.decorator';
 export const getPatternRegExp = memoize((styleKey: CoreExpandableStyleName) => {
   const escapedPattern = escapeRegExp(expandableStyles[styleKey].pattern);
-  const characters = escapeRegExp(uniq(expandableStyles[styleKey].pattern.split('')).join(''));
-  return new RegExp(`${escapedPattern}[^${characters}]+${escapedPattern}`, 'g');
+  return new RegExp(`${escapedPattern}(?:(?!${escapedPattern}).)+${escapedPattern}`, 'g');
 });
