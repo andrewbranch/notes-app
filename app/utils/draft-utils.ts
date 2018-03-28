@@ -144,20 +144,20 @@ export const getInsertedCharactersFromChange = (changeType: EditorChangeType, ol
 };
 
 export const getDeletedCharactersFromChange = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): [string, Iterable<number, CharacterMetadata>] => {
-  // backspace-character:
-  //   single block, collapsed selection
+  // backspace-character, remove-range:
+  //   single block, collapsed or expanded selection (collapsed for backspace)
   //   slice old block text from old selection start to new selection start
   //
   // delete-character:
   //   single block, collapsed constant selection
   //   slice old block text from selection start to selection start + 1
   //
-  // remove-range and split-block or insert-characters with non-collapsed selection
+  // split-block, and insert-characters with non-collapsed selection
   //   1+ blocks, non-collapsed selection
   //   deleted characters are the entirety of the old selected text
   //
   const oldSelection = oldEditorState.getSelection();
-  if (changeType === 'backspace-character') {
+  if (changeType === 'backspace-character' || changeType === 'remove-range') {
     const block = oldEditorState.getCurrentContent().getBlockForKey(oldSelection.getStartKey());
     const deletedCharacterRange = [newEditorState.getSelection().getStartOffset(), oldSelection.getStartOffset()];
     return [block.getText().slice(...deletedCharacterRange), block.getCharacterList().slice(...deletedCharacterRange)];
@@ -166,10 +166,7 @@ export const getDeletedCharactersFromChange = (changeType: EditorChangeType, old
     const selectionOffset = oldSelection.getStartOffset();
     const deletedCharacterRange = [selectionOffset, selectionOffset + 1];
     return [block.getText().slice(...deletedCharacterRange), block.getCharacterList().slice(...deletedCharacterRange)];
-  } else if (
-    changeType === 'remove-range' ||
-    !oldSelection.isCollapsed() && (changeType === 'insert-characters' || changeType === 'split-block')
-  ) {
+  } else if (!oldSelection.isCollapsed() && (changeType === 'insert-characters' || changeType === 'split-block')) {
     return getTextFromSelection(oldEditorState);
   }
 

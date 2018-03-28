@@ -144,7 +144,6 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
       }
     });
   } else {
-    assert(deletedCharacters.size <= 1, 'Selection was not collapsed but more than one character was deleted');
     deletedCharacters.forEach(character => {
       // If the deleted character was a decorator character
       if (character!.getStyle().some(isStyleDecorator)) {
