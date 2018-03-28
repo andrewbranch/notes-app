@@ -118,7 +118,7 @@
     "@types/history": "^4.5.2",
     "@types/jest": "^22.0.0",
     "@types/leveldown": "^1.7.0",
-    "@types/lodash": "^4.14.104",
+    "@types/lodash": "^4.14.106",
     "@types/memoizee": "^0.4.2",
     "@types/mousetrap": "^1.6.0",
     "@types/node": "^8.9.5",

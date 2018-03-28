@@ -152,21 +152,24 @@ export const getDeletedCharactersFromChange = (changeType: EditorChangeType, old
   //   single block, collapsed constant selection
   //   slice old block text from selection start to selection start + 1
   //
-  // remove-range and insert-characters with non-collapsed selection
+  // remove-range and split-block or insert-characters with non-collapsed selection
   //   1+ blocks, non-collapsed selection
   //   deleted characters are the entirety of the old selected text
   //
   const oldSelection = oldEditorState.getSelection();
   if (changeType === 'backspace-character') {
     const block = oldEditorState.getCurrentContent().getBlockForKey(oldSelection.getStartKey());
-    const deletedCharacterRange = [oldSelection.getStartOffset(), newEditorState.getSelection().getStartOffset()];
+    const deletedCharacterRange = [newEditorState.getSelection().getStartOffset(), oldSelection.getStartOffset()];
     return [block.getText().slice(...deletedCharacterRange), block.getCharacterList().slice(...deletedCharacterRange)];
   } else if (changeType === 'delete-character') {
     const block = oldEditorState.getCurrentContent().getBlockForKey(oldSelection.getStartKey());
     const selectionOffset = oldSelection.getStartOffset();
     const deletedCharacterRange = [selectionOffset, selectionOffset + 1];
     return [block.getText().slice(...deletedCharacterRange), block.getCharacterList().slice(...deletedCharacterRange)];
-  } else if (changeType === 'remove-range' || changeType === 'insert-characters' && !oldSelection.isCollapsed()) {
+  } else if (
+    changeType === 'remove-range' ||
+    !oldSelection.isCollapsed() && (changeType === 'insert-characters' || changeType === 'split-block')
+  ) {
     return getTextFromSelection(oldEditorState);
   }
 
@@ -197,7 +200,7 @@ export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, a
 };
 
 export const getContiguousStyleRangesAtOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, Range> => {
-  const stylesAtOffset = block.getInlineStyleAt(offset);
+  const stylesAtOffset = block.getInlineStyleAt(Math.max(0, offset));
   return stylesAtOffset.reduce((ranges, style) => {
     if (styleKeyFilter(style!)) {
       return ranges!.set(style!, getContiguousStyleRange(
