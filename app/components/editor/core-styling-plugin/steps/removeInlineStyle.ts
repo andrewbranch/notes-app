@@ -14,8 +14,8 @@ const commit = (editorState: EditorState, newContent: ContentState): EditorState
 }
 
 // For each decorator character deleted whose associated style range wasn’t fully deleted, remove that style range. (1)
-// If there was a deletion and the selection is now inside a style range that doesn’t pass that style’s RegExp test,
-// remove that style. For each style range that was split into two blocks, remove that style range from each block
+// If the selection is now inside a style range that doesn’t pass that style’s RegExp test, remove that style.
+// For each style range that was split into two blocks, remove that style range from each block
 // contiguous to the split point. Finally, remove styles continued from the end of a style range.
 // 
 // (1) If the selection was not collapsed, get style ranges at previous selection start. Find each range’s end.
@@ -47,7 +47,7 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
   const prevEndKey = prevSelection.getEndKey();
   const prevStartOffset = prevSelection.getStartOffset();
   const prevEndOffset = prevSelection.getEndOffset();
-  const [deletedText, deletedCharacters] = getDeletedCharactersFromChange(changeType, prevEditorState, editorState);
+  const [, deletedCharacters] = getDeletedCharactersFromChange(changeType, prevEditorState, editorState);
   let nextContent = content;
 
   if (changeType === 'split-block') {
@@ -198,15 +198,17 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
     return commit(editorState, nextContent);
   }
 
-  // If there was a deletion and the selection is now inside a style range
-  // that doesn’t pass that style’s RegExp test, remove that style.
-  if (deletedText.length) {
-    const block = content.getBlockForKey(startKey);
-    getContiguousStyleRangesAtOffset(
-      block,
-      startOffset,
-      isExpandableStyle
-    ).forEach((range, styleKey: CoreExpandableStyleName) => {
+  // If the selection is fully inside a style range that now doesn’t
+  // pass that style’s RegExp test, remove that style.
+  // Heuristic for a style range that’s the same between old content and new
+  // is the start of every style must be the same.
+  getContiguousStyleRangesAtOffset(
+    nextContent.getBlockForKey(startKey),
+    startOffset,
+    isExpandableStyle
+  ).forEach((range, styleKey: CoreExpandableStyleName) => {
+    if (range!.start < prevStartOffset) {
+      const block = nextContent.getBlockForKey(startKey);
       const pattern = getPatternRegExp(styleKey);
       const text = block.getText().slice(range!.start, range!.end);
       pattern.lastIndex = 0;
@@ -219,11 +221,14 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
           range!.end
         );
       }
-    });
+    }
+  });
 
+  if (nextContent !== content) {
     return commit(editorState, nextContent);
   }
 
+  // Finally, remove styles continued from the end of a style range.
   if (changeType === 'insert-fragment' || changeType === 'insert-characters') {
     const endedStyles = getContiguousStyleRangesAtOffset(
       prevContent.getBlockForKey(prevStartKey),
