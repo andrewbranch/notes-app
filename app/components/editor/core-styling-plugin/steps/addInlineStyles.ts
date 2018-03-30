@@ -1,6 +1,5 @@
 import { EditorState, Modifier } from 'draft-js';
 import { is, Map } from 'immutable';
-import { constant } from 'lodash';
 import { createSelectionWithRange, stripStylesFromBlock, getContiguousStyleRangesAtOffset, Range, performUnUndoableEdits } from '../../../../utils/draft-utils';
 import { expandableStyleValues, isExpandableStyle, expandableStyles, CoreExpandableStyleName } from '../styles';
 
@@ -48,7 +47,17 @@ export const addInlineStyles = (editorState: EditorState, prevEditorState: Edito
           const end = match.index + style.pattern.length;
 
           if (!style.allowsNesting) {
-            nextContent = stripStylesFromBlock(nextContent, block, constant(true), start, end);
+            // This style range should take on styles it is nested in, but remove any
+            // that it would be nesting. Simplest implementation is to unapply any styles
+            // that don’t already exist at the beginning of this range.
+            const stylesAtStartOfNewStyleRange = block.getInlineStyleAt(start);
+            nextContent = stripStylesFromBlock(
+              nextContent,
+              block,
+              styleKey => !stylesAtStartOfNewStyleRange.includes(styleKey),
+              start,
+              end
+            );
           }
           
           const styleSelection = createSelectionWithRange(block, start, end);

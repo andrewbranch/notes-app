@@ -1,4 +1,4 @@
-import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
+import { SelectionState, ContentBlock, Entity, Modifier, EditorState, CharacterMetadata, ContentState } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
 import { constant, sum } from 'lodash';
 import { Map, Set, OrderedSet, Iterable, List } from 'immutable';
