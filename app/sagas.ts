@@ -63,10 +63,17 @@ export function* updateNoteSaga() {
   }
 }
 
+export function* logEditorStateSaga() {
+  const note: Note = yield select(selectedNoteSelector);
+  yield call({ context: console, fn: console.log }, note.editor);
+  yield call({ context: console, fn: console.log }, convertToRaw(note.editor.getCurrentContent()));
+}
+
 export function* rootSaga() {
   yield all([
     takeEvery(createNoteActionCreator.type, createNoteSaga),
     takeEvery(deleteNote.type, deleteNoteSaga),
+    takeEvery('dev.logEditorState', logEditorStateSaga),
     fork(listenForNoteUpdates)
   ]);
 }

@@ -10,7 +10,6 @@ import { createCoreStylingPlugin } from './core-styling-plugin';
 
 export interface EditorProps {
   editor: EditorState;
-  title: string;
   noteId: string;
 }
 
