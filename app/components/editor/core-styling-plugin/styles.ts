@@ -5,16 +5,22 @@ import { Styles } from '../../../ui/types';
 import { values } from 'lodash';
 const styleVariables: Styles = require('../../../styles/variables.scss');
 
-export type CoreInlineStyleName = 'core.styling.inlineCode' | 'BOLD' | 'ITALIC' | 'UNDERLINE' | 'STRIKETHROUGH';
+export type CoreStaticStyleName = 'core.styling.decorator';
+export type CoreExpandableStyleName = 'core.styling.inlineCode' | 'BOLD' | 'ITALIC' | 'UNDERLINE' | 'STRIKETHROUGH';
+export type CoreStyleName = CoreStaticStyleName | CoreExpandableStyleName;
 
-export interface InlineStyleDefinition {
-  name: CoreInlineStyleName;
-  pattern: string;
+export interface CoreStyleDefinition {
+  name: CoreStyleName;
   allowsNesting: boolean;
   styleAttributes: React.CSSProperties;
 }
 
-export const styles: { [K in CoreInlineStyleName]: InlineStyleDefinition } = {
+export interface ExpandableStyleDefinition extends CoreStyleDefinition {
+  name: CoreExpandableStyleName;
+  pattern: string;
+}
+
+export const expandableStyles: { [K in CoreExpandableStyleName]: ExpandableStyleDefinition } = {
   'core.styling.inlineCode': {
     name: 'core.styling.inlineCode',
     pattern: '`',
@@ -22,8 +28,7 @@ export const styles: { [K in CoreInlineStyleName]: InlineStyleDefinition } = {
     styleAttributes: {
       fontFamily: 'monaco, consolas, monospace',
       fontSize: '80%',
-      backgroundColor: styleVariables.warmGray10,
-      borderRadius: 2
+      backgroundColor: styleVariables.warmGray10
     }
   },
 
@@ -64,12 +69,27 @@ export const styles: { [K in CoreInlineStyleName]: InlineStyleDefinition } = {
   }
 };
 
-const inlineStyleKeys = Object.keys(styles);
-export const styleValues = values(styles);
-export const TRIGGER_CHARACTERS = uniq(flatMap(styleValues, s => s.pattern.split('')));
-export const isCoreStyle = (styleKey: string): styleKey is CoreInlineStyleName => inlineStyleKeys.includes(styleKey);
-export const getPatternRegExp = memoize((styleKey: CoreInlineStyleName) => {
-  const escapedPattern = escapeRegExp(styles[styleKey].pattern);
-  const characters = escapeRegExp(uniq(styles[styleKey].pattern.split('')).join(''));
-  return new RegExp(`${escapedPattern}[^${characters}]+${escapedPattern}`, 'g');
+export const staticStyles: { [K in CoreStaticStyleName]: CoreStyleDefinition } = {
+  'core.styling.decorator': {
+    name: 'core.styling.decorator',
+    allowsNesting: false,
+    styleAttributes: {
+      color: 'rgba(0, 0, 0, 0.3)'
+    }
+  }
+};
+
+const expandableStyleKeys = Object.keys(expandableStyles);
+const staticStyleKeys = Object.keys(staticStyles);
+export const expandableStyleValues = values(expandableStyles);
+export const staticStyleValues = values(staticStyles);
+export const styleValues = [...expandableStyleValues, ...staticStyleValues];
+export const TRIGGER_CHARACTERS = uniq(flatMap(expandableStyleValues, s => s.pattern.split('')));
+export const isStaticStyle = (styleKey: string): styleKey is CoreStaticStyleName => staticStyleKeys.includes(styleKey)
+export const isCoreStyle = (styleKey: string): boolean => styleKey.startsWith('core.styling') || isExpandableStyle(styleKey);
+export const isExpandableStyle = (styleKey: string): styleKey is CoreExpandableStyleName => expandableStyleKeys.includes(styleKey);
+export const isStyleDecorator = (styleKey: string): styleKey is 'core.styling.decorator' => styleKey === 'core.styling.decorator';
+export const getPatternRegExp = memoize((styleKey: CoreExpandableStyleName) => {
+  const escapedPattern = escapeRegExp(expandableStyles[styleKey].pattern);
+  return new RegExp(`^${escapedPattern}(?:(?!${escapedPattern}).)+${escapedPattern}$`, 'g');
 });

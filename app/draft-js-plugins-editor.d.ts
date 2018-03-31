@@ -77,6 +77,6 @@ declare module 'draft-js-plugins-editor' {
   }
   
   export default class Editor extends React.Component<EditorProps> {
-  
+    focus(): void;
   }
 }

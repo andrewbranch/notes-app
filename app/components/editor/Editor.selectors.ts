@@ -4,5 +4,5 @@ import { Note } from '../../reducers/types';
 
 export const editorSelector = createSelector(
   selectedNoteSelector,
-  ({ id, title, editor }: Note) => ({ noteId: id, title, editor })
+  ({ id, editor }: Note) => ({ noteId: id, editor })
 );

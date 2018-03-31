@@ -1,7 +1,7 @@
-import { SelectionState, ContentBlock, Entity, ContentState, Modifier, EditorState, CharacterMetadata } from 'draft-js';
+import { SelectionState, ContentBlock, Entity, Modifier, EditorState, CharacterMetadata, ContentState } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
 import { constant, sum } from 'lodash';
-import { Map, Set, OrderedSet } from 'immutable';
+import { Map, Set, OrderedSet, Iterable, List } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
 if (false as true) var _ = Entity.mergeData('', {});
@@ -118,10 +118,15 @@ export const mapBlocksInSelection = <T>(editorState: EditorState, callback: (blo
   return arr;
 }
 
-export const getTextFromSelection = (editorState: EditorState, blockDelimiter = '\n'): string => {
-  return mapBlocksInSelection(editorState, (block, start, end) => {
-    return block.getText().slice(start, end);
-  }).join(blockDelimiter);
+export const getTextFromSelection = (editorState: EditorState, blockDelimiter = '\n'): [string, Iterable<number, CharacterMetadata>] => {
+  const text: string[] = [];
+  let characters: Iterable<number, CharacterMetadata> = List<CharacterMetadata>();
+  forEachBlockInSelection(editorState, (block, start, end) => {
+    text.push(block.getText().slice(start, end));
+    characters = characters.concat(block.getCharacterList().slice(start, end));
+  });
+
+  return [text.join(blockDelimiter), characters];
 }
 
 export const getInsertedCharactersFromChange = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): string => {
@@ -138,24 +143,34 @@ export const getInsertedCharactersFromChange = (changeType: EditorChangeType, ol
   return '';
 };
 
-export const getDeletedCharactersFromChange = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): string => {
-  // backspace-character and delete-character:
-  //   single block, collapsed selection
-  //   slice block text from old selection start to new selection start
+export const getDeletedCharactersFromChange = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): [string, Iterable<number, CharacterMetadata>] => {
+  // backspace-character, remove-range:
+  //   single block, collapsed or expanded selection (collapsed for backspace)
+  //   slice old block text from old selection start to new selection start
   //
-  // remove-range and insert-characters with non-collapsed selection
+  // delete-character:
+  //   single block, collapsed constant selection
+  //   slice old block text from selection start to selection start + 1
+  //
+  // split-block, and insert-characters with non-collapsed selection
   //   1+ blocks, non-collapsed selection
   //   deleted characters are the entirety of the old selected text
   //
   const oldSelection = oldEditorState.getSelection();
-  if (changeType === 'backspace-character' || changeType === 'delete-character') {
+  if (changeType === 'backspace-character' || changeType === 'remove-range') {
     const block = oldEditorState.getCurrentContent().getBlockForKey(oldSelection.getStartKey());
-    return block.getText().slice(...[oldSelection.getStartOffset(), newEditorState.getSelection().getStartOffset()].sort());
-  } else if (changeType === 'remove-range' || changeType === 'insert-characters' && !oldSelection.isCollapsed()) {
+    const deletedCharacterRange = [newEditorState.getSelection().getStartOffset(), oldSelection.getStartOffset()];
+    return [block.getText().slice(...deletedCharacterRange), block.getCharacterList().slice(...deletedCharacterRange)];
+  } else if (changeType === 'delete-character') {
+    const block = oldEditorState.getCurrentContent().getBlockForKey(oldSelection.getStartKey());
+    const selectionOffset = oldSelection.getStartOffset();
+    const deletedCharacterRange = [selectionOffset, selectionOffset + 1];
+    return [block.getText().slice(...deletedCharacterRange), block.getCharacterList().slice(...deletedCharacterRange)];
+  } else if (!oldSelection.isCollapsed() && (changeType === 'insert-characters' || changeType === 'split-block')) {
     return getTextFromSelection(oldEditorState);
   }
 
-  return '';
+  return ['', List<CharacterMetadata>()];
 };
 
 export const getAdjacentCharacters = (contentState: ContentState, selectionState: SelectionState): [string, string] => {
@@ -179,6 +194,20 @@ export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, a
   while (start >= 0 && characters.get(start).hasStyle(styleKey)) start--;
   while (end < characters.size && characters.get(end).hasStyle(styleKey)) end++;
   return Range(block.getKey(), start + 1, end);
+};
+
+export const getContiguousStyleRangesAtOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, Range> => {
+  const stylesAtOffset = block.getInlineStyleAt(Math.max(0, offset));
+  return stylesAtOffset.reduce((ranges, style) => {
+    if (styleKeyFilter(style!)) {
+      return ranges!.set(style!, getContiguousStyleRange(
+        block,
+        style!,
+        offset
+      ));
+    }
+    return ranges!;
+  }, Map<string, Range>());
 };
 
 export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, Range> => {
