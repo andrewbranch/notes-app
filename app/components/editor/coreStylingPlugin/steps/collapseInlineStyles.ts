@@ -1,5 +1,5 @@
 import { EditorState, ContentBlock, SelectionState, ContentState } from 'draft-js';
-import { Edit, hasEdgeWithin, getContiguousStyleRangesNearSelectionEdges } from '../../../../utils/draft-utils';
+import { Edit, hasEdgeWithin, getContiguousStyleRangesNearSelectionEdges } from '../../../../utils/draftUtils';
 import { isStyleDecorator, isExpandableStyle, CoreExpandableStyleName, expandableStyles, getPatternRegExp } from '../styles';
 
 const deleteRange = (block: ContentBlock, start: number, end: number): Edit => {

@@ -1,6 +1,6 @@
 import { ContentState, RawDraftContentState, ContentBlock, RawDraftContentBlock, EditorState } from 'draft-js';
-import { collapseInlineStylesInBlock } from '../components/editor/core-styling-plugin/steps/collapseInlineStyle';
-import { performDependentEdits } from './draft-utils';
+import { collapseInlineStylesInBlock } from '../components/editor/coreStylingPlugin/steps/collapseInlineStyles';
+import { performDependentEdits } from './draftUtils';
 
 const defaultNoteTitle = 'Untitled note';
 

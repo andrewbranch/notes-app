@@ -1,6 +1,6 @@
 import { EditorState, Modifier } from 'draft-js';
 import { is, Map } from 'immutable';
-import { createSelectionWithRange, stripStylesFromBlock, getContiguousStyleRangesAtOffset, Range, performUnUndoableEdits } from '../../../../utils/draft-utils';
+import { createSelectionWithRange, stripStylesFromBlock, getContiguousStyleRangesAtOffset, Range, performUnUndoableEdits } from '../../../../utils/draftUtils';
 import { expandableStyleValues, isExpandableStyle, expandableStyles, CoreExpandableStyleName } from '../styles';
 
 export const addInlineStyles = (editorState: EditorState, prevEditorState: EditorState): EditorState => {

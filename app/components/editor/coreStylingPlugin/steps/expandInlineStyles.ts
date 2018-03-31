@@ -1,5 +1,5 @@
 import { EditorState } from 'draft-js';
-import { getContiguousStyleRangesNearSelectionEdges, Edit, InsertionEdit } from '../../../../utils/draft-utils';
+import { getContiguousStyleRangesNearSelectionEdges, Edit, InsertionEdit } from '../../../../utils/draftUtils';
 import { isExpandableStyle, CoreExpandableStyleName, expandableStyles, getPatternRegExp } from '../styles';
 
 export const expandInlineStyle = (editorState: EditorState): Edit[] => {

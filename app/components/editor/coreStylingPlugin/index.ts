@@ -1,12 +1,12 @@
 import { EditorState, Modifier } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
 import { decorators } from './decorators';
-import { removeInlineStyles } from './steps/removeInlineStyle';
-import { styleValues } from './styles';
-import { collapseInlineStyles } from './steps/collapseInlineStyle';
-import { expandInlineStyle } from './steps/expandInlineStyle';
-import { createSelectionWithRange, createSelectionWithSelection, performDependentEdits } from '../../../utils/draft-utils';
+import { removeInlineStyles } from './steps/removeInlineStyles';
 import { addInlineStyles } from './steps/addInlineStyles';
+import { collapseInlineStyles } from './steps/collapseInlineStyles';
+import { expandInlineStyle } from './steps/expandInlineStyles';
+import { styleValues } from './styles';
+import { createSelectionWithRange, createSelectionWithSelection, performDependentEdits } from '../../../utils/draftUtils';
 
 export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plugin = getEditorState => ({
   handleBeforeInput: (chars, editorState, { setEditorState }) => {

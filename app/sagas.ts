@@ -9,8 +9,8 @@ import { selectedNoteSelector } from './selectors/notes.selectors';
 import { NoteTransaction } from '../interprocess/types';
 import { deleteNote } from './components/Shell.actions';
 import { Note } from './reducers/types';
-import { performDependentEdits } from './utils/draft-utils';
-import { collapseInlineStyleRangesAtSelectionEdges } from './components/editor/core-styling-plugin/steps/collapseInlineStyle';
+import { performDependentEdits } from './utils/draftUtils';
+import { collapseInlineStyleRangesAtSelectionEdges } from './components/editor/coreStylingPlugin/steps/collapseInlineStyles';
 
 export function* createNoteSaga(action: ActionWithPayload<NoteTransaction>) {
   yield call(createNoteIPC.send, action.payload);

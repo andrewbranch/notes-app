@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { EditorState, ContentState } from 'draft-js';
 import { eq } from 'lodash/fp';
-import { getContiguousStyleRangesAtOffset, stripStylesFromBlock, getDeletedCharactersFromChange, Range, performUnUndoableEdits } from '../../../../utils/draft-utils';
+import { getContiguousStyleRangesAtOffset, stripStylesFromBlock, getDeletedCharactersFromChange, Range, performUnUndoableEdits } from '../../../../utils/draftUtils';
 import { isExpandableStyle, CoreExpandableStyleName, isStyleDecorator, expandableStyles, isCoreStyle, getPatternRegExp } from '../styles';
 
 const commit = (editorState: EditorState, newContent: ContentState): EditorState => {
