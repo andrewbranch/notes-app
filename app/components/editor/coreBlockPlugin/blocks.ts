@@ -1,42 +1,57 @@
 import { DraftBlockType } from 'draft-js';
 import { values } from 'lodash';
 
-export type CoreBlockDefinition = {
+export interface CoreBlockDefinition {
   type: DraftBlockType;
   pattern: RegExp;
   expandable?: boolean;
 };
 
-export const blocks: { [K in DraftBlockType]?: CoreBlockDefinition } = {
+export interface CoreStaticBlockDefinition extends CoreBlockDefinition {
+  expandable?: false;
+}
+
+export interface CoreExpandableBlockDefinition extends CoreBlockDefinition {
+  expandable: true;
+  canonicalPattern: string;
+}
+
+export const blocks: { [K in DraftBlockType]?: CoreStaticBlockDefinition | CoreExpandableBlockDefinition } = {
   'header-one': {
     type: 'header-one',
     pattern: /^# /,
-    expandable: true
+    expandable: true,
+    canonicalPattern: '# '
   },
   'header-two': {
     type: 'header-two',
     pattern: /^## /,
-    expandable: true
+    expandable: true,
+    canonicalPattern: '## '
   },
   'header-three': {
     type: 'header-three',
     pattern: /^### /,
-    expandable: true
+    expandable: true,
+    canonicalPattern: '### '
   },
   'header-four': {
     type: 'header-four',
     pattern: /^#### /,
-    expandable: true
+    expandable: true,
+    canonicalPattern: '#### '
   },
   'header-five': {
     type: 'header-five',
     pattern: /^##### /,
-    expandable: true
+    expandable: true,
+    canonicalPattern: '##### '
   },
   'header-six': {
     type: 'header-six',
     pattern: /^###### /,
-    expandable: true
+    expandable: true,
+    canonicalPattern: '###### '
   },
   'unordered-list-item': {
     type: 'unordered-list-item',
