@@ -1,5 +1,5 @@
 import { EditorState, ContentState, Modifier } from 'draft-js';
-import { blockValues } from '../blocks';
+import { blockValues, blocks } from '../blocks';
 import { createSelectionWithBlock, performUnUndoableEdits } from '../../../../utils/draftUtils';
 
 export const convertBlockType = (editorState: EditorState, prevEditorState: EditorState): EditorState => {
@@ -20,12 +20,13 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
     .reduce((content: ContentState, block) => {
       const blockText = block!.getText();
       const currentBlockType = block!.getType();
-      const matchingBlockPattern = blockValues.find(b => blockText.startsWith(b!.pattern));
-      if (matchingBlockPattern) {
-        if (currentBlockType !== matchingBlockPattern.type) {
-          return Modifier.setBlockType(content, createSelectionWithBlock(block!), matchingBlockPattern.type);
+      const currentBlockDefinition = blocks[currentBlockType];
+      const newBlockDefinition = blockValues.find(b => b!.pattern.test(blockText));
+      if (newBlockDefinition) {
+        if (currentBlockType !== newBlockDefinition.type) {
+          return Modifier.setBlockType(content, createSelectionWithBlock(block!), newBlockDefinition.type);
         }
-      } else if (currentBlockType !== 'unstyled') {
+      } else if (currentBlockType !== 'unstyled' && (!currentBlockDefinition || currentBlockDefinition.expandable)) {
         return Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled');
       }
 
