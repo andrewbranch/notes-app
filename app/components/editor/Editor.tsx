@@ -7,6 +7,7 @@ import { connect } from 'react-redux';
 import { editorSelector } from './Editor.selectors';
 import * as editorActions from './Editor.actions';
 import { createCoreStylingPlugin } from './coreStylingPlugin';
+import { createCoreBlockPlugin } from './coreBlockPlugin';
 
 export interface EditorProps {
   editor: EditorState;
@@ -15,6 +16,7 @@ export interface EditorProps {
 
 export class Editor extends React.Component<EditorProps & typeof editorActions> {
   private coreStylingPlugin = createCoreStylingPlugin(() => this.props.editor);
+  private coreBlockPlugin = createCoreBlockPlugin(() => this.props.editor);
   private editor: DraftEditor | null;
 
   public focus() {
@@ -33,7 +35,7 @@ export class Editor extends React.Component<EditorProps & typeof editorActions> 
         ref={x => this.editor = x}
         editorState={this.props.editor}
         onChange={this.updateEditorState}
-        plugins={[this.coreStylingPlugin]}
+        plugins={[this.coreStylingPlugin, this.coreBlockPlugin]}
       />
     );
   }
