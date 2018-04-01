@@ -6,7 +6,7 @@ import { addInlineStyles } from './steps/addInlineStyles';
 import { collapseInlineStyles } from './steps/collapseInlineStyles';
 import { expandInlineStyle } from './steps/expandInlineStyles';
 import { styleValues } from './styles';
-import { createSelectionWithRange, createSelectionWithSelection, performDependentEdits } from '../../../utils/draftUtils';
+import { createSelectionWithSelection, performDependentEdits } from '../../../utils/draftUtils';
 
 export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plugin = getEditorState => ({
   handleBeforeInput: (chars, editorState, { setEditorState }) => {
@@ -17,15 +17,25 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
       !editorState.getInlineStyleOverride() &&
       !editorState.getCurrentInlineStyle().isEmpty()
     ) {
-      const newSelection = createSelectionWithRange(selection.getStartKey(), 0, 0);
-      setEditorState(EditorState.forceSelection(
-        EditorState.push(
-          editorState,
-          Modifier.insertText(editorState.getCurrentContent(), newSelection, chars),
-          'insert-characters'
-        ),
-        createSelectionWithSelection(newSelection, chars.length, chars.length)
-      ));
+      if (selection.isCollapsed()) {
+        setEditorState(EditorState.forceSelection(
+          EditorState.push(
+            editorState,
+            Modifier.insertText(editorState.getCurrentContent(), selection, chars),
+            'insert-characters'
+          ),
+          createSelectionWithSelection(selection, chars.length, chars.length)
+        ));
+      } else {
+        setEditorState(EditorState.forceSelection(
+          EditorState.push(
+            editorState,
+            Modifier.replaceText(editorState.getCurrentContent(), selection, chars),
+            'insert-characters'
+          ),
+          createSelectionWithSelection(selection, chars.length, chars.length)
+        ));
+      }
 
       return 'handled';
     }

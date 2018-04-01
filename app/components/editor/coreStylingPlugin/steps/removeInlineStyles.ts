@@ -111,7 +111,7 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
             prevStartKey,
             isStyleDecorator,
             range!.end - decoratorPattern.length,
-            prevStartOffset
+            startOffset
           );
         }
       }

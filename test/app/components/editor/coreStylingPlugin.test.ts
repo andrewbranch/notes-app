@@ -1,6 +1,6 @@
 import '../../../utils/enzymeConfig';
 import { createEditorProvider, Key } from './editorProvider';
-import { boldWithSelectionAtEnd, boldWithSelectionAtStart, boldHelloSelectedFrom4ToEnd, boldHelloSelectedFrom7ToEnd, helloBoldSelectedFromStartTo10, helloBoldSelectedFromStartTo7 } from './fixtures';
+import { boldWithSelectionAtEnd, boldWithSelectionAtStart, boldHelloSelectedFrom4ToEnd, boldHelloSelectedFrom7ToEnd, helloBoldSelectedFromStartTo10, helloBoldSelectedFromStartTo7, italicWithSelectionAtEnd } from './fixtures';
 
 describe('coreStylingPlugin', () => {
   describe('steps', () => {
@@ -92,8 +92,15 @@ describe('coreStylingPlugin', () => {
           expect(provider.getEditorState()).toMatchSnapshot();
         });
 
-        test.skip('replacing a range including part of the trailing decorator sequence should remove the style', async () => {
+        test('replacing a range including part of a two-character trailing decorator sequence should remove the style', async () => {
           const provider = await createEditorProvider({ initialEditorState: boldHelloSelectedFrom7ToEnd });
+          await provider.typeText('a');
+          expect(provider.getEditorState()).toMatchSnapshot();
+        });
+
+        test.skip('replacing a range including the one-character trailing decorator sequence should remove the style', async () => {
+          const provider = await createEditorProvider({ initialEditorState: italicWithSelectionAtEnd });
+          await provider.setSelection({ anchorOffset: 7, focusOffset: 8 });
           await provider.typeText('a');
           expect(provider.getEditorState()).toMatchSnapshot();
         });
@@ -129,6 +136,15 @@ describe('coreStylingPlugin', () => {
           expect(provider.getEditorState()).toMatchSnapshot();
         });
 
+        test.skip('replacing the first character of a leading two-character decorator sequence should remove the style', async () => {
+          const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtStart });
+          await provider.setSelection({ focusOffset: 1 });
+          await provider.typeText('a');
+          expect(provider.getEditorState()).toMatchSnapshot();
+        });
+      });
+
+      describe('editing within the range', () => {
         test('deleting the entire contents of a range should remove the style', async () => {
           const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtEnd });
           await provider.setSelection({ anchorOffset: 2, focusOffset: 6 });
