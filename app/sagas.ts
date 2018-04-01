@@ -69,11 +69,18 @@ export function* logEditorStateSaga() {
   yield call({ context: console, fn: console.log }, convertToRaw(note.editor.getCurrentContent()));
 }
 
+export function* logFixtureSaga() {
+  const note: Note = yield select(selectedNoteSelector);
+  const rawContent = convertToRaw(note.editor.getCurrentContent());
+  yield call({ context: console, fn: console.log }, `EditorState.forceSelection(EditorState.createWithContent(convertFromRaw(${JSON.stringify(rawContent)} as any)), new SelectionState(${JSON.stringify(note.editor.getSelection())}))`);
+}
+
 export function* rootSaga() {
   yield all([
     takeEvery(createNoteActionCreator.type, createNoteSaga),
     takeEvery(deleteNote.type, deleteNoteSaga),
     takeEvery('dev.logEditorState', logEditorStateSaga),
+    takeEvery('dev.logFixture', logFixtureSaga),
     fork(listenForNoteUpdates)
   ]);
 }
