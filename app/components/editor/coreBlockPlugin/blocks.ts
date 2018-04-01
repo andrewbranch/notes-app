@@ -55,7 +55,7 @@ export const blocks: { [K in DraftBlockType]?: CoreStaticBlockDefinition | CoreE
   },
   'unordered-list-item': {
     type: 'unordered-list-item',
-    pattern: / ?[-*] /,
+    pattern: /^ ?[-*] /,
     expandable: false
   }
 };

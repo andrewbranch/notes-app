@@ -48,7 +48,7 @@ export type EditorProvider = {
   editorInstance: Editor;
   getEditorState: () => EditorState;
   typeText: (text: string) => Promise<void>;
-  pressKey: (key: Key) => Promise<void>;
+  pressKey: (key: Key, times?: number) => Promise<void>;
   setSelection: (selection: Partial<RawSelectionState>) => Promise<void>;
 };
 
@@ -88,6 +88,7 @@ type EditorProviderOptions = Readonly<{
 
 export const createEditorProvider = async (options: EditorProviderOptions = {}): Promise<EditorProvider> => {
   (global as any).getSelection = () => ({});
+  (window as any).scrollTo = noop;
   const wrapper = mount<{}, { editor: EditorState }>(<EditorWrapper />);
   const wrapperInstance = wrapper.instance() as EditorWrapper;
   const contentEditable = wrapper.find('.public-DraftEditor-content');
@@ -99,9 +100,11 @@ export const createEditorProvider = async (options: EditorProviderOptions = {}):
     editorInstance: wrapperInstance.editorRef,
     typeText: createTypeText(contentEditable),
     getEditorState: () => wrapper.state().editor,
-    pressKey: async key => {
-      contentEditable.simulate('keyDown', { which: key, keyCode: key });
-      await flush();
+    pressKey: async (key, times = 1) => {
+      for (let i = 0; i < times; i++) {
+        contentEditable.simulate('keyDown', { which: key, keyCode: key });
+        await flush();
+      }
     },
     setSelection: async selection => new Promise<void>(resolve => {
       wrapper.setState({
