@@ -6,7 +6,7 @@ import { addInlineStyles } from './steps/addInlineStyles';
 import { collapseInlineStyles } from './steps/collapseInlineStyles';
 import { expandInlineStyle } from './steps/expandInlineStyles';
 import { styleValues } from './styles';
-import { createSelectionWithSelection, performDependentEdits } from '../../../utils/draftUtils';
+import { performDependentEdits, createSelectionWithRange } from '../../../utils/draftUtils';
 
 export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plugin = getEditorState => ({
   handleBeforeInput: (chars, editorState, { setEditorState }) => {
@@ -24,7 +24,7 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
             Modifier.insertText(editorState.getCurrentContent(), selection, chars),
             'insert-characters'
           ),
-          createSelectionWithSelection(selection, chars.length, chars.length)
+          createSelectionWithRange(selection.getFocusKey(), chars.length, chars.length)
         ));
       } else {
         setEditorState(EditorState.forceSelection(
@@ -33,7 +33,7 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
             Modifier.replaceText(editorState.getCurrentContent(), selection, chars),
             'insert-characters'
           ),
-          createSelectionWithSelection(selection, chars.length, chars.length)
+          createSelectionWithRange(selection.getFocusKey(), chars.length, chars.length)
         ));
       }
 
