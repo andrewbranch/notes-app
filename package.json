@@ -39,10 +39,20 @@
       "app/node_modules"
     ],
     "transform": {
-      "^.+\\.(ts|tsx)$": "<rootDir>/test/preprocessor.js"
+      "^.+\\.(ts|tsx)$": "ts-jest"
+    },
+    "globals": {
+      "ts-jest": {
+        "tsConfigFile": "app/tsconfig.json"
+      }
     },
     "testMatch": [
       "**/?(*.)(spec|test).ts?(x)"
+    ],
+    "collectCoverage": true,
+    "coveragePathIgnorePatterns": [
+      "<rootDir>/test/",
+      "/node_modules/"
     ]
   },
   "build": {
