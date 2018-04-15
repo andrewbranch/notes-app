@@ -166,10 +166,84 @@ describe('coreStylingPlugin', () => {
           expect(provider.getEditorState()).toMatchSnapshot();
         });
 
-        test('inserting a character in the middle of a two-character decorator sequence should remove the style', async () => {
+        test('inserting a character in the middle of a leading two-character decorator sequence should remove the style', async () => {
           const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtEnd });
           await provider.setSelection({ anchorOffset: 1, focusOffset: 1 });
           await provider.typeText('a');
+          expect(provider.getEditorState()).toMatchSnapshot();
+        });
+
+        test('inserting a character in the middle of a trailing two-character decorator sequence should remove the style', async () => {
+          const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtEnd });
+          await provider.setSelection({ anchorOffset: 7, focusOffset: 7 });
+          await provider.typeText('a');
+          expect(provider.getEditorState()).toMatchSnapshot();
+        });
+      });
+
+      describe('splitting a range into two blocks', () => {
+        it('splitting a range in the middle should remove the style', async () => {
+          const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtEnd });
+          await provider.setSelection({ anchorOffset: 4, focusOffset: 4 });
+          await provider.pressKey(Key.RETURN);
+          const blocks = provider.getEditorState().getCurrentContent().getBlocksAsArray();
+          expect(blocks).toHaveLength(2);
+          expect(blocks.every(block => block.getCharacterList().every(c => c!.getStyle().size === 0))).toBe(true);
+          expect(blocks[0].getText()).toBe('**Bo');
+          expect(blocks[1].getText()).toBe('ld**');
+        });
+
+        it('splitting a range in the middle of a leading two-character decorator sequence should remove the style', async () => {
+          const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtEnd });
+          await provider.setSelection({ anchorOffset: 1, focusOffset: 1 });
+          await provider.pressKey(Key.RETURN);
+          const blocks = provider.getEditorState().getCurrentContent().getBlocksAsArray();
+          expect(blocks).toHaveLength(2);
+          expect(blocks.every(block => block.getCharacterList().every(c => c!.getStyle().size === 0))).toBe(true);
+          expect(blocks[0].getText()).toBe('*');
+          expect(blocks[1].getText()).toBe('*Bold**');
+        });
+
+        it('splitting a range in the middle of a trailing two-character decorator sequence should remove the style', async () => {
+          const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtEnd });
+          await provider.setSelection({ anchorOffset: 7, focusOffset: 7 });
+          await provider.pressKey(Key.RETURN);
+          const blocks = provider.getEditorState().getCurrentContent().getBlocksAsArray();
+          expect(blocks).toHaveLength(2);
+          expect(blocks.every(block => block.getCharacterList().every(c => c!.getStyle().size === 0))).toBe(true);
+          expect(blocks[0].getText()).toBe('**Bold*');
+          expect(blocks[1].getText()).toBe('*');
+        });
+
+        it('splitting a block right before a style range should not remove the style', async () => {
+          const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtStart });
+          await provider.pressKey(Key.RETURN);
+          const blocks = provider.getEditorState().getCurrentContent().getBlocksAsArray();
+          expect(blocks).toHaveLength(2);
+          expect(blocks[0].getText()).toBe('');
+          expect(blocks[1].getText()).toBe('**Bold**');
+          const decoratorCharacterStyles = blocks[1].getCharacterList().slice(0, 2).map(c => c!.getStyle()).toArray();
+          expect(decoratorCharacterStyles).toHaveLength(2);
+          expect(decoratorCharacterStyles.every(styles => styles.includes('BOLD'))).toBe(true);
+          expect(decoratorCharacterStyles.every(styles => styles.includes('core.styling.decorator'))).toBe(true);
+        });
+
+        it('splitting a block right after a style range should not remove the style', async () => {
+          const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtEnd });
+          await provider.pressKey(Key.RETURN);
+          const blocks = provider.getEditorState().getCurrentContent().getBlocksAsArray();
+          expect(blocks).toHaveLength(2);
+          expect(blocks[0].getText()).toBe('Bold');
+          expect(blocks[1].getText()).toBe('');
+          const characterStyles = blocks[0].getCharacterList().map(c => c!.getStyle()).toArray();
+          expect(characterStyles.every(styles => styles.includes('BOLD'))).toBe(true);
+        });
+      });
+
+      describe('writing after a style range', () => {
+        it('a character inserted immediately after a style range should not be styled', async () => {
+          const provider = await createEditorProvider({ initialEditorState: boldWithSelectionAtEnd });
+          await provider.typeText('x');
           expect(provider.getEditorState()).toMatchSnapshot();
         });
       });

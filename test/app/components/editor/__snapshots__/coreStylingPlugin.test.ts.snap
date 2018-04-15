@@ -4893,7 +4893,7 @@ EditorState {
 }
 `;
 
-exports[`coreStylingPlugin steps removeInlineStyles editing within the range inserting a character in the middle of a two-character decorator sequence should remove the style 1`] = `
+exports[`coreStylingPlugin steps removeInlineStyles editing within the range inserting a character in the middle of a leading two-character decorator sequence should remove the style 1`] = `
 EditorState {
   "_immutable": Immutable.Record {
     "allowUndo": true,
@@ -5003,6 +5003,554 @@ EditorState {
       ],
     },
     "undoStack": Immutable.Stack [
+      Immutable.Record {
+        "entityMap": Object {},
+        "blockMap": Immutable.OrderedMap {
+          "aacj3": Immutable.Record {
+            "key": "aacj3",
+            "type": "unstyled",
+            "text": "**Bold**",
+            "characterList": Immutable.List [
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+            ],
+            "depth": 0,
+            "data": Immutable.Map {},
+          },
+        },
+        "selectionBefore": Immutable.Record {
+          "anchorKey": "aacj3",
+          "anchorOffset": 0,
+          "focusKey": "aacj3",
+          "focusOffset": 0,
+          "isBackward": false,
+          "hasFocus": false,
+        },
+        "selectionAfter": Immutable.Record {
+          "anchorKey": "aacj3",
+          "anchorOffset": 0,
+          "focusKey": "aacj3",
+          "focusOffset": 0,
+          "isBackward": false,
+          "hasFocus": false,
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`coreStylingPlugin steps removeInlineStyles editing within the range inserting a character in the middle of a trailing two-character decorator sequence should remove the style 1`] = `
+EditorState {
+  "_immutable": Immutable.Record {
+    "allowUndo": true,
+    "currentContent": Immutable.Record {
+      "entityMap": Object {},
+      "blockMap": Immutable.OrderedMap {
+        "aacj3": Immutable.Record {
+          "key": "aacj3",
+          "type": "unstyled",
+          "text": "**Bold*a*",
+          "characterList": Immutable.List [
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+          ],
+          "depth": 0,
+          "data": Immutable.Map {},
+        },
+      },
+      "selectionBefore": Immutable.Record {
+        "anchorKey": "aacj3",
+        "anchorOffset": 7,
+        "focusKey": "aacj3",
+        "focusOffset": 7,
+        "isBackward": false,
+        "hasFocus": true,
+      },
+      "selectionAfter": Immutable.Record {
+        "anchorKey": "aacj3",
+        "anchorOffset": 8,
+        "focusKey": "aacj3",
+        "focusOffset": 8,
+        "isBackward": false,
+        "hasFocus": true,
+      },
+    },
+    "decorator": MultiDecorator {
+      "decorators": Immutable.List [
+        CompositeDraftDecorator {
+          "_decorators": Array [],
+        },
+      ],
+    },
+    "directionMap": Immutable.OrderedMap {
+      "aacj3": "LTR",
+    },
+    "forceSelection": true,
+    "inCompositionMode": false,
+    "inlineStyleOverride": null,
+    "lastChangeType": "change-inline-style",
+    "nativelyRenderedContent": null,
+    "redoStack": Immutable.Stack [],
+    "selection": Immutable.Record {
+      "anchorKey": "aacj3",
+      "anchorOffset": 8,
+      "focusKey": "aacj3",
+      "focusOffset": 8,
+      "isBackward": false,
+      "hasFocus": true,
+    },
+    "treeMap": Immutable.OrderedMap {
+      "aacj3": Immutable.List [
+        Immutable.Record {
+          "start": 0,
+          "end": 9,
+          "decoratorKey": null,
+          "leaves": Immutable.List [
+            Immutable.Record {
+              "start": 0,
+              "end": 9,
+            },
+          ],
+        },
+      ],
+    },
+    "undoStack": Immutable.Stack [
+      Immutable.Record {
+        "entityMap": Object {},
+        "blockMap": Immutable.OrderedMap {
+          "aacj3": Immutable.Record {
+            "key": "aacj3",
+            "type": "unstyled",
+            "text": "**Bold**",
+            "characterList": Immutable.List [
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+            ],
+            "depth": 0,
+            "data": Immutable.Map {},
+          },
+        },
+        "selectionBefore": Immutable.Record {
+          "anchorKey": "aacj3",
+          "anchorOffset": 0,
+          "focusKey": "aacj3",
+          "focusOffset": 0,
+          "isBackward": false,
+          "hasFocus": false,
+        },
+        "selectionAfter": Immutable.Record {
+          "anchorKey": "aacj3",
+          "anchorOffset": 0,
+          "focusKey": "aacj3",
+          "focusOffset": 0,
+          "isBackward": false,
+          "hasFocus": false,
+        },
+      },
+    ],
+  },
+}
+`;
+
+exports[`coreStylingPlugin steps removeInlineStyles writing after a style range a character inserted immediately after a style range should not be styled 1`] = `
+EditorState {
+  "_immutable": Immutable.Record {
+    "allowUndo": true,
+    "currentContent": Immutable.Record {
+      "entityMap": Object {},
+      "blockMap": Immutable.OrderedMap {
+        "aacj3": Immutable.Record {
+          "key": "aacj3",
+          "type": "unstyled",
+          "text": "Boldx",
+          "characterList": Immutable.List [
+            Immutable.Record {
+              "style": Immutable.OrderedSet [
+                "BOLD",
+              ],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [
+                "BOLD",
+              ],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [
+                "BOLD",
+              ],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [
+                "BOLD",
+              ],
+              "entity": null,
+            },
+            Immutable.Record {
+              "style": Immutable.OrderedSet [],
+              "entity": null,
+            },
+          ],
+          "depth": 0,
+          "data": Immutable.Map {},
+        },
+      },
+      "selectionBefore": Immutable.Record {
+        "anchorKey": "aacj3",
+        "anchorOffset": 0,
+        "focusKey": "aacj3",
+        "focusOffset": 0,
+        "isBackward": false,
+        "hasFocus": false,
+      },
+      "selectionAfter": Immutable.Record {
+        "anchorKey": "aacj3",
+        "anchorOffset": 4,
+        "focusKey": "aacj3",
+        "focusOffset": 4,
+        "isBackward": false,
+        "hasFocus": false,
+      },
+    },
+    "decorator": MultiDecorator {
+      "decorators": Immutable.List [
+        CompositeDraftDecorator {
+          "_decorators": Array [],
+        },
+      ],
+    },
+    "directionMap": Immutable.OrderedMap {
+      "aacj3": "LTR",
+    },
+    "forceSelection": true,
+    "inCompositionMode": false,
+    "inlineStyleOverride": null,
+    "lastChangeType": "remove-range",
+    "nativelyRenderedContent": null,
+    "redoStack": Immutable.Stack [],
+    "selection": Immutable.Record {
+      "anchorKey": "aacj3",
+      "anchorOffset": 5,
+      "focusKey": "aacj3",
+      "focusOffset": 5,
+      "isBackward": false,
+      "hasFocus": true,
+    },
+    "treeMap": Immutable.OrderedMap {
+      "aacj3": Immutable.List [
+        Immutable.Record {
+          "start": 0,
+          "end": 5,
+          "decoratorKey": null,
+          "leaves": Immutable.List [
+            Immutable.Record {
+              "start": 0,
+              "end": 4,
+            },
+            Immutable.Record {
+              "start": 4,
+              "end": 5,
+            },
+          ],
+        },
+      ],
+    },
+    "undoStack": Immutable.Stack [
+      Immutable.Record {
+        "entityMap": Object {},
+        "blockMap": Immutable.OrderedMap {
+          "aacj3": Immutable.Record {
+            "key": "aacj3",
+            "type": "unstyled",
+            "text": "Bold**x",
+            "characterList": Immutable.List [
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [],
+                "entity": null,
+              },
+            ],
+            "depth": 0,
+            "data": Immutable.Map {},
+          },
+        },
+        "selectionBefore": Immutable.Record {
+          "anchorKey": "aacj3",
+          "anchorOffset": 9,
+          "focusKey": "aacj3",
+          "focusOffset": 9,
+          "isBackward": false,
+          "hasFocus": true,
+        },
+        "selectionAfter": Immutable.Record {
+          "anchorKey": "aacj3",
+          "anchorOffset": 0,
+          "focusKey": "aacj3",
+          "focusOffset": 0,
+          "isBackward": false,
+          "hasFocus": false,
+        },
+      },
+      Immutable.Record {
+        "entityMap": Object {},
+        "blockMap": Immutable.OrderedMap {
+          "aacj3": Immutable.Record {
+            "key": "aacj3",
+            "type": "unstyled",
+            "text": "**Bold**x",
+            "characterList": Immutable.List [
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [
+                  "BOLD",
+                  "core.styling.decorator",
+                ],
+                "entity": null,
+              },
+              Immutable.Record {
+                "style": Immutable.OrderedSet [],
+                "entity": null,
+              },
+            ],
+            "depth": 0,
+            "data": Immutable.Map {},
+          },
+        },
+        "selectionBefore": Immutable.Record {
+          "anchorKey": "aacj3",
+          "anchorOffset": 6,
+          "focusKey": "aacj3",
+          "focusOffset": 8,
+          "isBackward": false,
+          "hasFocus": false,
+        },
+        "selectionAfter": Immutable.Record {
+          "anchorKey": "aacj3",
+          "anchorOffset": 6,
+          "focusKey": "aacj3",
+          "focusOffset": 8,
+          "isBackward": false,
+          "hasFocus": false,
+        },
+      },
       Immutable.Record {
         "entityMap": Object {},
         "blockMap": Immutable.OrderedMap {
