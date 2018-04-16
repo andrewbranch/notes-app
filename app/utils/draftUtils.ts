@@ -146,7 +146,8 @@ export const getInsertedCharactersFromChange = (changeType: EditorChangeType, ol
 export const getDeletedCharactersFromChange = (changeType: EditorChangeType, oldEditorState: EditorState, newEditorState: EditorState): [string, Iterable<number, CharacterMetadata>] => {
   // backspace-character, remove-range:
   //   single block, collapsed or expanded selection (collapsed for backspace)
-  //   slice old block text from old selection start to new selection start
+  //   collapsed: slice old block text from old selection start to new selection start
+  //   not collapsed: deleted characters are the entirety of the old selected text
   //
   // delete-character:
   //   single block, collapsed constant selection
@@ -159,6 +160,9 @@ export const getDeletedCharactersFromChange = (changeType: EditorChangeType, old
   const oldSelection = oldEditorState.getSelection();
   if (changeType === 'backspace-character' || changeType === 'remove-range') {
     const block = oldEditorState.getCurrentContent().getBlockForKey(oldSelection.getStartKey());
+    if (!oldSelection.isCollapsed()) {
+      return getTextFromSelection(oldEditorState);
+    }
     const deletedCharacterRange = [newEditorState.getSelection().getStartOffset(), oldSelection.getStartOffset()];
     return [block.getText().slice(...deletedCharacterRange), block.getCharacterList().slice(...deletedCharacterRange)];
   } else if (changeType === 'delete-character') {

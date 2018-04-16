@@ -87,8 +87,6 @@ type EditorProviderOptions = Readonly<{
 }>
 
 export const createEditorProvider = async (options: EditorProviderOptions = {}): Promise<EditorProvider> => {
-  (global as any).getSelection = () => ({});
-  (window as any).scrollTo = noop;
   const wrapper = mount<{}, { editor: EditorState }>(<EditorWrapper />);
   const wrapperInstance = wrapper.instance() as EditorWrapper;
   const contentEditable = wrapper.find('.public-DraftEditor-content');

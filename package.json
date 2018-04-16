@@ -6,6 +6,8 @@
   "main": "main.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test jest",
+    "serve-test-editor": "cross-env webpack-dev-server --config test/editor/app/webpack.config.ts",
+    "test-editor": "cross-env NODE_ENV=test PORT=4444 jest",
     "test-all": "npm run test && npm run build && npm run test-e2e",
     "test-watch": "npm test -- --watch",
     "test-e2e": "cross-env NODE_ENV=test node --trace-warnings ./test/runTests.js e2e",
@@ -25,6 +27,9 @@
     "cleanup": "mop -v"
   },
   "jest": {
+    "globalSetup": "jest-environment-puppeteer/setup",
+    "globalTeardown": "jest-environment-puppeteer/teardown",
+    "testEnvironment": "jest-environment-puppeteer",
     "moduleNameMapper": {
       "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/internals/mocks/fileMock.js",
       "\\.(css|less|sass|scss)$": "identity-obj-proxy"
@@ -49,7 +54,6 @@
     "testMatch": [
       "**/?(*.)(spec|test).ts?(x)"
     ],
-    "collectCoverage": true,
     "coveragePathIgnorePatterns": [
       "<rootDir>/test/",
       "/node_modules/"
@@ -127,6 +131,7 @@
     "@types/enzyme": "^3.1.1",
     "@types/history": "^4.5.2",
     "@types/jest": "^22.2.2",
+    "@types/jest-environment-puppeteer": "^2.2.0",
     "@types/leveldown": "^1.7.0",
     "@types/lodash": "^4.14.106",
     "@types/memoizee": "^0.4.2",
@@ -145,6 +150,7 @@
     "@types/reselect": "^2.2.0",
     "@types/sinon": "^4.0.0",
     "@types/uuid": "^3.4.3",
+    "@types/webpack": "3",
     "asar": "^0.14.0",
     "boiler-room-custodian": "^0.6.2",
     "concurrently": "^3.1.0",
@@ -164,8 +170,10 @@
     "html-webpack-plugin": "^2.24.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^22.4.3",
+    "jest-environment-puppeteer": "^2.3.0",
     "json-loader": "^0.5.4",
     "node-sass": "^4.1.1",
+    "puppeteer": "^1.3.0",
     "react-hot-loader": "^3.0.0-beta.6",
     "react-json-tree": "^0.11.0",
     "react-test-renderer": "^16.0.0",
@@ -181,7 +189,9 @@
     "typescript": "2.7",
     "url-loader": "^0.6.1",
     "webpack": "^3.3.0",
+    "webpack-cli": "^2.0.14",
     "webpack-dev-middleware": "^2.0.3",
+    "webpack-dev-server": "2.9.1",
     "webpack-hot-middleware": "^2.13.2",
     "webpack-merge": "^4.1.1"
   },
