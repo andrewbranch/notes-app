@@ -3,7 +3,7 @@ import { convertFromRaw, SelectionState } from 'draft-js';
 import { Selector } from './selectors';
 
 export async function loadApp() {
-  return page.goto(`http://localhost:${process.env.PORT || 51423}`);
+  return page.goto(`file://${path.resolve(__dirname, 'app/index.html')}`);
 }
 
 export async function getContentState() {

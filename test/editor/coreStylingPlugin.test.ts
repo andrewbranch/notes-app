@@ -1,5 +1,4 @@
-import { Selector } from './selectors';
-import { getContentState, loadApp, pressKey, getState, withShift, typeText } from './transport';
+import { loadApp, pressKey, getState, withShift, typeText } from './transport';
 
 beforeEach(async () => {
   await loadApp();

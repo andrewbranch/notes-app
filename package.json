@@ -6,8 +6,7 @@
   "main": "main.js",
   "scripts": {
     "test": "cross-env NODE_ENV=test jest",
-    "serve-test-editor": "cross-env webpack-dev-server --config test/editor/app/webpack.config.ts",
-    "test-editor": "cross-env NODE_ENV=test PORT=4444 jest",
+    "test-editor": "cross-env NODE_ENV=test jest",
     "test-all": "npm run test && npm run build && npm run test-e2e",
     "test-watch": "npm test -- --watch",
     "test-e2e": "cross-env NODE_ENV=test node --trace-warnings ./test/runTests.js e2e",
@@ -27,7 +26,7 @@
     "cleanup": "mop -v"
   },
   "jest": {
-    "globalSetup": "jest-environment-puppeteer/setup",
+    "globalSetup": "./test/editor/setup",
     "globalTeardown": "jest-environment-puppeteer/teardown",
     "testEnvironment": "jest-environment-puppeteer",
     "moduleNameMapper": {
@@ -167,6 +166,7 @@
     "express": "^4.14.0",
     "extract-text-webpack-plugin": "^3.0.0",
     "file-loader": "^1.1.5",
+    "hard-source-webpack-plugin": "^0.6.4",
     "html-webpack-plugin": "^2.24.1",
     "identity-obj-proxy": "^3.0.0",
     "jest": "^22.4.3",

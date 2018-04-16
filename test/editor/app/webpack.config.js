@@ -1,8 +1,10 @@
-import * as path from 'path';
-import { NormalModuleReplacementPlugin } from 'webpack';
-import { Configuration } from 'webpack';
+// @ts-check
+const path = require('path');
+const webpack = require('webpack');
+const HardSourcePlugin = require('hard-source-webpack-plugin');
 
-const config: Configuration = {
+/** @type {webpack.Configuration} */
+const config = {
   context: __dirname,
   entry: './index.tsx',
   module: {
@@ -83,7 +85,7 @@ const config: Configuration = {
           loader: 'sass-loader'
         }
       ]
-    },]
+    }]
   },
 
   output: {
@@ -93,22 +95,18 @@ const config: Configuration = {
 
   target: 'web',
 
-  devServer: {
-    port: parseInt(process.env.PORT, 10) || 51423,
-    contentBase: __dirname,
-  },
-
   // https://webpack.github.io/docs/configuration.html#resolve
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.json']
   },
 
   plugins: [
-    new NormalModuleReplacementPlugin(
+    new webpack.NormalModuleReplacementPlugin(
       /generateRandomKey/,
       path.resolve(__dirname, 'generateCounterKey.ts')
-    )
+    ),
+    new HardSourcePlugin()
   ]
 };
 
-export default config;
+module.exports = config;
