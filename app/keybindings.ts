@@ -32,8 +32,13 @@ export const keybindings: Keybinding<any>[] = [
 const devKeybindings = process.env.NODE_ENV === 'production' ? [] : [
   keybinding({
     title: 'Log current editorState',
-    key: meta('shift+e'),
+    key: meta('e'),
     action: createActionCreator('dev.logEditorState')
+  }),
+  keybinding({
+    title: 'Log current editorState as fixture',
+    key: meta('shift+e'),
+    action: createActionCreator('dev.logFixture')
   })
 ];
 

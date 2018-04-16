@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { EditorState, ContentState } from 'draft-js';
 import { eq } from 'lodash/fp';
-import { getContiguousStyleRangesAtOffset, stripStylesFromBlock, getDeletedCharactersFromChange, Range, performUnUndoableEdits } from '../../../../utils/draftUtils';
+import { getContiguousStyleRangesAtOffset, stripStylesFromBlock, getDeletedCharactersFromChange, Range, performUnUndoableEdits, getInsertedCharactersFromChange } from '../../../../utils/draftUtils';
 import { isExpandableStyle, CoreExpandableStyleName, isStyleDecorator, expandableStyles, isCoreStyle, getPatternRegExp } from '../styles';
 
 const commit = (editorState: EditorState, newContent: ContentState): EditorState => {
@@ -48,6 +48,7 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
   const prevStartOffset = prevSelection.getStartOffset();
   const prevEndOffset = prevSelection.getEndOffset();
   const [, deletedCharacters] = getDeletedCharactersFromChange(changeType, prevEditorState, editorState);
+  const insertedText = getInsertedCharactersFromChange(changeType, prevEditorState, editorState);
   let nextContent = content;
 
   if (changeType === 'split-block') {
@@ -111,7 +112,7 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
             prevStartKey,
             isStyleDecorator,
             range!.end - decoratorPattern.length,
-            prevStartOffset
+            startOffset
           );
         }
       }
@@ -128,7 +129,7 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
         const decoratorPattern = expandableStyles[styleKey].pattern;
         // Remove expandable style
         const endCharacterOffset = startOffset + range!.end - prevEndOffset;
-        nextContent = stripStylesFromBlock(nextContent, prevEndKey, eq(styleKey), startOffset, endCharacterOffset);
+        nextContent = stripStylesFromBlock(nextContent, prevEndKey, eq(styleKey), prevStartOffset, endCharacterOffset);
         // Remove that style’s decorator characters’ style
         nextContent = stripStylesFromBlock(nextContent, prevStartKey, isStyleDecorator, endCharacterOffset - decoratorPattern.length, endCharacterOffset);
         // Remove that style’s leading decorator’s style if it exists (can only happen with decorators of length > 1)
@@ -137,8 +138,8 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
             nextContent,
             prevStartKey,
             isStyleDecorator,
-            startOffset,
-            range!.start + decoratorPattern.length - prevEndOffset
+            prevStartOffset,
+            range!.start + decoratorPattern.length - deletedCharacters.size + insertedText.length
           );
         }
       }
