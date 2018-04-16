@@ -14,7 +14,7 @@ class EditorWrapper extends React.Component<{}, { editor: EditorState }> {
   componentDidMount() {
     this.editorRef.focus();
     (window as any).getContentState = () => convertToRaw(this.state.editor.getCurrentContent());
-    (window as any).getSelectionState = () => this.state.editor.getSelection();
+    (window as any).getSelectionState = () => this.state.editor.getSelection().toJS();
   }
 
   render() {
