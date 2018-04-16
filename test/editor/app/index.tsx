@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { render } from 'react-dom';
-import { EditorState, convertToRaw } from 'draft-js';
+import { EditorState, convertToRaw, SelectionState } from 'draft-js';
 import { Editor } from '../../../app/components/editor/Editor';
 
 class EditorWrapper extends React.Component<{}, { editor: EditorState }> {

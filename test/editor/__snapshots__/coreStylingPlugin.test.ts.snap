@@ -1,0 +1,72 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`coreStylingPlugin steps removeInlineStyles deleting decorator characters backspacing the first of a two-character leading decorator sequence should remove the style 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "*Bold**",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "",
+    "anchorOffset": 0,
+    "focusKey": "",
+    "focusOffset": 0,
+    "isBackward": false,
+    "hasFocus": false,
+  },
+}
+`;

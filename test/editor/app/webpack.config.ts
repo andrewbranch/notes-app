@@ -1,4 +1,5 @@
 import * as path from 'path';
+import { NormalModuleReplacementPlugin } from 'webpack';
 import { Configuration } from 'webpack';
 
 const config: Configuration = {
@@ -100,7 +101,14 @@ const config: Configuration = {
   // https://webpack.github.io/docs/configuration.html#resolve
   resolve: {
     extensions: ['.js', '.ts', '.tsx', '.json']
-  }
+  },
+
+  plugins: [
+    new NormalModuleReplacementPlugin(
+      /generateRandomKey/,
+      path.resolve(__dirname, 'generateCounterKey.ts')
+    )
+  ]
 };
 
 export default config;
