@@ -52,12 +52,28 @@ export async function withMeta(keyOrFn: string | (() => Promise<void>), times?: 
   return withModifierKey('Meta', keyOrFn, times);
 }
 
+export async function withAlt(fn: () => Promise<void>): Promise<void>
+export async function withAlt(key: string, times?: number): Promise<void>
+export async function withAlt(keyOrFn: string | (() => Promise<void>), times?: number): Promise<void> {
+  return withModifierKey('Alt', keyOrFn, times);
+}
+
+export async function withCtrl(fn: () => Promise<void>): Promise<void>
+export async function withCtrl(key: string, times?: number): Promise<void>
+export async function withCtrl(keyOrFn: string | (() => Promise<void>), times?: number): Promise<void> {
+  return withModifierKey('Control', keyOrFn, times);
+}
+
 export async function deleteToBeginningOfLine() {
   if (!isMacOS) {
     throw new Error('Don’t know how to do that not on macOS');
   }
 
   return withMeta('Backspace');
+}
+
+export async function deleteWord(times = 1) {
+  return isMacOS ? withAlt('Backspace', times) : withCtrl('Backspace', times);
 }
 
 export async function typeText(text: string) {

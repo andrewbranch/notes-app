@@ -1,4 +1,4 @@
-import { loadApp, pressKey, getState, withShift, typeText, deleteToBeginningOfLine, cleanup } from './transport';
+import { loadApp, pressKey, getState, withShift, typeText, deleteToBeginningOfLine, deleteWord } from './transport';
 import { isMacOS } from '../../app/utils/platform';
 
 beforeEach(async () => {
@@ -220,6 +220,10 @@ describe('coreStylingPlugin', () => {
           await typeText('a');
           expect(await getState()).toMatchSnapshot();
         });
+
+        test.skip('word-deleting at the end of a style range should work', async () => {
+
+        });
       });
 
       describe('editing within the range', () => {
@@ -338,5 +342,12 @@ describe('coreStylingPlugin', () => {
         expect(await getState()).toMatchSnapshot();
       });
     }
+
+    test.skip('word-deleting right in front of a style range should work', async () => {
+      await typeText('a**bold**');
+      await pressKey('ArrowLeft', 8);
+      await deleteWord();
+      expect(await getState()).toMatchSnapshot();
+    });
   });
 });
