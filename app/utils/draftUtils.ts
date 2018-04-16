@@ -74,6 +74,9 @@ export const stripEntitiesFromBlock = (contentState: ContentState, blockOrKey: C
 };
 
 export const stripStylesFromBlock = (contentState: ContentState, blockOrKey: ContentBlock | string, styleFilter: (styleName: string) => boolean, start: number = 0, end?: number): ContentState => {
+  if (start === end) {
+    return contentState;
+  }
   const block = typeof blockOrKey === 'string' ? contentState.getBlockForKey(blockOrKey): blockOrKey;
   const originalCharacters = block.getCharacterList()
   const newCharacters = originalCharacters.slice(start, end).map(character => {

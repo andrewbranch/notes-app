@@ -1,4 +1,5 @@
-import { loadApp, pressKey, getState, withShift, typeText } from './transport';
+import { loadApp, pressKey, getState, withShift, typeText, deleteToBeginningOfLine, cleanup } from './transport';
+import { isMacOS } from '../../app/utils/platform';
 
 beforeEach(async () => {
   await loadApp();
@@ -6,6 +7,35 @@ beforeEach(async () => {
 
 describe('coreStylingPlugin', () => {
   describe('steps', () => {
+    describe('addInlineStyles', () => {
+      describe('Built-in styles', async () => {
+        test('typing bold sequence should work', async () => {
+          await typeText('Not bold, **bold**');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('typing italic sequence should work', async () => {
+          await typeText('Not italic, _italic_');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('typing code sequence should work', async () => {
+          await typeText('Not code, `code`');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test.skip('typing underline sequence should work', async () => {
+          await typeText('Not underlined, __underlined__');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('typing strikethrough sequence should work', async () => {
+          await typeText('Not strikethrough, ~strikethrough~');
+          expect(await getState()).toMatchSnapshot();
+        });
+      });
+    });
+
     describe('removeInlineStyles', () => {
       describe('deleting decorator characters', () => {
         test('backspacing the first of a two-character leading decorator sequence should remove the style', async () => {
@@ -32,6 +62,34 @@ describe('coreStylingPlugin', () => {
         test('backspacing the second of a two-character trailing decorator sequence should remove the style', async () => {
           await typeText('**Bold**');
           await pressKey('Backspace');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('backspacing a one-character trailing decorator sequence should remove the style', async () => {
+          await typeText('_Italic_');
+          await pressKey('Backspace');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test.skip('replacing the trailing decorator sequence should remove the style', async () => {
+          await typeText('_Italic_');
+          await withShift('ArrowLeft');
+          await typeText('a');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('backspacing a one-character leading decorator sequence should remove the style', async () => {
+          await typeText('_Italic_');
+          await pressKey('ArrowLeft', 7);
+          await pressKey('Backspace');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('replacing the leading decorator sequence should remove the style', async () => {
+          await typeText('_Italic_');
+          await pressKey('ArrowLeft', 7);
+          await withShift('ArrowLeft');
+          await typeText('a');
           expect(await getState()).toMatchSnapshot();
         });
 
@@ -103,13 +161,6 @@ describe('coreStylingPlugin', () => {
         test('replacing a range including part of a two-character trailing decorator sequence should remove the style', async () => {
           await typeText('**Bold** hello');
           await withShift('ArrowLeft', 7);
-          await typeText('a');
-          expect(await getState()).toMatchSnapshot();
-        });
-
-        test.skip('replacing the trailing decorator sequence should remove the style', async () => {
-          await typeText('_Italic_')
-          await withShift('ArrowLeft');
           await typeText('a');
           expect(await getState()).toMatchSnapshot();
         });
@@ -253,5 +304,39 @@ describe('coreStylingPlugin', () => {
         });
       });
     });
+  });
+
+  describe('general editing', () => {
+    if (isMacOS) {
+      test('deleting a line with two-character decorator style range at the beginning should work', async () => {
+        await typeText('**Bold** hello');
+        await deleteToBeginningOfLine();
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('deleting a line with two-character decorator style range at the end should work', async () => {
+        await typeText('Hello **bold**');
+        await deleteToBeginningOfLine();
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('deleting a line with one-character decorator style range at the beginning should work', async () => {
+        await typeText('_Italic_ hello');
+        await deleteToBeginningOfLine();
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('deleting a line with two-character decorator style range at the end should work', async () => {
+        await typeText('Hello _italic_');
+        await deleteToBeginningOfLine();
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('deleting a line with style range in the middle should work', async () => {
+        await typeText('Hello **bold** hi');
+        await deleteToBeginningOfLine();
+        expect(await getState()).toMatchSnapshot();
+      });
+    }
   });
 });

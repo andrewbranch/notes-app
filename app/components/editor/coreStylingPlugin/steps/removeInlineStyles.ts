@@ -89,7 +89,7 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
         }
       }
     });
-  } else if (!prevSelection.isCollapsed()) {
+  } else if (!prevSelection.isCollapsed() || changeType === 'remove-range') {
     // assert.equal(prevStartKey, selection.getStartKey(), 'New selection is not in the same block as the previous selection');
     
     // Handle style ranges whose end got broken off
@@ -170,26 +170,23 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
         const style = expandableStyles[styleToRemove];
         // Remove that style.
         nextContent = stripStylesFromBlock(nextContent, prevStartKey, eq(styleToRemove), range.start, range.end - 1);
-        // Remove that style’s decorator character styles.
-        if (style.pattern.length > 1) {
-          // Remove trailing decorator style
-          nextContent = stripStylesFromBlock(
-            nextContent,
-            prevStartKey,
-            isStyleDecorator,
-            range.end - style.pattern.length - Number(!modifiedDecoratorIsTrailing),
-            range.end - 1
-          );
+        // Remove trailing decorator style
+        nextContent = stripStylesFromBlock(
+          nextContent,
+          prevStartKey,
+          isStyleDecorator,
+          range.end - style.pattern.length - Number(!modifiedDecoratorIsTrailing),
+          range.end - deletedCharacters.size
+        );
 
-          // Remove leading decorator style
-          nextContent = stripStylesFromBlock(
-            nextContent,
-            prevStartKey,
-            isStyleDecorator,
-            range.start,
-            range.start + style.pattern.length - Number(!modifiedDecoratorIsTrailing)
-          );
-        }
+        // Remove leading decorator style
+        nextContent = stripStylesFromBlock(
+          nextContent,
+          prevStartKey,
+          isStyleDecorator,
+          range.start,
+          range.start + style.pattern.length - Number(!modifiedDecoratorIsTrailing)
+        );
       }
     });
   }
