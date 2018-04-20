@@ -339,6 +339,69 @@ describe('coreStylingPlugin', () => {
         });
       });
     });
+
+    describe('collapseInlineStyles', () => {
+      test('collapses a style range with a two-character decorator sequence', async () => {
+        await typeText('**Bold** ');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('collapses a style range with a one-character decorator sequence', async () => {
+        await typeText('`Code` ');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('typing a letter outside a style range should collapse it', async () => {
+        await typeText('**Bold**x');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('typing a newline outside a style range should collapse it', async () => {
+        await typeText('**Bold**');
+        await pressKey('Enter');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('typing another decorator character outside a style range should collapse it', async () => {
+        await typeText('**Bold***');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('moving the selection outside a style range with the left arrow key should collapse it', async () => {
+        await typeText(' **Bold**');
+        await pressKey('ArrowLeft', 9);
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('moving the selection outside a style range with the right arrow key should collapse it', async () => {
+        await typeText(' ');
+        await pressKey('ArrowLeft');
+        await typeText('**Bold**');
+        await pressKey('ArrowRight');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('moving the selection from inside a style range to another block should collapse it', async () => {
+        await pressKey('Enter');
+        await pressKey('ArrowUp');
+        await typeText('**Bold**');
+        await pressKey('ArrowDown');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('collapses styles inside other styles', async () => {
+        await typeText('**Bold**');
+        await pressKey('ArrowLeft', 2);
+        await typeText(' `code` ');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test.skip('blurring the editor should collapse any expanded style range', async () => {
+        await typeText('**Bold**');
+        await page.focus('body');
+        expect(await getState()).toMatchSnapshot();
+      });
+    });
   });
 
   describe('general editing', () => {
