@@ -2892,6 +2892,151 @@ Object {
 }
 `;
 
+exports[`coreStylingPlugin steps expandInlineStyles expands style ranges inside other styles correctly 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "**Bold \`code\`**",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 13,
+    "focusKey": "0",
+    "focusOffset": 13,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
 exports[`coreStylingPlugin steps expandInlineStyles expands style ranges on backspace to boundary 1`] = `
 Object {
   "content": Immutable.Record {
