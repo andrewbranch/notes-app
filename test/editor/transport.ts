@@ -84,6 +84,10 @@ export async function deleteWord(times = 1) {
   return isMacOS ? withAlt('Backspace', times) : withCtrl('Backspace', times);
 }
 
+export async function forwardDeleteWord(times = 1) {
+  return isMacOS ? withAlt('Delete', times) : withCtrl('Delete', times);
+}
+
 export async function typeText(text: string) {
   return page.type(Selector.ContentEditable, text);
 }

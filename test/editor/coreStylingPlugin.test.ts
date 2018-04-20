@@ -1,4 +1,4 @@
-import { loadApp, pressKey, getState, withShift, typeText, deleteToBeginningOfLine, deleteWord } from './transport';
+import { loadApp, pressKey, getState, withShift, typeText, deleteToBeginningOfLine, deleteWord, forwardDeleteWord } from './transport';
 import { isMacOS } from '../../app/utils/platform';
 
 beforeEach(async () => {
@@ -102,7 +102,7 @@ describe('coreStylingPlugin', () => {
           expect(await getState()).toMatchSnapshot();
         });
 
-        test.skip('replacing the trailing decorator sequence should remove the style', async () => {
+        test('replacing the trailing decorator sequence should remove the style', async () => {
           await typeText('_Italic_');
           await withShift('ArrowLeft');
           await typeText('a');
@@ -252,8 +252,17 @@ describe('coreStylingPlugin', () => {
           expect(await getState()).toMatchSnapshot();
         });
 
-        test.skip('word-deleting at the end of a style range should work', async () => {
+        test('word-deleting at the end of a style range should work', async () => {
+          await typeText('**Bold**');
+          await deleteWord();
+          expect(await getState()).toMatchSnapshot();
+        });
 
+        test.skip('word-deleting at the end of one style range and the beginning of the other should work', async () => {
+          await typeText('**Bold**`code`');
+          await pressKey('ArrowLeft', 6);
+          await deleteWord();
+          expect(await getState()).toMatchSnapshot();
         });
       });
 
@@ -473,6 +482,11 @@ describe('coreStylingPlugin', () => {
         await pressKey('ArrowLeft');
         expect(await getState()).toMatchSnapshot();
       });
+
+      test.skip('doesn’t expand an adjacent style range of the same type', async () => {
+        await typeText('**bold****bold**');
+        expect(await getState()).toMatchSnapshot();
+      });
     });
   });
 
@@ -509,10 +523,17 @@ describe('coreStylingPlugin', () => {
       });
     }
 
-    test.skip('word-deleting right in front of a style range should work', async () => {
+    test('word-deleting right in front of a style range should work', async () => {
       await typeText('a**bold**');
       await pressKey('ArrowLeft', 8);
       await deleteWord();
+      expect(await getState()).toMatchSnapshot();
+    });
+
+    test('word-forward-deleting at the end boundary of a style range should work', async () => {
+      await typeText('**bold**a');
+      await pressKey('ArrowLeft');
+      await forwardDeleteWord();
       expect(await getState()).toMatchSnapshot();
     });
   });
