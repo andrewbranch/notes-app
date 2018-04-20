@@ -72,6 +72,14 @@ export async function deleteToBeginningOfLine() {
   return withMeta('Backspace');
 }
 
+// export async function goToBeginningOfLine() {
+//   return isMacOS ? withMeta('ArrowLeft') : pressKey('Home');
+}
+
+export async function goToEndOfLine() {
+  return isMacOS ? withMeta('ArrowRight') : pressKey('End');
+}
+
 export async function deleteWord(times = 1) {
   return isMacOS ? withAlt('Backspace', times) : withCtrl('Backspace', times);
 }

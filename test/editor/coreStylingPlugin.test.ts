@@ -402,6 +402,66 @@ describe('coreStylingPlugin', () => {
         expect(await getState()).toMatchSnapshot();
       });
     });
+
+    describe('expandInlineStyles', () => {
+      test('expands style ranges with a one-character decorator sequence on left arrow to boundary', async () => {
+        await typeText('`Code` ');
+        await pressKey('ArrowLeft');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('expands style ranges with a two-character decorator sequence on left arrow to boundary', async () => {
+        await typeText('**Bold** ');
+        await pressKey('ArrowLeft');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('expands style ranges on right arrow to boundary', async () => {
+        await typeText(' **Bold**');
+        await pressKey('ArrowLeft', 9);
+        await pressKey('ArrowRight');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('expands style ranges on up arrow to boundary', async () => {
+        await typeText('**Bold**');
+        await pressKey('Enter');
+        await pressKey('ArrowUp');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('expands style ranges on backspace to boundary', async () => {
+        await typeText('**Bold** ');
+        await pressKey('Backspace');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('expands style range on forward delete to boundary', async () => {
+        await typeText(' **Bold**');
+        await pressKey('ArrowLeft', 9);
+        await pressKey('Delete');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('expands style range on click to move selection into range', async () => {
+        await typeText('**Bold** ');
+        await page.click('[data-text]');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('exapnds style range on shift-arrow backwards', async () => {
+        await typeText('**Bold** ');
+        await withShift('ArrowLeft');
+        expect(await getState()).toMatchSnapshot();
+      });
+
+      test('expands style range on shift-arrow forwards', async () => {
+        await typeText(' **Bold**');
+        await pressKey('ArrowLeft', 9);
+        await withShift('ArrowRight');
+        expect(await getState()).toMatchSnapshot();
+      });
+    });
   });
 
   describe('general editing', () => {
