@@ -8,7 +8,7 @@ beforeEach(async () => {
 describe('coreStylingPlugin', () => {
   describe('steps', () => {
     describe('addInlineStyles', () => {
-      describe('Built-in styles', async () => {
+      describe('built-in styles', () => {
         test('typing bold sequence should work', async () => {
           await typeText('Not bold, **bold**');
           expect(await getState()).toMatchSnapshot();
@@ -31,6 +31,37 @@ describe('coreStylingPlugin', () => {
 
         test('typing strikethrough sequence should work', async () => {
           await typeText('Not strikethrough, ~strikethrough~');
+          expect(await getState()).toMatchSnapshot();
+        });
+      });
+
+      describe('nested styles', () => {
+        test('can create bold inside italic (no shared boundary)', async () => {
+          await typeText('_Italic **bold italic** just italic_');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('can create bold inside italic (one shared boundary)', async () => {
+          await typeText('_Italic **bold italic**_');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('can create code inside bold inside italic', async () => {
+          await typeText('_**`code`**_');
+          expect(await getState()).toMatchSnapshot();
+          await typeText(' ');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('can’t create any style inside code', async () => {
+          await typeText('`Code`');
+          await pressKey('ArrowLeft');
+          await typeText(' **nope** _hi_ ~womp~ ');
+          expect(await getState()).toMatchSnapshot();
+        });
+
+        test('existing styles are stripped when applying code style', async () => {
+          await typeText('`Code **nope** _hi_ ~womp~ `');
           expect(await getState()).toMatchSnapshot();
         });
       });

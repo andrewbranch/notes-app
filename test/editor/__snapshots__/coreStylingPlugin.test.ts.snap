@@ -210,7 +210,7 @@ Object {
 }
 `;
 
-exports[`coreStylingPlugin steps addInlineStyles Built-in styles typing bold sequence should work 1`] = `
+exports[`coreStylingPlugin steps addInlineStyles built-in styles typing bold sequence should work 1`] = `
 Object {
   "content": Immutable.Record {
     "entityMap": Object {},
@@ -345,7 +345,7 @@ Object {
 }
 `;
 
-exports[`coreStylingPlugin steps addInlineStyles Built-in styles typing code sequence should work 1`] = `
+exports[`coreStylingPlugin steps addInlineStyles built-in styles typing code sequence should work 1`] = `
 Object {
   "content": Immutable.Record {
     "entityMap": Object {},
@@ -466,7 +466,7 @@ Object {
 }
 `;
 
-exports[`coreStylingPlugin steps addInlineStyles Built-in styles typing italic sequence should work 1`] = `
+exports[`coreStylingPlugin steps addInlineStyles built-in styles typing italic sequence should work 1`] = `
 Object {
   "content": Immutable.Record {
     "entityMap": Object {},
@@ -607,7 +607,7 @@ Object {
 }
 `;
 
-exports[`coreStylingPlugin steps addInlineStyles Built-in styles typing strikethrough sequence should work 1`] = `
+exports[`coreStylingPlugin steps addInlineStyles built-in styles typing strikethrough sequence should work 1`] = `
 Object {
   "content": Immutable.Record {
     "entityMap": Object {},
@@ -818,7 +818,7 @@ Object {
 }
 `;
 
-exports[`coreStylingPlugin steps addInlineStyles Built-in styles typing underline sequence should work 1`] = `
+exports[`coreStylingPlugin steps addInlineStyles nested styles can create bold inside italic (no shared boundary) 1`] = `
 Object {
   "content": Immutable.Record {
     "entityMap": Object {},
@@ -826,79 +826,131 @@ Object {
       "0": Immutable.Record {
         "key": "0",
         "type": "unstyled",
-        "text": "Not underlined, _underlined_",
+        "text": "_Italic bold italic just italic_",
         "characterList": Immutable.List [
           Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [],
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.decorator",
+            ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
               "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
             ],
             "entity": null,
           },
@@ -952,6 +1004,371 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 32,
+    "focusKey": "0",
+    "focusOffset": 32,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
+exports[`coreStylingPlugin steps addInlineStyles nested styles can create bold inside italic (one shared boundary) 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "_Italic bold italic_",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 20,
+    "focusKey": "0",
+    "focusOffset": 20,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
+exports[`coreStylingPlugin steps addInlineStyles nested styles can create code inside bold inside italic 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "_code_",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.inlineCode",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.inlineCode",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.inlineCode",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.inlineCode",
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "ITALIC",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 6,
+    "focusKey": "0",
+    "focusOffset": 6,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
+exports[`coreStylingPlugin steps addInlineStyles nested styles can create code inside bold inside italic 2`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "code ",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+              "BOLD",
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+              "BOLD",
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+              "BOLD",
+              "ITALIC",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+              "BOLD",
               "ITALIC",
             ],
             "entity": null,
@@ -984,9 +1401,387 @@ Object {
   },
   "selection": Immutable.Record {
     "anchorKey": "0",
-    "anchorOffset": 28,
+    "anchorOffset": 5,
     "focusKey": "0",
-    "focusOffset": 28,
+    "focusOffset": 5,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
+exports[`coreStylingPlugin steps addInlineStyles nested styles can’t create any style inside code 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "\`Code **nope** _hi_ ~womp~ \`",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 27,
+    "focusKey": "0",
+    "focusOffset": 27,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
+exports[`coreStylingPlugin steps addInlineStyles nested styles existing styles are stripped when applying code style 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "\`Code nope hi womp \`",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 20,
+    "focusKey": "0",
+    "focusOffset": 20,
     "isBackward": false,
     "hasFocus": true,
   },
