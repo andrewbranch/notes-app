@@ -258,7 +258,7 @@ describe('coreStylingPlugin', () => {
           expect(await getState()).toMatchSnapshot();
         });
 
-        test.skip('word-deleting at the end of one style range and the beginning of the other should work', async () => {
+        test('word-deleting at the end of one style range and the beginning of the other should work', async () => {
           await typeText('**Bold**`code`');
           await pressKey('ArrowLeft', 6);
           await deleteWord();
@@ -405,9 +405,9 @@ describe('coreStylingPlugin', () => {
         expect(await getState()).toMatchSnapshot();
       });
 
-      test.skip('blurring the editor should collapse any expanded style range', async () => {
+      test('blurring the editor should collapse any expanded style range', async () => {
         await typeText('**Bold**');
-        await page.focus('body');
+        await page.click('#outside-editor');
         expect(await getState()).toMatchSnapshot();
       });
     });

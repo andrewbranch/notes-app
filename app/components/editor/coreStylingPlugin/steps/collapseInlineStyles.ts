@@ -1,6 +1,7 @@
 import { EditorState, ContentBlock, SelectionState, ContentState } from 'draft-js';
 import { Edit, hasEdgeWithin, getContiguousStyleRangesNearSelectionEdges } from '../../../../utils/draftUtils';
 import { isStyleDecorator, isExpandableStyle, CoreExpandableStyleName, expandableStyles, getPatternRegExp } from '../styles';
+import { uniq, flatMap } from 'lodash';
 
 const deleteRange = (block: ContentBlock, start: number, end: number): Edit => {
   const blockKey = block.getKey();
@@ -41,6 +42,12 @@ export const collapseInlineStyles = (editorState: EditorState, prevEditorState: 
   const content = editorState.getCurrentContent();
   const selection = editorState.getSelection();
   const prevSelection = prevEditorState.getSelection();
+  if (!selection.getHasFocus()) {
+    const startKey = selection.getStartKey();
+    const endKey = selection.getEndKey();
+    const blocks = uniq([startKey, endKey]);
+    return flatMap(blocks, key => collapseInlineStylesInBlock(content.getBlockForKey(key)));
+  }
   
   const edits = collapseInlineStyleRangesAtSelectionEdges(content, prevSelection, selection);
   if (edits.length) {

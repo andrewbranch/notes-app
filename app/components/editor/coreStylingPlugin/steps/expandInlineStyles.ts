@@ -5,6 +5,10 @@ import { isExpandableStyle, CoreExpandableStyleName, expandableStyles, getPatter
 export const expandInlineStyle = (editorState: EditorState): Edit[] => {
   const content = editorState.getCurrentContent();
   const selection = editorState.getSelection();
+  if (!selection.getHasFocus()) {
+    return [];
+  }
+
   const edits: Edit[] = [];
   getContiguousStyleRangesNearSelectionEdges(
     content,

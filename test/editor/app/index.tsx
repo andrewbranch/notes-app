@@ -29,4 +29,10 @@ class EditorWrapper extends React.Component<{}, { editor: EditorState }> {
   }
 }
 
-render(<EditorWrapper />, document.getElementById('app'));
+render(
+  <>
+    <EditorWrapper />
+    <a href="#" id="outside-editor">Something outside the editor</a>
+  </>
+  , document.getElementById('app')
+);

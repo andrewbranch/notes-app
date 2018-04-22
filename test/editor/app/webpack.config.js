@@ -104,8 +104,7 @@ const config = {
     new webpack.NormalModuleReplacementPlugin(
       /generateRandomKey/,
       path.resolve(__dirname, 'generateCounterKey.ts')
-    ),
-    new HardSourcePlugin()
+    )
   ]
 };
 
