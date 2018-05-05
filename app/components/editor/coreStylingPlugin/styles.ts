@@ -32,21 +32,21 @@ export const expandableStyles: { [K in CoreExpandableStyleName]: ExpandableStyle
     }
   },
 
-  'BOLD': {
-    name: 'BOLD',
-    pattern: '**',
-    allowsNesting: true,
-    styleAttributes: {
-      fontWeight: 'bold'
-    }
-  },
-
   'ITALIC': {
     name: 'ITALIC',
     pattern: '_',
     allowsNesting: true,
     styleAttributes: {
       fontStyle: 'italic'
+    }
+  },
+
+  'BOLD': {
+    name: 'BOLD',
+    pattern: '**',
+    allowsNesting: true,
+    styleAttributes: {
+      fontWeight: 'bold'
     }
   },
 
@@ -79,8 +79,8 @@ export const staticStyles: { [K in CoreStaticStyleName]: CoreStyleDefinition } =
   }
 };
 
-const expandableStyleKeys = Object.keys(expandableStyles);
 const staticStyleKeys = Object.keys(staticStyles);
+export const expandableStyleKeys = Object.keys(expandableStyles); // FIXME: shouldn’t really depend on key order
 export const expandableStyleValues = values(expandableStyles);
 export const staticStyleValues = values(staticStyles);
 export const styleValues = [...expandableStyleValues, ...staticStyleValues];

@@ -232,19 +232,19 @@ export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: 
   }, Map<string, Range>());
 };
 
-export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, Set<Range>> => {
+export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, OrderedSet<Range>> => {
   // We intentionally allow separated `content` and `selection`, so if, say,
   // you are looking at updated content at a previous selection, the blocks could be undefined.
-  const focusBlock: ContentBlock | undefined = content.getBlockForKey(selection.getFocusKey());
-  const anchorBlock: ContentBlock | undefined = content.getBlockForKey(selection.getAnchorKey());
-  const stylesNearFocus = focusBlock
-    ? getContiguousStyleRangesNearOffset(focusBlock, selection.getFocusOffset(), styleKeyFilter).map(value => Set([value!])) as Map<string, Set<Range>>
-    : Map<string, Set<Range>>();
-  return selection.isCollapsed() || !anchorBlock
-    ? stylesNearFocus
-    : stylesNearFocus.mergeWith((a, b) => a!.union(b!), getContiguousStyleRangesNearOffset(
-      anchorBlock,
-      selection.getAnchorOffset(),
+  const startBlock: ContentBlock | undefined = content.getBlockForKey(selection.getStartKey());
+  const endBlock: ContentBlock | undefined = content.getBlockForKey(selection.getEndKey());
+  const stylesNearStart = startBlock
+    ? getContiguousStyleRangesNearOffset(startBlock, selection.getStartOffset(), styleKeyFilter).map(value => OrderedSet([value!])) as Map<string, OrderedSet<Range>>
+    : Map<string, OrderedSet<Range>>();
+  return selection.isCollapsed() || !endBlock
+    ? stylesNearStart
+    : stylesNearStart.mergeWith((a, b) => a!.add(b!.first()), getContiguousStyleRangesNearOffset(
+      endBlock,
+      selection.getEndOffset(),
       styleKeyFilter
     ).map(value => Set([value!])));
 };

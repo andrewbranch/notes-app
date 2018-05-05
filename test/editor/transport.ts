@@ -72,10 +72,6 @@ export async function deleteToBeginningOfLine() {
   return withMeta('Backspace');
 }
 
-// export async function goToBeginningOfLine() {
-//   return isMacOS ? withMeta('ArrowLeft') : pressKey('Home');
-}
-
 export async function goToEndOfLine() {
   return isMacOS ? withMeta('ArrowRight') : pressKey('End');
 }
@@ -89,5 +85,9 @@ export async function forwardDeleteWord(times = 1) {
 }
 
 export async function typeText(text: string) {
-  return page.type(Selector.ContentEditable, text);
+  return page.type(Selector.ContentEditable, text, { delay: 10 });
+}
+
+export async function delay(msec: number) {
+  return new Promise(resolve => setTimeout(resolve, msec));
 }
