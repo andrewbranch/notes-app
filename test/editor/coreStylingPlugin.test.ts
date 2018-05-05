@@ -471,13 +471,13 @@ describe('coreStylingPlugin', () => {
         expect(await getState()).toMatchSnapshot();
       });
 
-      test('expands style ranges inside other styles correctly', async () => {
+      test.skip('expands style ranges inside other styles correctly', async () => {
         await typeText('**Bold `code`**');
         await pressKey('ArrowLeft', 2);
         expect(await getState()).toMatchSnapshot();
       });
 
-      test.skip('expands style ranges sharing the same boundary predictably', async () => {
+      test('expands style ranges sharing the same boundary predictably', async () => {
         await typeText('**_`x`_** ');
         await pressKey('ArrowLeft');
         expect(await getState()).toMatchSnapshot();
