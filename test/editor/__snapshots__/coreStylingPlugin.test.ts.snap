@@ -4988,6 +4988,89 @@ Object {
 }
 `;
 
+exports[`coreStylingPlugin steps removeInlineStyles deleting decorator characters deleting nested decorator characters sharing the same boundary should work 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "**_x**",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 4,
+    "focusKey": "0",
+    "focusOffset": 4,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
 exports[`coreStylingPlugin steps removeInlineStyles deleting decorator characters forward-deleting the first of a two-character leading decorator sequence should remove the style 1`] = `
 Object {
   "content": Immutable.Record {

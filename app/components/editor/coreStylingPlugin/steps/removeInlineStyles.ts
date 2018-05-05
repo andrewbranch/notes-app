@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { EditorState, ContentState } from 'draft-js';
 import { eq } from 'lodash/fp';
-import { getContiguousStyleRangesAtOffset, stripStylesFromBlock, getDeletedCharactersFromChange, Range, performUnUndoableEdits, getInsertedCharactersFromChange, getContiguousStyleRangesNearOffset } from '../../../../utils/draftUtils';
+import { getContiguousStyleRangesAtOffset, stripStylesFromBlock, getDeletedCharactersFromChange, Range, performUnUndoableEdits, getInsertedCharactersFromChange, getContiguousStyleRangesNearOffset, getEquivalentStyleRangeAtOffset } from '../../../../utils/draftUtils';
 import { isExpandableStyle, CoreExpandableStyleName, isStyleDecorator, expandableStyles, isCoreStyle, getPatternRegExp } from '../styles';
 
 const commit = (editorState: EditorState, newContent: ContentState): EditorState => {
@@ -177,11 +177,10 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
         const styleRangesAtDeletedCharacter = getContiguousStyleRangesAtOffset(
           prevBlock,
           startOffset,
-          isCoreStyle
+          isExpandableStyle
         );
 
-        const decoratorStyleRange = styleRangesAtDeletedCharacter.get('core.styling.decorator');
-        assert.ok(decoratorStyleRange, 'Decorator style range was not in the map');
+        const [, decoratorStyleRange] = getEquivalentStyleRangeAtOffset(prevBlock, startOffset);
         // Find the expandable style range that shares a boundary with the decorator style range
         const styleRangesToRemove = styleRangesAtDeletedCharacter.filter(range => (
           range !== decoratorStyleRange &&

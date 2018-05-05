@@ -194,12 +194,15 @@ export const performUnUndoableEdits = (editorState: EditorState, performEdits: (
   return EditorState.set(performEdits(disabledUndoEditorState), { allowUndo: true });
 };
 
-export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, aroundIndex: number): Range => {
+export function getContiguousStyleRange(block: ContentBlock, styleKey: string, aroundIndex: number): Range
+export function getContiguousStyleRange(block: ContentBlock, characterFilter: (char: CharacterMetadata) => boolean, aroundIndex: number): Range
+export function getContiguousStyleRange(block: ContentBlock, characterFilter: string | ((char: CharacterMetadata) => boolean), aroundIndex: number): Range {
+  const filter = typeof characterFilter === 'string' ? (char: CharacterMetadata) => char.hasStyle(characterFilter) : characterFilter;
   const characters = block.getCharacterList();
   let start = aroundIndex;
   let end = aroundIndex;
-  while (start >= 0 && characters.get(start).hasStyle(styleKey)) start--;
-  while (end < characters.size && characters.get(end).hasStyle(styleKey)) end++;
+  while (start >= 0 && filter(characters.get(start))) start--;
+  while (end < characters.size && filter(characters.get(end))) end++;
   return Range(block.getKey(), start + 1, end);
 };
 
@@ -215,6 +218,11 @@ export const getContiguousStyleRangesAtOffset = (block: ContentBlock, offset: nu
     }
     return ranges!;
   }, Map<string, Range>());
+};
+
+export const getEquivalentStyleRangeAtOffset = (block: ContentBlock, offset: number): [OrderedSet<string>, Range] => {
+  const stylesAtOffset = block.getInlineStyleAt(Math.max(0, offset));
+  return [stylesAtOffset, getContiguousStyleRange(block, char => char.getStyle().equals(stylesAtOffset), offset)];
 };
 
 export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, Range> => {

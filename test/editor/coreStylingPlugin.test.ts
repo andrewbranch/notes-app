@@ -264,6 +264,13 @@ describe('coreStylingPlugin', () => {
           await deleteWord();
           expect(await getState()).toMatchSnapshot();
         });
+
+        test('deleting nested decorator characters sharing the same boundary should work', async () => {
+          await typeText('**_x_**');
+          await pressKey('ArrowLeft', 2);
+          await pressKey('Backspace');
+          expect(await getState()).toMatchSnapshot();
+        });
       });
 
       describe('editing within the range', () => {
