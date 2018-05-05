@@ -2769,15 +2769,15 @@ Object {
         "characterList": Immutable.List [
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
@@ -2807,15 +2807,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
@@ -2868,15 +2868,15 @@ Object {
         "characterList": Immutable.List [
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
@@ -2906,15 +2906,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
@@ -2967,15 +2967,15 @@ Object {
         "characterList": Immutable.List [
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
@@ -3005,15 +3005,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
@@ -3066,15 +3066,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
@@ -3104,15 +3104,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
@@ -3306,15 +3306,15 @@ Object {
         "characterList": Immutable.List [
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
@@ -3344,15 +3344,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
@@ -3405,15 +3405,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
@@ -3443,15 +3443,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
@@ -3500,15 +3500,15 @@ Object {
         "characterList": Immutable.List [
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
@@ -3538,15 +3538,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
@@ -3603,29 +3603,37 @@ Object {
         "characterList": Immutable.List [
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
               "ITALIC",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
+              "ITALIC",
+              "core.styling.inlineCode",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
               "BOLD",
               "ITALIC",
               "core.styling.inlineCode",
@@ -3635,6 +3643,7 @@ Object {
           Immutable.Record {
             "style": Immutable.OrderedSet [
               "BOLD",
+              "core.styling.decorator",
               "ITALIC",
               "core.styling.inlineCode",
             ],
@@ -3642,32 +3651,23 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
-              "ITALIC",
-              "core.styling.inlineCode",
-            ],
-            "entity": null,
-          },
-          Immutable.Record {
-            "style": Immutable.OrderedSet [
               "core.styling.decorator",
-              "BOLD",
               "ITALIC",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
@@ -3720,8 +3720,8 @@ Object {
         "characterList": Immutable.List [
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
               "core.styling.decorator",
-              "core.styling.inlineCode",
             ],
             "entity": null,
           },
@@ -3751,8 +3751,8 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "core.styling.inlineCode",
               "core.styling.decorator",
-              "core.styling.inlineCode",
             ],
             "entity": null,
           },
@@ -3805,15 +3805,15 @@ Object {
         "characterList": Immutable.List [
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
@@ -3843,15 +3843,15 @@ Object {
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
+              "BOLD",
               "core.styling.decorator",
-              "BOLD",
             ],
             "entity": null,
           },
           Immutable.Record {
             "style": Immutable.OrderedSet [
-              "core.styling.decorator",
               "BOLD",
+              "core.styling.decorator",
             ],
             "entity": null,
           },
