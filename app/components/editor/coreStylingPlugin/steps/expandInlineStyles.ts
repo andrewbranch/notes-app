@@ -20,6 +20,8 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
    * If the selection is collapsed, the latter will remain empty.
    */
   const insertionEdits: [InsertionEdit[], InsertionEdit[]] = [[], []];
+
+  type InsertionEditWithOwnStyle = InsertionEdit & { ownStyle: CoreExpandableStyleName };
   /**
    * A tuple whose two entries correspond to insertions happening at either end of the selection.
    * Each entry is an array of tuples: each entry in each array is a tuple representing the leading
@@ -28,7 +30,7 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
    * an effect on the ones that get expanded inside it. That effect is added as this data structure
    * gets transferred and flattened into `edits`.
    */
-  const insertionPairs: [[InsertionEdit, InsertionEdit][], [InsertionEdit, InsertionEdit][]] = [[], []];
+  const insertionPairs: [[InsertionEditWithOwnStyle, InsertionEditWithOwnStyle][], [InsertionEditWithOwnStyle, InsertionEditWithOwnStyle][]] = [[], []];
   getContiguousStyleRangesNearSelectionEdges(
     content,
     selection,
@@ -43,30 +45,36 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
       const pattern = getPatternRegExp(styleKey);
       pattern.lastIndex = 0;
       if (!pattern.test(collapsedText)) {
-        insertionPairs[rangeIndex].unshift([{
+        insertionPairs[rangeIndex].push([{
           type: 'insertion',
           blockKey,
           offset: start,
-          style: Set([styleKey]),
-          text: style.pattern
+          style: block.getInlineStyleAt(start).add('core.styling.decorator'),
+          text: style.pattern,
+          ownStyle: styleKey
         }, {
           type: 'insertion',
           blockKey,
           offset: start + collapsedText.length,
-          style: Set([styleKey]),
-          text: style.pattern
+          style: block.getInlineStyleAt(start).add('core.styling.decorator'),
+          text: style.pattern,
+          ownStyle: styleKey
         }]);
       }
       rangeIndex++;
     });
   });
 
-  // Copy from `insertionPairs` to `insertionEdits`, adding their styles along the way
+  // Copy from `insertionPairs` to `insertionEdits`, starting with the innermost and working out,
+  // subtracting their styles along the way. E.g., for “**_`x`_**,” we’d copy the backtick insertion
+  // with all styles, then add the underscore insertions with all its styles minus code, then the
+  // asterisk insertions with all its styles minus code and italics.
   insertionPairs.forEach((pairs, index) => {
-    let accumStyles = OrderedSet(['core.styling.decorator']);
+    let accumStyles: Set<string> = Set();
     pairs.forEach(pair => {
-      pair[0].style = pair[1].style = accumStyles = accumStyles.concat(pair[0].style) as OrderedSet<string>;
-      insertionEdits[index].splice(insertionEdits[index].length / 2, 0, pair[0], pair[1]);
+      pair[0].style = pair[1].style = pair[0].style!.subtract(accumStyles) as OrderedSet<string>;
+      accumStyles = accumStyles.add(pair[0].ownStyle);
+      insertionEdits[index] = [pair[0], ...insertionEdits[index], pair[1]];
     });
   });
 
