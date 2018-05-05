@@ -1,6 +1,7 @@
 import { EditorState } from 'draft-js';
 import { getContiguousStyleRangesNearSelectionEdges, Edit, InsertionEdit } from '../../../../utils/draftUtils';
 import { isExpandableStyle, CoreExpandableStyleName, expandableStyles, getPatternRegExp } from '../styles';
+import { Set, OrderedSet } from 'immutable';
 
 export const expandInlineStyle = (editorState: EditorState): Edit[] => {
   const content = editorState.getCurrentContent();
@@ -9,13 +10,32 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
     return [];
   }
 
-  const edits: Edit[] = [];
+  /**
+   * A flattened array of insertion edits and a selection edit: the final data structure
+   * to be passed to `performDependentEdits`.
+   */
+  let edits: Edit[] = [];
+  /**
+   * A tuple whose two entries correspond to insertions happening at either end of the selection.
+   * If the selection is collapsed, the latter will remain empty.
+   */
+  const insertionEdits: [InsertionEdit[], InsertionEdit[]] = [[], []];
+  /**
+   * A tuple whose two entries correspond to insertions happening at either end of the selection.
+   * Each entry is an array of tuples: each entry in each array is a tuple representing the leading
+   * and trailing characters to be inserted for a single style range. This data structure serves
+   * as a staging ground for the final flat array of edits, as each style range being expanded has
+   * an effect on the ones that get expanded inside it. That effect is added as this data structure
+   * gets transferred and flattened into `edits`.
+   */
+  const insertionPairs: [[InsertionEdit, InsertionEdit][], [InsertionEdit, InsertionEdit][]] = [[], []];
   getContiguousStyleRangesNearSelectionEdges(
     content,
     selection,
     isExpandableStyle
   ).forEach((ranges, styleKey: CoreExpandableStyleName) => {
     const style = expandableStyles[styleKey];
+    let rangeIndex = 0;
     ranges!.forEach(range => {
       const { blockKey, start, end } = range!;
       const block = content.getBlockForKey(blockKey);
@@ -23,23 +43,35 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
       const pattern = getPatternRegExp(styleKey);
       pattern.lastIndex = 0;
       if (!pattern.test(collapsedText)) {
-        const styles = block.getInlineStyleAt(start);
-        edits.push({
+        insertionPairs[rangeIndex].unshift([{
           type: 'insertion',
           blockKey,
           offset: start,
-          style: styles.add('core.styling.decorator'),
+          style: Set([styleKey]),
           text: style.pattern
         }, {
           type: 'insertion',
           blockKey,
           offset: start + collapsedText.length,
-          style: styles.add('core.styling.decorator'),
+          style: Set([styleKey]),
           text: style.pattern
-        });
+        }]);
       }
+      rangeIndex++;
     });
   });
+
+  // Copy from `insertionPairs` to `insertionEdits`, adding their styles along the way
+  insertionPairs.forEach((pairs, index) => {
+    let accumStyles = OrderedSet(['core.styling.decorator']);
+    pairs.forEach(pair => {
+      pair[0].style = pair[1].style = accumStyles = accumStyles.concat(pair[0].style) as OrderedSet<string>;
+      insertionEdits[index].splice(insertionEdits[index].length / 2, 0, pair[0], pair[1]);
+    });
+  });
+
+  // Copy from `insertionEdits` to `edits` just to flatten
+  edits = [...insertionEdits[0], ...insertionEdits[1]];
 
   if (edits.length) {
     // Special case: when selection is on the leading edge of a newly expanded
