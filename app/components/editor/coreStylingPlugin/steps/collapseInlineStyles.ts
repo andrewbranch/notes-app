@@ -23,12 +23,13 @@ export function collapseInlineStyleRangesAtSelectionEdges(content: ContentState,
         const block = content.getBlockForKey(blockKey);
         const style = expandableStyles[styleKey];
         const expandedText = block.getText().slice(start, end);
-        const pattern = getPatternRegExp(styleKey);
+        const pattern = getPatternRegExp(styleKey, false);
         pattern.lastIndex = 0;
-        if (pattern.test(expandedText)) {
+        const match = pattern.exec(expandedText);
+        if (match) {
           edits.push(
-            deleteRange(block, start, start + style.pattern.length),
-            deleteRange(block, end - style.pattern.length, end)
+            deleteRange(block, start + match.index, start + match.index + style.pattern.length),
+            deleteRange(block, start + match.index + match[0].length - style.pattern.length, start + match.index + match[0].length)
           );
         }
       }

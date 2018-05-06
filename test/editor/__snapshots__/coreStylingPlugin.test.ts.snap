@@ -2757,6 +2757,343 @@ Object {
 }
 `;
 
+exports[`coreStylingPlugin steps expandInlineStyles doesn’t expand an adjacent style range of the same type 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "bold**bold**",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 12,
+    "focusKey": "0",
+    "focusOffset": 12,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
+exports[`coreStylingPlugin steps expandInlineStyles doesn’t expand an adjacent style range of the same type 2`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "boldbold ",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 9,
+    "focusKey": "0",
+    "focusOffset": 9,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
+exports[`coreStylingPlugin steps expandInlineStyles doesn’t expand an adjacent style range of the same type 3`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "**boldbold** ",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "BOLD",
+              "core.styling.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 12,
+    "focusKey": "0",
+    "focusOffset": 12,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
 exports[`coreStylingPlugin steps expandInlineStyles exapnds style range on shift-arrow backwards 1`] = `
 Object {
   "content": Immutable.Record {

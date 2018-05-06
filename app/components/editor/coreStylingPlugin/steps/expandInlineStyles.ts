@@ -57,9 +57,10 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
       const { blockKey, start, end } = range!;
       const block = content.getBlockForKey(blockKey);
       const collapsedText = block.getText().slice(start, end);
-      const pattern = getPatternRegExp(styleKey);
+      const pattern = getPatternRegExp(styleKey, false);
       pattern.lastIndex = 0;
-      if (!pattern.test(collapsedText)) {
+      const match = collapsedText.match(pattern);
+      if (!match) {
         insertionPairs[rangeIndex].push([{
           type: 'insertion',
           blockKey,

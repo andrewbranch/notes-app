@@ -89,7 +89,7 @@ export const isStaticStyle = (styleKey: string): styleKey is CoreStaticStyleName
 export const isCoreStyle = (styleKey: string): boolean => styleKey.startsWith('core.styling') || isExpandableStyle(styleKey);
 export const isExpandableStyle = (styleKey: string): styleKey is CoreExpandableStyleName => expandableStyleKeys.includes(styleKey);
 export const isStyleDecorator = (styleKey: string): styleKey is 'core.styling.decorator' => styleKey === 'core.styling.decorator';
-export const getPatternRegExp = memoize((styleKey: CoreExpandableStyleName) => {
+export const getPatternRegExp = memoize((styleKey: CoreExpandableStyleName, exact = true) => {
   const escapedPattern = escapeRegExp(expandableStyles[styleKey].pattern);
-  return new RegExp(`^${escapedPattern}(?:(?!${escapedPattern}).)+${escapedPattern}$`, 'g');
+  return new RegExp(`${exact ? '^' : ''}${escapedPattern}(?:(?!${escapedPattern}).)+${escapedPattern}${exact ? '$' : ''}`, 'g');
 });

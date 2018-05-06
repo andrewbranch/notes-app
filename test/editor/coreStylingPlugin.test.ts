@@ -485,27 +485,31 @@ describe('coreStylingPlugin', () => {
       });
 
       test('expands style ranges sharing the same boundary predictably', async () => {
-        let state;
         await typeText('**_`x`_** ');
         await pressKey('ArrowLeft');
         expect(await getState()).toMatchSnapshot();
         expect((await getState()).content.getPlainText()).toBe('**x** ');
         await pressKey('ArrowLeft', 2);
-        expect(state = await getState()).toMatchSnapshot();
+        expect(await getState()).toMatchSnapshot();
         await pressKey('ArrowLeft');
-        expect(state = await getState()).toMatchSnapshot();
+        expect(await getState()).toMatchSnapshot();
         await pressKey('ArrowRight', 4);
         await pressKey('Backspace', 10);
-        expect((state = await getState()).content.getPlainText()).toBe('');
+        expect((await getState()).content.getPlainText()).toBe('');
         await typeText('_**`x`**_ ');
         await pressKey('ArrowLeft', 4);
-        expect(state = await getState()).toMatchSnapshot();
-        expect((state = await getState()).content.getPlainText()).toBe('**_`x`_** ');
+        expect(await getState()).toMatchSnapshot();
+        expect((await getState()).content.getPlainText()).toBe('**_`x`_** ');
       });
 
-      test.skip('doesn’t expand an adjacent style range of the same type', async () => {
+      test('doesn’t expand an adjacent style range of the same type', async () => {
         await typeText('**bold****bold**');
         expect(await getState()).toMatchSnapshot();
+        await typeText(' ');
+        expect(await getState()).toMatchSnapshot();
+        await pressKey('ArrowLeft');
+        expect(await getState()).toMatchSnapshot();
+        expect((await getState()).content.getPlainText()).toBe('**boldbold** ');
       });
     });
   });
