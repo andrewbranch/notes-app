@@ -60,4 +60,5 @@ export const blocks: { [K in DraftBlockType]?: CoreStaticBlockDefinition | CoreE
   }
 };
 
+export const MAX_BLOCK_SEQ_LENGTH = 7; // header-six
 export const blockValues = values(blocks);
