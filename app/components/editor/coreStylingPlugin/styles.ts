@@ -32,21 +32,21 @@ export const expandableStyles: { [K in CoreExpandableStyleName]: ExpandableStyle
     }
   },
 
-  'BOLD': {
-    name: 'BOLD',
-    pattern: '**',
-    allowsNesting: true,
-    styleAttributes: {
-      fontWeight: 'bold'
-    }
-  },
-
   'ITALIC': {
     name: 'ITALIC',
     pattern: '_',
     allowsNesting: true,
     styleAttributes: {
       fontStyle: 'italic'
+    }
+  },
+
+  'BOLD': {
+    name: 'BOLD',
+    pattern: '**',
+    allowsNesting: true,
+    styleAttributes: {
+      fontWeight: 'bold'
     }
   },
 
@@ -79,8 +79,8 @@ export const staticStyles: { [K in CoreStaticStyleName]: CoreStyleDefinition } =
   }
 };
 
-const expandableStyleKeys = Object.keys(expandableStyles);
 const staticStyleKeys = Object.keys(staticStyles);
+export const expandableStyleKeys = Object.keys(expandableStyles); // FIXME: shouldn’t really depend on key order
 export const expandableStyleValues = values(expandableStyles);
 export const staticStyleValues = values(staticStyles);
 export const styleValues = [...expandableStyleValues, ...staticStyleValues];
@@ -89,7 +89,7 @@ export const isStaticStyle = (styleKey: string): styleKey is CoreStaticStyleName
 export const isCoreStyle = (styleKey: string): boolean => styleKey.startsWith('core.styling') || isExpandableStyle(styleKey);
 export const isExpandableStyle = (styleKey: string): styleKey is CoreExpandableStyleName => expandableStyleKeys.includes(styleKey);
 export const isStyleDecorator = (styleKey: string): styleKey is 'core.styling.decorator' => styleKey === 'core.styling.decorator';
-export const getPatternRegExp = memoize((styleKey: CoreExpandableStyleName) => {
+export const getPatternRegExp = memoize((styleKey: CoreExpandableStyleName, exact = true) => {
   const escapedPattern = escapeRegExp(expandableStyles[styleKey].pattern);
-  return new RegExp(`^${escapedPattern}(?:(?!${escapedPattern}).)+${escapedPattern}$`, 'g');
+  return new RegExp(`${exact ? '^' : ''}${escapedPattern}(?:(?!${escapedPattern}).)+${escapedPattern}${exact ? '$' : ''}`, 'g');
 });

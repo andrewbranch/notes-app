@@ -1,7 +1,7 @@
 import * as assert from 'assert';
 import { EditorState, ContentState } from 'draft-js';
 import { eq } from 'lodash/fp';
-import { getContiguousStyleRangesAtOffset, stripStylesFromBlock, getDeletedCharactersFromChange, Range, performUnUndoableEdits, getInsertedCharactersFromChange } from '../../../../utils/draftUtils';
+import { getContiguousStyleRangesAtOffset, stripStylesFromBlock, getDeletedCharactersFromChange, Range, performUnUndoableEdits, getInsertedCharactersFromChange, getContiguousStyleRangesNearOffset, getEquivalentStyleRangeAtOffset } from '../../../../utils/draftUtils';
 import { isExpandableStyle, CoreExpandableStyleName, isStyleDecorator, expandableStyles, isCoreStyle, getPatternRegExp } from '../styles';
 
 const commit = (editorState: EditorState, newContent: ContentState): EditorState => {
@@ -89,15 +89,27 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
         }
       }
     });
-  } else if (!prevSelection.isCollapsed()) {
-    // assert.equal(prevStartKey, selection.getStartKey(), 'New selection is not in the same block as the previous selection');
+  } else if (!prevSelection.isCollapsed() || changeType === 'remove-range') {
     
     // Handle style ranges whose end got broken off
-    getContiguousStyleRangesAtOffset(
+    getContiguousStyleRangesNearOffset(
       prevContent.getBlockForKey(prevStartKey),
       prevStartOffset,
       isExpandableStyle
     ).forEach((range, styleKey: CoreExpandableStyleName) => {
+      // Do nothing if the edit took place on the boundary of the style range
+      // but only affected stuff outside of it
+      if (prevSelection.isCollapsed()) {
+        if (
+          // Deleting backwards from the start boundary
+          prevStartOffset === range!.start && startOffset < prevStartOffset ||
+          // Deleting forwards from the end boundary
+          prevStartOffset === range!.end + 1 && startOffset === prevStartOffset
+        ) {
+          return;
+        }
+      }
+
       // If end of style range was within the selection but the start wasn’t
       if (range!.start < prevStartOffset && (prevEndKey !== prevStartKey || range!.end <= prevEndOffset)) {
         const decoratorPattern = expandableStyles[styleKey].pattern;
@@ -105,8 +117,8 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
         nextContent = stripStylesFromBlock(nextContent, prevStartKey, eq(styleKey), range!.start, startOffset);
         // Remove that style’s leading decorator’s style
         nextContent = stripStylesFromBlock(nextContent, prevStartKey, isStyleDecorator, range!.start, range!.start + decoratorPattern.length);
-        // Remove that style’s trailing decorator’s style if it exists (can only happen with decorators of length > 1)
-        if (decoratorPattern.length > 1 && range!.end - decoratorPattern.length < prevStartOffset) {
+        // Remove that style’s trailing decorator’s style if it exists
+        if (range!.end - decoratorPattern.length < startOffset) {
           nextContent = stripStylesFromBlock(
             nextContent,
             prevStartKey,
@@ -118,12 +130,25 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
       }
     });
 
-    // Handle style ranges whose beginning got broken off
-    getContiguousStyleRangesAtOffset(
+    // TODO: this is partly redundant and too many iterations if selection was collapsed
+    getContiguousStyleRangesNearOffset(
       prevContent.getBlockForKey(prevEndKey),
       prevEndOffset,
       isExpandableStyle
     ).forEach((range, styleKey: CoreExpandableStyleName) => {
+      // Do nothing if the edit took place on the boundary of the style range
+      // but only affected stuff outside of it
+      if (prevSelection.isCollapsed()) {
+        if (
+          // Deleting backwards from the start boundary
+          prevStartOffset === range!.start && startOffset < prevStartOffset ||
+          // Deleting forwards from the end boundary
+          prevStartOffset === range!.end + 1 && startOffset === prevStartOffset
+        ) {
+          return;
+        }
+      }
+
       // If start of style range was within the selection but the end wasn’t
       if (range!.end >= prevEndOffset && (prevStartKey !== prevEndKey || range!.start >= prevStartOffset)) {
         const decoratorPattern = expandableStyles[styleKey].pattern;
@@ -152,11 +177,10 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
         const styleRangesAtDeletedCharacter = getContiguousStyleRangesAtOffset(
           prevBlock,
           startOffset,
-          isCoreStyle
+          isExpandableStyle
         );
 
-        const decoratorStyleRange = styleRangesAtDeletedCharacter.get('core.styling.decorator');
-        assert.ok(decoratorStyleRange, 'Decorator style range was not in the map');
+        const [, decoratorStyleRange] = getEquivalentStyleRangeAtOffset(prevBlock, startOffset);
         // Find the expandable style range that shares a boundary with the decorator style range
         const styleRangesToRemove = styleRangesAtDeletedCharacter.filter(range => (
           range !== decoratorStyleRange &&
@@ -170,26 +194,23 @@ export const removeInlineStyles = (editorState: EditorState, prevEditorState: Ed
         const style = expandableStyles[styleToRemove];
         // Remove that style.
         nextContent = stripStylesFromBlock(nextContent, prevStartKey, eq(styleToRemove), range.start, range.end - 1);
-        // Remove that style’s decorator character styles.
-        if (style.pattern.length > 1) {
-          // Remove trailing decorator style
-          nextContent = stripStylesFromBlock(
-            nextContent,
-            prevStartKey,
-            isStyleDecorator,
-            range.end - style.pattern.length - Number(!modifiedDecoratorIsTrailing),
-            range.end - 1
-          );
+        // Remove trailing decorator style
+        nextContent = stripStylesFromBlock(
+          nextContent,
+          prevStartKey,
+          isStyleDecorator,
+          range.end - style.pattern.length - Number(!modifiedDecoratorIsTrailing),
+          range.end - deletedCharacters.size
+        );
 
-          // Remove leading decorator style
-          nextContent = stripStylesFromBlock(
-            nextContent,
-            prevStartKey,
-            isStyleDecorator,
-            range.start,
-            range.start + style.pattern.length - Number(!modifiedDecoratorIsTrailing)
-          );
-        }
+        // Remove leading decorator style
+        nextContent = stripStylesFromBlock(
+          nextContent,
+          prevStartKey,
+          isStyleDecorator,
+          range.start,
+          range.start + style.pattern.length - Number(!modifiedDecoratorIsTrailing)
+        );
       }
     });
   }

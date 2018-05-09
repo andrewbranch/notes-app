@@ -78,10 +78,14 @@ export const addInlineStyles = (editorState: EditorState, prevEditorState: Edito
     });
   });
 
-  return performUnUndoableEdits(editorState, disabledUndoEditorState => {
-    return EditorState.forceSelection(
-      EditorState.push(disabledUndoEditorState, nextContent, 'change-inline-style'),
-      selection
-    );
-  });
+  if (content !== nextContent) {
+    return performUnUndoableEdits(editorState, disabledUndoEditorState => {
+      return EditorState.forceSelection(
+        EditorState.push(disabledUndoEditorState, nextContent, 'change-inline-style'),
+        selection
+      );
+    });
+  }
+
+  return editorState;
 };

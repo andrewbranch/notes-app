@@ -7,6 +7,7 @@
   "scripts": {
     "test": "cross-env NODE_ENV=test jest",
     "test-editor": "cross-env NODE_ENV=test jest",
+    "test-editor-debug": "HEADLESS=false node --inspect-brk node_modules/.bin/jest --runInBand",
     "test-all": "npm run test && npm run build && npm run test-e2e",
     "test-watch": "npm test -- --watch",
     "test-e2e": "cross-env NODE_ENV=test node --trace-warnings ./test/runTests.js e2e",

@@ -74,6 +74,9 @@ export const stripEntitiesFromBlock = (contentState: ContentState, blockOrKey: C
 };
 
 export const stripStylesFromBlock = (contentState: ContentState, blockOrKey: ContentBlock | string, styleFilter: (styleName: string) => boolean, start: number = 0, end?: number): ContentState => {
+  if (start === end) {
+    return contentState;
+  }
   const block = typeof blockOrKey === 'string' ? contentState.getBlockForKey(blockOrKey): blockOrKey;
   const originalCharacters = block.getCharacterList()
   const newCharacters = originalCharacters.slice(start, end).map(character => {
@@ -191,12 +194,15 @@ export const performUnUndoableEdits = (editorState: EditorState, performEdits: (
   return EditorState.set(performEdits(disabledUndoEditorState), { allowUndo: true });
 };
 
-export const getContiguousStyleRange = (block: ContentBlock, styleKey: string, aroundIndex: number): Range => {
+export function getContiguousStyleRange(block: ContentBlock, styleKey: string, aroundIndex: number): Range
+export function getContiguousStyleRange(block: ContentBlock, characterFilter: (char: CharacterMetadata) => boolean, aroundIndex: number): Range
+export function getContiguousStyleRange(block: ContentBlock, characterFilter: string | ((char: CharacterMetadata) => boolean), aroundIndex: number): Range {
+  const filter = typeof characterFilter === 'string' ? (char: CharacterMetadata) => char.hasStyle(characterFilter) : characterFilter;
   const characters = block.getCharacterList();
   let start = aroundIndex;
   let end = aroundIndex;
-  while (start >= 0 && characters.get(start).hasStyle(styleKey)) start--;
-  while (end < characters.size && characters.get(end).hasStyle(styleKey)) end++;
+  while (start >= 0 && filter(characters.get(start))) start--;
+  while (end < characters.size && filter(characters.get(end))) end++;
   return Range(block.getKey(), start + 1, end);
 };
 
@@ -214,6 +220,11 @@ export const getContiguousStyleRangesAtOffset = (block: ContentBlock, offset: nu
   }, Map<string, Range>());
 };
 
+export const getEquivalentStyleRangeAtOffset = (block: ContentBlock, offset: number): [OrderedSet<string>, Range] => {
+  const stylesAtOffset = block.getInlineStyleAt(Math.max(0, offset));
+  return [stylesAtOffset, getContiguousStyleRange(block, char => char.getStyle().equals(stylesAtOffset), offset)];
+};
+
 export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: number, styleKeyFilter: (styleKey: string) => boolean): Map<string, Range> => {
   const stylesAtOffset = block.getInlineStyleAt(offset);
   const stylesAdjacentToOffset = offset > 0 ? block.getInlineStyleAt(offset - 1).subtract(stylesAtOffset) : OrderedSet<string>();
@@ -229,19 +240,19 @@ export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: 
   }, Map<string, Range>());
 };
 
-export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, Set<Range>> => {
+export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, OrderedSet<Range>> => {
   // We intentionally allow separated `content` and `selection`, so if, say,
   // you are looking at updated content at a previous selection, the blocks could be undefined.
-  const focusBlock: ContentBlock | undefined = content.getBlockForKey(selection.getFocusKey());
-  const anchorBlock: ContentBlock | undefined = content.getBlockForKey(selection.getAnchorKey());
-  const stylesNearFocus = focusBlock
-    ? getContiguousStyleRangesNearOffset(focusBlock, selection.getFocusOffset(), styleKeyFilter).map(value => Set([value!])) as Map<string, Set<Range>>
-    : Map<string, Set<Range>>();
-  return selection.isCollapsed() || !anchorBlock
-    ? stylesNearFocus
-    : stylesNearFocus.mergeWith((a, b) => a!.union(b!), getContiguousStyleRangesNearOffset(
-      anchorBlock,
-      selection.getAnchorOffset(),
+  const startBlock: ContentBlock | undefined = content.getBlockForKey(selection.getStartKey());
+  const endBlock: ContentBlock | undefined = content.getBlockForKey(selection.getEndKey());
+  const stylesNearStart = startBlock
+    ? getContiguousStyleRangesNearOffset(startBlock, selection.getStartOffset(), styleKeyFilter).map(value => OrderedSet([value!])) as Map<string, OrderedSet<Range>>
+    : Map<string, OrderedSet<Range>>();
+  return selection.isCollapsed() || !endBlock
+    ? stylesNearStart
+    : stylesNearStart.mergeWith((a, b) => a!.add(b!.first()), getContiguousStyleRangesNearOffset(
+      endBlock,
+      selection.getEndOffset(),
       styleKeyFilter
     ).map(value => Set([value!])));
 };
