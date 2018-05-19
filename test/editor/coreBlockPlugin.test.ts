@@ -54,7 +54,7 @@ describe('coreBlockPlugin', () => {
     });
   });
 
-  describe('decorator sequence styles', async () => {
+  describe('decorator sequence styles', () => {
     test('styles decorator characters when a block is created', async () => {
       await typeText('## ');
       expect(await getState()).toMatchSnapshot();
@@ -75,6 +75,26 @@ describe('coreBlockPlugin', () => {
       await typeText('## Hello');
       await pressKey('Enter');
       await pressKey('Backspace');
+      expect(await getState()).toMatchSnapshot();
+    });
+  });
+
+  describe('general editing', () => {
+    test('Maintains/expands block when forward-deleting the preceding block', async () => {
+      await pressKey('Enter');
+      await typeText('# Hello');
+      await pressKey('ArrowUp');
+      await pressKey('Delete');
+      await assertBlockType('header-one');
+      expect(await getState()).toMatchSnapshot();
+    });
+
+    test('Maintains block when backspacing the beginning of the block into an empty preceding block', async () => {
+      await pressKey('Enter');
+      await typeText('# X');
+      await pressKey('ArrowLeft', 3);
+      await pressKey('Backspace');
+      await assertBlockType('header-one');
       expect(await getState()).toMatchSnapshot();
     });
   });
