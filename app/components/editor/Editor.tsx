@@ -18,6 +18,7 @@ export class Editor extends React.Component<EditorProps & typeof editorActions> 
   private coreStylingPlugin = createCoreStylingPlugin(() => this.props.editor);
   private coreBlockPlugin = createCoreBlockPlugin(() => this.props.editor);
   private editor: DraftEditor | null;
+  private isFocused: boolean = false;
 
   public focus() {
     if (this.editor) {
@@ -25,8 +26,21 @@ export class Editor extends React.Component<EditorProps & typeof editorActions> 
     }
   }
 
+  private onFocus: React.FocusEventHandler<HTMLElement> = () => this.isFocused = true;
+  private onBlur: React.FocusEventHandler<HTMLElement> = () => this.isFocused = false;
+
   private updateEditorState = (editorState: EditorState) => {
     this.props.updateEditor({ noteId: this.props.noteId, editorState, time: Date.now() });
+  }
+
+  // When noteId changes to point at a freshly created EditorState,
+  // the SelectionState’s `isFocused` is always false, and causes
+  // weird bugs before it gets back into sync. Calling `focus()`
+  // makes it set itself to `true`.
+  componentDidUpdate(prevProps: EditorProps) {
+    if (this.isFocused && this.props.noteId !== prevProps.noteId) {
+      this.focus();
+    }
   }
 
   render() {
@@ -36,6 +50,8 @@ export class Editor extends React.Component<EditorProps & typeof editorActions> 
         editorState={this.props.editor}
         onChange={this.updateEditorState}
         plugins={[this.coreStylingPlugin, this.coreBlockPlugin]}
+        onFocus={this.onFocus}
+        onBlur={this.onBlur}
       />
     );
   }

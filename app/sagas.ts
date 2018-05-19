@@ -1,9 +1,9 @@
 import { convertToRaw } from 'draft-js';
 import { delay, Task } from 'redux-saga';
-import { takeEvery, call, all, take, select, fork, cancel } from 'redux-saga/effects';
+import { takeEvery, call, all, take, select, fork, cancel, put } from 'redux-saga/effects';
 import { createNoteIPC, updateNoteIPC } from '../interprocess/ipcDefinitions';
 import { ActionWithPayload } from './actions/helpers';
-import { createNoteActionCreator } from './actions/notes';
+import { createNoteActionCreator, CreateNotePayload } from './actions/notes';
 import { updateEditor } from './components/editor/Editor.actions';
 import { selectedNoteSelector } from './selectors/notes.selectors';
 import { NoteTransaction } from '../interprocess/types';
@@ -11,6 +11,7 @@ import { deleteNote } from './components/Shell.actions';
 import { Note } from './reducers/types';
 import { performDependentEdits } from './utils/draftUtils';
 import { collapseInlineStyleRangesAtSelectionEdges } from './components/editor/coreStylingPlugin/steps/collapseInlineStyles';
+import { push } from 'react-router-redux';
 
 export function* createNoteSaga(action: ActionWithPayload<NoteTransaction>) {
   yield call(createNoteIPC.send, action.payload);
@@ -63,6 +64,13 @@ export function* updateNoteSaga() {
   }
 }
 
+export function* navigateToNewNotesSaga() {
+  while (true) {
+    const action: ActionWithPayload<CreateNotePayload> = yield take(createNoteActionCreator.type);
+    yield put(push(`/${action.payload.id}`));
+  }
+}
+
 export function* logEditorStateSaga() {
   const note: Note = yield select(selectedNoteSelector);
   yield call({ context: console, fn: console.log }, note.editor);
@@ -81,6 +89,7 @@ export function* rootSaga() {
     takeEvery(deleteNote.type, deleteNoteSaga),
     takeEvery('dev.logEditorState', logEditorStateSaga),
     takeEvery('dev.logFixture', logFixtureSaga),
-    fork(listenForNoteUpdates)
+    fork(listenForNoteUpdates),
+    fork(navigateToNewNotesSaga)
   ]);
 }
