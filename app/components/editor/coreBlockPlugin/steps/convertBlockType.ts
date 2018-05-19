@@ -1,6 +1,7 @@
 import { EditorState, ContentState, Modifier } from 'draft-js';
 import { blockValues, blocks, CoreBlockDefinition } from '../blocks';
 import { createSelectionWithBlock, performUnUndoableEdits, createSelectionWithRange } from '../../../../utils/draftUtils';
+import { OrderedSet } from 'immutable';
 
 const matchBlock = (text: string): [CoreBlockDefinition, RegExpExecArray] | [null, null] => {
   for (let block of blockValues) {
@@ -34,12 +35,21 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
         if (currentBlockType !== newBlockDefinition.type) {
           let result = Modifier.setBlockType(content, createSelectionWithBlock(block!), newBlockDefinition.type);
           if (match[1]) {
-            result = Modifier.applyInlineStyle(result, createSelectionWithRange(block!, match.index, match[1].length), 'core.block.decorator');
+            result = Modifier.replaceText(
+              result,
+              createSelectionWithRange(block!, match.index, match[1].length),
+              match[1],
+              OrderedSet(['core.block.decorator'])
+            );
           }
           return result;
         }
       } else if (currentBlockType !== 'unstyled' && (!currentBlockDefinition || currentBlockDefinition.expandable)) {
-        return Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled');
+        return Modifier.removeInlineStyle(
+          Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled'),
+          createSelectionWithBlock(block!),
+          'core.block.decorator'
+        );
       }
 
       return content;

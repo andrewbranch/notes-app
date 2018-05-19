@@ -1,5 +1,174 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`coreBlockPlugin decorator sequence styles removes other styles when styling decorator characters 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "header-two",
+        "text": "## ",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.block.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.block.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 3,
+    "focusKey": "0",
+    "focusOffset": 3,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
+exports[`coreBlockPlugin decorator sequence styles styles decorator characters 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "header-two",
+        "text": "## ",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.block.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [
+              "core.block.decorator",
+            ],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 3,
+    "focusKey": "0",
+    "focusOffset": 3,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
+exports[`coreBlockPlugin decorator sequence styles unstyles decorator characters when block is destroyed 1`] = `
+Object {
+  "content": Immutable.Record {
+    "entityMap": Object {},
+    "blockMap": Immutable.OrderedMap {
+      "0": Immutable.Record {
+        "key": "0",
+        "type": "unstyled",
+        "text": "##",
+        "characterList": Immutable.List [
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+          Immutable.Record {
+            "style": Immutable.OrderedSet [],
+            "entity": null,
+          },
+        ],
+        "depth": 0,
+        "data": Immutable.Map {},
+      },
+    },
+    "selectionBefore": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+    "selectionAfter": Immutable.Record {
+      "anchorKey": "0",
+      "anchorOffset": 0,
+      "focusKey": "0",
+      "focusOffset": 0,
+      "isBackward": false,
+      "hasFocus": false,
+    },
+  },
+  "selection": Immutable.Record {
+    "anchorKey": "0",
+    "anchorOffset": 2,
+    "focusKey": "0",
+    "focusOffset": 2,
+    "isBackward": false,
+    "hasFocus": true,
+  },
+}
+`;
+
 exports[`coreBlockPlugin headings creates a heading after typing some hashes and a space 1`] = `
 Object {
   "content": Immutable.Record {

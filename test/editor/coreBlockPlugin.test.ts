@@ -53,4 +53,22 @@ describe('coreBlockPlugin', () => {
       await assertBlockType('unstyled');
     });
   });
+
+  describe('decorator sequence styles', async () => {
+    test('styles decorator characters', async () => {
+      await typeText('## ');
+      expect(await getState()).toMatchSnapshot();
+    });
+
+    test('removes other styles when styling decorator characters', async () => {
+      await typeText('`#`# ');
+      expect(await getState()).toMatchSnapshot();
+    });
+
+    test('unstyles decorator characters when block is destroyed', async () => {
+      await typeText('## ');
+      await pressKey('Backspace');
+      expect(await getState()).toMatchSnapshot();
+    });
+  });
 });
