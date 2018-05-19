@@ -3,7 +3,7 @@ import { Plugin } from 'draft-js-plugins-editor';
 import { decorators } from './decorators';
 import { removeInlineStyles } from './steps/removeInlineStyles';
 import { addInlineStyles } from './steps/addInlineStyles';
-import { collapseInlineStyles } from './steps/collapseInlineStyles';
+import { collapseInlineStyles, collapseInlineStyleRangesAtSelectionEdges } from './steps/collapseInlineStyles';
 import { expandInlineStyle } from './steps/expandInlineStyles';
 import { styleValues } from './styles';
 import { performDependentEdits, createSelectionWithRange } from '../../../utils/draftUtils';
@@ -59,3 +59,10 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
     [style.name]: style.styleAttributes
   }), {})
 });
+
+export const normalizeCoreStyles = (editorState: EditorState) => {
+  return performDependentEdits(
+    editorState,
+    collapseInlineStyleRangesAtSelectionEdges(editorState.getCurrentContent(), editorState.getSelection())
+  );
+}

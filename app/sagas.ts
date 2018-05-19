@@ -1,6 +1,7 @@
 import { convertToRaw } from 'draft-js';
 import { delay, Task } from 'redux-saga';
 import { takeEvery, call, all, take, select, fork, cancel, put } from 'redux-saga/effects';
+import { push } from 'react-router-redux';
 import { createNoteIPC, updateNoteIPC } from '../interprocess/ipcDefinitions';
 import { ActionWithPayload } from './actions/helpers';
 import { createNoteActionCreator, CreateNotePayload } from './actions/notes';
@@ -11,7 +12,7 @@ import { deleteNote } from './components/Shell.actions';
 import { Note } from './reducers/types';
 import { performDependentEdits } from './utils/draftUtils';
 import { collapseInlineStyleRangesAtSelectionEdges } from './components/editor/coreStylingPlugin/steps/collapseInlineStyles';
-import { push } from 'react-router-redux';
+import { normalizePlugins } from './components/editor/normalizePlugins';
 
 export function* createNoteSaga(action: ActionWithPayload<NoteTransaction>) {
   yield call(createNoteIPC.send, action.payload);
@@ -44,16 +45,12 @@ export function* updateNoteSaga() {
         if (selectedNote.id === prevSelectedNote.id && selectedNote !== prevSelectedNote) {
           const { editor } = selectedNote;
           const content = editor.getCurrentContent();
-          const selection = editor.getSelection();
           const prevContent = prevSelectedNote.editor.getCurrentContent();
           if (content !== prevContent) {
             yield call(updateNoteIPC.send, {
               id: selectedNote.id,
               patch: {
-                content: convertToRaw(performDependentEdits(
-                  editor,
-                  collapseInlineStyleRangesAtSelectionEdges(content, selection)
-                ).getCurrentContent()),
+                content: convertToRaw(normalizePlugins(editor).getCurrentContent()),
                 updatedAt: Date.now()
               }
             });

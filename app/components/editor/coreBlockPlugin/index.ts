@@ -1,7 +1,7 @@
 import { Plugin } from 'draft-js-plugins-editor';
 import { EditorState } from 'draft-js';
 import { convertBlockType } from './steps/convertBlockType';
-import { collapseBlocks } from './steps/collapseBlocks';
+import { collapseBlocks, collapseBlocksAtSelectionEdges } from './steps/collapseBlocks';
 import { expandBlocks } from './steps/expandBlocks';
 
 export const createCoreBlockPlugin = (getEditorState: () => EditorState): Plugin => ({
@@ -18,3 +18,7 @@ export const createCoreBlockPlugin = (getEditorState: () => EditorState): Plugin
     }
   }
 });
+
+export const normalizeCoreBlocks = (editorState: EditorState) => {
+  return collapseBlocksAtSelectionEdges(editorState);
+}
