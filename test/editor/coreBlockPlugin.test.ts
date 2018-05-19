@@ -55,7 +55,7 @@ describe('coreBlockPlugin', () => {
   });
 
   describe('decorator sequence styles', async () => {
-    test('styles decorator characters', async () => {
+    test('styles decorator characters when a block is created', async () => {
       await typeText('## ');
       expect(await getState()).toMatchSnapshot();
     });
@@ -67,6 +67,13 @@ describe('coreBlockPlugin', () => {
 
     test('unstyles decorator characters when block is destroyed', async () => {
       await typeText('## ');
+      await pressKey('Backspace');
+      expect(await getState()).toMatchSnapshot();
+    });
+
+    test('styles decorator characters when a block is expanded', async () => {
+      await typeText('## Hello');
+      await pressKey('Enter');
       await pressKey('Backspace');
       expect(await getState()).toMatchSnapshot();
     });
