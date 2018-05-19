@@ -10,8 +10,6 @@ import { selectedNoteSelector } from './selectors/notes.selectors';
 import { NoteTransaction } from '../interprocess/types';
 import { deleteNote } from './components/Shell.actions';
 import { Note } from './reducers/types';
-import { performDependentEdits } from './utils/draftUtils';
-import { collapseInlineStyleRangesAtSelectionEdges } from './components/editor/coreStylingPlugin/steps/collapseInlineStyles';
 import { normalizePlugins } from './components/editor/normalizePlugins';
 
 export function* createNoteSaga(action: ActionWithPayload<NoteTransaction>) {
