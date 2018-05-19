@@ -2,7 +2,7 @@ import { EditorState, ContentState, Modifier } from 'draft-js';
 import { blockValues, blocks } from '../blocks';
 import { createSelectionWithBlock, performUnUndoableEdits } from '../../../../utils/draftUtils';
 
-export const resetBlockType = (editorState: EditorState, prevEditorState: EditorState): EditorState => {
+export const convertBlockType = (editorState: EditorState, prevEditorState: EditorState): EditorState => {
   const content = editorState.getCurrentContent();
   const prevContent = prevEditorState.getCurrentContent();
   if (content === prevContent) {
