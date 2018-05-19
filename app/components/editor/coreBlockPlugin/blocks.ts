@@ -19,37 +19,37 @@ export interface CoreExpandableBlockDefinition extends CoreBlockDefinition {
 export const blocks: { [K in DraftBlockType]?: CoreStaticBlockDefinition | CoreExpandableBlockDefinition } = {
   'header-one': {
     type: 'header-one',
-    pattern: /^# /,
+    pattern: /^(#) /,
     expandable: true,
     canonicalPattern: '# '
   },
   'header-two': {
     type: 'header-two',
-    pattern: /^## /,
+    pattern: /^(##) /,
     expandable: true,
     canonicalPattern: '## '
   },
   'header-three': {
     type: 'header-three',
-    pattern: /^### /,
+    pattern: /^(###) /,
     expandable: true,
     canonicalPattern: '### '
   },
   'header-four': {
     type: 'header-four',
-    pattern: /^#### /,
+    pattern: /^(####) /,
     expandable: true,
     canonicalPattern: '#### '
   },
   'header-five': {
     type: 'header-five',
-    pattern: /^##### /,
+    pattern: /^(#####) /,
     expandable: true,
     canonicalPattern: '##### '
   },
   'header-six': {
     type: 'header-six',
-    pattern: /^###### /,
+    pattern: /^(######) /,
     expandable: true,
     canonicalPattern: '###### '
   },

@@ -1,6 +1,14 @@
 import { EditorState, ContentState, Modifier } from 'draft-js';
-import { blockValues, blocks } from '../blocks';
-import { createSelectionWithBlock, performUnUndoableEdits } from '../../../../utils/draftUtils';
+import { blockValues, blocks, CoreBlockDefinition } from '../blocks';
+import { createSelectionWithBlock, performUnUndoableEdits, createSelectionWithRange } from '../../../../utils/draftUtils';
+
+const matchBlock = (text: string): [CoreBlockDefinition, RegExpExecArray] | [null, null] => {
+  for (let block of blockValues) {
+    const match = block!.pattern.exec(text);
+    if (match) return [block!, match];
+  }
+  return [null, null];
+}
 
 export const convertBlockType = (editorState: EditorState, prevEditorState: EditorState): EditorState => {
   const content = editorState.getCurrentContent();
@@ -21,10 +29,14 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
       const blockText = block!.getText();
       const currentBlockType = block!.getType();
       const currentBlockDefinition = blocks[currentBlockType];
-      const newBlockDefinition = blockValues.find(b => b!.pattern.test(blockText));
-      if (newBlockDefinition) {
+      const [newBlockDefinition, match] = matchBlock(blockText);
+      if (newBlockDefinition && match) {
         if (currentBlockType !== newBlockDefinition.type) {
-          return Modifier.setBlockType(content, createSelectionWithBlock(block!), newBlockDefinition.type);
+          let result = Modifier.setBlockType(content, createSelectionWithBlock(block!), newBlockDefinition.type);
+          if (match[1]) {
+            result = Modifier.applyInlineStyle(result, createSelectionWithRange(block!, match.index, match[1].length), 'core.block.decorator');
+          }
+          return result;
         }
       } else if (currentBlockType !== 'unstyled' && (!currentBlockDefinition || currentBlockDefinition.expandable)) {
         return Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled');

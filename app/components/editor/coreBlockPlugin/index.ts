@@ -10,5 +10,11 @@ export const createCoreBlockPlugin = (getEditorState: () => EditorState): Plugin
     const editorStateWithConvertedBlocks = convertBlockType(editorState, prevEditorState);
     const editorStateWithCollapsedBlocks = collapseBlocks(editorStateWithConvertedBlocks);
     return expandBlocks(editorStateWithCollapsedBlocks);
+  },
+
+  customStyleMap: {
+    'core.block.decorator': {
+      color: 'rgba(0, 0, 0, 0.3)'
+    }
   }
 });

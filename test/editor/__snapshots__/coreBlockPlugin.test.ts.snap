@@ -11,7 +11,9 @@ Object {
         "text": "# ",
         "characterList": Immutable.List [
           Immutable.Record {
-            "style": Immutable.OrderedSet [],
+            "style": Immutable.OrderedSet [
+              "core.block.decorator",
+            ],
             "entity": null,
           },
           Immutable.Record {
