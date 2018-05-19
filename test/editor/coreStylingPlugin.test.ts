@@ -519,31 +519,31 @@ describe('coreStylingPlugin', () => {
       test('deleting a line with two-character decorator style range at the beginning should work', async () => {
         await typeText('**Bold** hello');
         await deleteToBeginningOfLine();
-        expect(await getState()).toMatchSnapshot();
+        expect((await getState()).content.getPlainText()).toBe('');
       });
 
       test('deleting a line with two-character decorator style range at the end should work', async () => {
         await typeText('Hello **bold**');
         await deleteToBeginningOfLine();
-        expect(await getState()).toMatchSnapshot();
+        expect((await getState()).content.getPlainText()).toBe('');
       });
 
       test('deleting a line with one-character decorator style range at the beginning should work', async () => {
         await typeText('_Italic_ hello');
         await deleteToBeginningOfLine();
-        expect(await getState()).toMatchSnapshot();
+        expect((await getState()).content.getPlainText()).toBe('');
       });
 
       test('deleting a line with two-character decorator style range at the end should work', async () => {
         await typeText('Hello _italic_');
         await deleteToBeginningOfLine();
-        expect(await getState()).toMatchSnapshot();
+        expect((await getState()).content.getPlainText()).toBe('');
       });
 
       test('deleting a line with style range in the middle should work', async () => {
         await typeText('Hello **bold** hi');
         await deleteToBeginningOfLine();
-        expect(await getState()).toMatchSnapshot();
+        expect((await getState()).content.getPlainText()).toBe('');
       });
     }
 
