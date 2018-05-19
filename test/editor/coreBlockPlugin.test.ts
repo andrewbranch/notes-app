@@ -8,25 +8,25 @@ beforeEach(async () => {
 
 describe('coreBlockPlugin', () => {
   describe('headings', () => {
-    test('doesn’t create a heading when typing hashes before space is pressed', async t => {
+    test('doesn’t create a heading when typing hashes before space is pressed', async () => {
       await typeText('#');
       await assertBlockType('unstyled');
     });
 
-    test('creates a heading after typing some hashes and a space', async t => {
+    test('creates a heading after typing some hashes and a space', async () => {
       await typeText('# ');
       await assertBlockType('header-one');
       expect(await getState()).toMatchSnapshot();
     });
 
-    test('creates a heading after typing a hash if there’s a trailing space', async t => {
+    test('creates a heading after typing a hash if there’s a trailing space', async () => {
       await typeText(' ');
       await pressKey('ArrowLeft');
       await typeText('#');
       await assertBlockType('header-one');
     });
 
-    test('changes heading type when modifying hashes', async t => {
+    test('changes heading type when modifying hashes', async () => {
       await typeText('# ');
       await pressKey('ArrowLeft');
       await typeText('#');
@@ -35,12 +35,12 @@ describe('coreBlockPlugin', () => {
       await assertBlockType('header-one');
     });
 
-    test('doesn’t create a heading if the hashes aren’t at the beginning of the block', async t => {
+    test('doesn’t create a heading if the hashes aren’t at the beginning of the block', async () => {
       await typeText(' # ');
       await assertBlockType('unstyled');
     });
 
-    test('resets block type if the heading sequence becomes invalid', async t => {
+    test('resets block type if the heading sequence becomes invalid', async () => {
       await typeText('## ');
       await assertBlockType('header-two');
       await pressKey('ArrowLeft');
