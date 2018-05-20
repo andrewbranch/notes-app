@@ -1,4 +1,4 @@
-import { EditorState, ContentState, Modifier } from 'draft-js';
+import { EditorState, ContentState, Modifier, ContentBlock } from 'draft-js';
 import { blockValues, blocks, CoreBlockDefinition } from '../blocks';
 import { createSelectionWithBlock, performUnUndoableEdits, createSelectionWithRange } from '../../../../utils/draftUtils';
 import { OrderedSet } from 'immutable';
@@ -21,12 +21,23 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
   const selection = editorState.getSelection();
   const prevSelection = prevEditorState.getSelection();
   const nextContent = content.getBlockMap()
-    .skipUntil((_, key) => key === prevSelection.getStartKey())
+    .skipUntil((_, key) => key === selection.getStartKey())
     .takeUntil((_, key) => {
       const firstNonMatchingBlock = content.getBlockAfter(selection.getEndKey());
       return firstNonMatchingBlock && firstNonMatchingBlock.getKey() === key;
     })
     .reduce((content: ContentState, block) => {
+      const prevBlock = prevContent.getBlockForKey(block!.getKey()) as ContentBlock | undefined;
+      // If the block wasn’t modified, don’t change it
+      if (block === prevBlock) {
+        return content;
+      }
+
+      if (prevBlock && prevBlock.getText() === "" && editorState.getLastChangeType() === 'delete-character') {
+        const prevBlockNowInCurrentBlock = prevContent.getBlockAfter(prevBlock.getKey());
+        return Modifier.setBlockType(content, createSelectionWithBlock(block!), prevBlockNowInCurrentBlock.getType());
+      }
+
       const blockText = block!.getText();
       const currentBlockType = block!.getType();
       const currentBlockDefinition = blocks[currentBlockType];
