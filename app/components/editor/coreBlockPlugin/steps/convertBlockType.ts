@@ -1,6 +1,6 @@
 import { EditorState, ContentState, Modifier, ContentBlock } from 'draft-js';
 import { blockValues, blocks, CoreBlockDefinition } from '../blocks';
-import { createSelectionWithBlock, performUnUndoableEdits, createSelectionWithRange } from '../../../../utils/draftUtils';
+import { createSelectionWithBlock, performUnUndoableEdits, createSelectionWithRange, createSelectionWithSelection } from '../../../../utils/draftUtils';
 import { OrderedSet } from 'immutable';
 
 const matchBlock = (text: string): [CoreBlockDefinition, RegExpExecArray] | [null, null] => {
@@ -19,23 +19,25 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
   }
 
   const selection = editorState.getSelection();
-  const prevSelection = prevEditorState.getSelection();
-  const nextContent = content.getBlockMap()
+  const { content: nextContent, adjustSelection } = content.getBlockMap()
     .skipUntil((_, key) => key === selection.getStartKey())
     .takeUntil((_, key) => {
       const firstNonMatchingBlock = content.getBlockAfter(selection.getEndKey());
       return firstNonMatchingBlock && firstNonMatchingBlock.getKey() === key;
     })
-    .reduce((content: ContentState, block) => {
+    .reduce(({ content, adjustSelection }: { content: ContentState, adjustSelection: { [key: string]: number } }, block) => {
       const prevBlock = prevContent.getBlockForKey(block!.getKey()) as ContentBlock | undefined;
       // If the block wasn’t modified, don’t change it
       if (block === prevBlock) {
-        return content;
+        return { content, adjustSelection };
       }
 
       if (prevBlock && prevBlock.getText() === "" && editorState.getLastChangeType() === 'delete-character') {
         const prevBlockNowInCurrentBlock = prevContent.getBlockAfter(prevBlock.getKey());
-        return Modifier.setBlockType(content, createSelectionWithBlock(block!), prevBlockNowInCurrentBlock.getType());
+        return {
+          content: Modifier.setBlockType(content, createSelectionWithBlock(block!), prevBlockNowInCurrentBlock.getType()),
+          adjustSelection
+        };
       }
 
       const blockText = block!.getText();
@@ -44,31 +46,43 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
       const [newBlockDefinition, match] = matchBlock(blockText);
       if (newBlockDefinition && match) {
         if (currentBlockType !== newBlockDefinition.type) {
-          let result = Modifier.setBlockType(content, createSelectionWithBlock(block!), newBlockDefinition.type);
-          result = Modifier.replaceText(
-            result,
-            createSelectionWithRange(block!, match.index, match[match[1] ? 1 : 0].length),
-            newBlockDefinition.expandable ? match[1] || match[0] : '',
-            OrderedSet(['core.block.decorator'])
-          );
-          return result;
+          return {
+            content: Modifier.setBlockType(
+              Modifier.replaceText(
+                content,
+                createSelectionWithRange(block!, match.index, match[match[1] ? 1 : 0].length),
+                newBlockDefinition.expandable ? match[1] || match[0] : '',
+                OrderedSet(['core.block.decorator'])
+              ),
+              createSelectionWithBlock(block!),
+              newBlockDefinition.type
+            ),
+            adjustSelection: {
+              ...adjustSelection,
+              [block!.getKey()]: newBlockDefinition.expandable ? 0 : match[match[1] ? 1 : 0].length - match.index
+            }
+          };
         }
       } else if (currentBlockType !== 'unstyled' && (!currentBlockDefinition || currentBlockDefinition.expandable)) {
-        return Modifier.removeInlineStyle(
-          Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled'),
-          createSelectionWithBlock(block!),
-          'core.block.decorator'
-        );
+        return {
+          content: Modifier.removeInlineStyle(
+            Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled'),
+            createSelectionWithBlock(block!),
+            'core.block.decorator'
+          ),
+          adjustSelection
+        };
       }
 
-      return content;
-    }, editorState.getCurrentContent());
+      return { content, adjustSelection };
+    }, { content: editorState.getCurrentContent(), adjustSelection: {} });
   
   if (nextContent !== content) {
     return performUnUndoableEdits(editorState, disabledUndoEditorState => {
+      const adjustSelectionForBlock = -(adjustSelection[selection.getStartKey()] || 0);
       return EditorState.forceSelection(
         EditorState.push(disabledUndoEditorState, nextContent, 'change-block-type'),
-        selection
+        createSelectionWithSelection(selection, adjustSelectionForBlock, adjustSelectionForBlock)
       );
     });
   }

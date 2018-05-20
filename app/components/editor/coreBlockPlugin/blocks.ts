@@ -11,6 +11,7 @@ export interface CoreBlockDefinition {
 
 export interface CoreStaticBlockDefinition extends CoreBlockDefinition {
   expandable?: false;
+  canonicalPattern: string;
 }
 
 export interface CoreExpandableBlockDefinition extends CoreBlockDefinition {
@@ -76,7 +77,8 @@ export const blocks: { [K in DraftBlockType]?: CoreStaticBlockDefinition | CoreE
   'unordered-list-item': {
     type: 'unordered-list-item',
     pattern: /^- /,
-    expandable: false
+    expandable: false,
+    canonicalPattern: '- '
   }
 };
 
