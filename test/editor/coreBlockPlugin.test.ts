@@ -52,6 +52,14 @@ describe('coreBlockPlugin', () => {
       await typeText('x');
       await assertBlockType('unstyled');
     });
+
+    test.skip('resets block type if the heading sequence becomes invalid by splitting the block', async () => {
+      await typeText('## ');
+      await pressKey('ArrowLeft', 2);
+      await pressKey('Enter');
+      await pressKey('Enter');
+      expect(await getState()).toMatchSnapshot();
+    });
   });
 
   describe('unordered lists', () => {
@@ -116,6 +124,13 @@ describe('coreBlockPlugin', () => {
       await typeText('## Hello');
       await pressKey('Enter');
       await pressKey('Backspace');
+      expect(await getState()).toMatchSnapshot();
+    });
+
+    test.skip('unstyles decorator characters when they get stripped off and are no longer decorator characters', async () => {
+      await typeText('## ');
+      await pressKey('ArrowLeft', 2);
+      await typeText(' ');
       expect(await getState()).toMatchSnapshot();
     });
   });
