@@ -54,6 +54,14 @@ describe('coreBlockPlugin', () => {
     });
   });
 
+  describe('unordered lists', () => {
+    test('creates a list after typing the control sequence', async () => {
+      await typeText('- ');
+      await assertBlockType('unordered-list-item');
+      expect((await getState()).content.getPlainText()).toBe('');
+    });
+  });
+
   describe('decorator sequence styles', () => {
     test('styles decorator characters when a block is created', async () => {
       await typeText('## ');

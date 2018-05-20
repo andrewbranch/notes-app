@@ -34,14 +34,12 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
       if (newBlockDefinition && match) {
         if (currentBlockType !== newBlockDefinition.type) {
           let result = Modifier.setBlockType(content, createSelectionWithBlock(block!), newBlockDefinition.type);
-          if (match[1]) {
-            result = Modifier.replaceText(
-              result,
-              createSelectionWithRange(block!, match.index, match[1].length),
-              match[1],
-              OrderedSet(['core.block.decorator'])
-            );
-          }
+          result = Modifier.replaceText(
+            result,
+            createSelectionWithRange(block!, match.index, match[match[1] ? 1 : 0].length),
+            newBlockDefinition.expandable ? match[1] || match[0] : '',
+            OrderedSet(['core.block.decorator'])
+          );
           return result;
         }
       } else if (currentBlockType !== 'unstyled' && (!currentBlockDefinition || currentBlockDefinition.expandable)) {
