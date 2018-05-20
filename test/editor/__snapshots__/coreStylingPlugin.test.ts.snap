@@ -2266,7 +2266,7 @@ Object {
     "blockMap": Immutable.OrderedMap {
       "0": Immutable.Record {
         "key": "0",
-        "type": "unordered-list-item",
+        "type": "unstyled",
         "text": "Bold ",
         "characterList": Immutable.List [
           Immutable.Record {
