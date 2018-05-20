@@ -1,5 +1,7 @@
 import { DraftBlockType } from 'draft-js';
 import { values } from 'lodash';
+import { InsertionEdit } from '../../../utils/draftUtils';
+import { OrderedSet } from 'immutable';
 
 export interface CoreBlockDefinition {
   type: DraftBlockType;
@@ -13,49 +15,67 @@ export interface CoreStaticBlockDefinition extends CoreBlockDefinition {
 
 export interface CoreExpandableBlockDefinition extends CoreBlockDefinition {
   expandable: true;
-  canonicalPattern: string;
+  canonicalPattern: Pick<InsertionEdit, 'text' | 'style'>[];
 }
 
 export const blocks: { [K in DraftBlockType]?: CoreStaticBlockDefinition | CoreExpandableBlockDefinition } = {
   'header-one': {
     type: 'header-one',
-    pattern: /^# /,
+    pattern: /^(#) /,
     expandable: true,
-    canonicalPattern: '# '
+    canonicalPattern: [
+      { text: '#', style: OrderedSet(['core.block.decorator']) },
+      { text: ' ' }
+    ]
   },
   'header-two': {
     type: 'header-two',
-    pattern: /^## /,
+    pattern: /^(##) /,
     expandable: true,
-    canonicalPattern: '## '
+    canonicalPattern: [
+      { text: '##', style: OrderedSet(['core.block.decorator']) },
+      { text: ' ' }
+    ]
   },
   'header-three': {
     type: 'header-three',
-    pattern: /^### /,
+    pattern: /^(###) /,
     expandable: true,
-    canonicalPattern: '### '
+    canonicalPattern: [
+      { text: '###', style: OrderedSet(['core.block.decorator']) },
+      { text: ' ' }
+    ]
   },
   'header-four': {
     type: 'header-four',
-    pattern: /^#### /,
+    pattern: /^(####) /,
     expandable: true,
-    canonicalPattern: '#### '
+    canonicalPattern: [
+      { text: '####', style: OrderedSet(['core.block.decorator']) },
+      { text: ' ' }
+    ]
   },
   'header-five': {
     type: 'header-five',
-    pattern: /^##### /,
+    pattern: /^(#####) /,
     expandable: true,
-    canonicalPattern: '##### '
+    canonicalPattern: [
+      { text: '#####', style: OrderedSet(['core.block.decorator']) },
+      { text: ' ' }
+    ]
   },
   'header-six': {
     type: 'header-six',
-    pattern: /^###### /,
+    pattern: /^(######) /,
     expandable: true,
-    canonicalPattern: '###### '
+    canonicalPattern: [
+      { text: '######', style: OrderedSet(['core.block.decorator']) },
+      { text: ' ' }
+    ]
   },
   'unordered-list-item': {
     type: 'unordered-list-item',
-    pattern: /^ ?[-*] /,
+    pattern: /^- /,
     expandable: false
   }
 };

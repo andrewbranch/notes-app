@@ -1,14 +1,15 @@
 import { EditorState, ContentState, Modifier } from 'draft-js';
+import { uniq } from 'lodash';
 import { blocks } from '../blocks';
 import { hasEdgeWithin, createSelectionWithRange, performUnUndoableEdits } from '../../../../utils/draftUtils';
 
-export const collapseBlocks = (editorState: EditorState, affectedBlocks = editorState.getCurrentContent().getBlockMap().keySeq().toArray()): EditorState => {
+export const collapseBlocks = (editorState: EditorState, affectedBlocks = editorState.getCurrentContent().getBlockMap().keySeq().toArray(), force?: boolean): EditorState => {
   const selection = editorState.getSelection();
   const currentContent = editorState.getCurrentContent();
   const nextContent = affectedBlocks.reduce((content: ContentState, blockKey) => {
     const block = content.getBlockForKey(blockKey);
     const blockDefinition = blocks[block.getType()];
-    if (blockDefinition && blockDefinition.expandable && !hasEdgeWithin(selection, blockKey, 0, block.getLength())) {
+    if (blockDefinition && blockDefinition.expandable && (force || !hasEdgeWithin(selection, blockKey, 0, block.getLength()))) {
       const blockText = block.getText();
       const match = blockText.match(blockDefinition.pattern);
       if (match) {
@@ -33,4 +34,9 @@ export const collapseBlocks = (editorState: EditorState, affectedBlocks = editor
   }
 
   return editorState;
+}
+
+export const collapseBlocksAtSelectionEdges = (editorState: EditorState) => {
+  const selection = editorState.getSelection();
+  return collapseBlocks(editorState, uniq([selection.getStartKey(), selection.getEndKey()]), true);
 }

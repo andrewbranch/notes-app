@@ -10,15 +10,16 @@ export const expandBlocks = (editorState: EditorState): EditorState => {
     const block = currentContent.getBlockForKey(blockKey);
     const blockDefinition = blocks[block.getType()];
     if (blockDefinition && blockDefinition.expandable && !blockDefinition.pattern.test(block.getText())) {
-      const edit: InsertionEdit = {
+      const insertions = blockDefinition.canonicalPattern.map(pattern => ({
         type: 'insertion',
         blockKey,
         offset: 0,
-        text: blockDefinition.canonicalPattern,
+        text: pattern.text,
+        style: pattern.style,
         disableUndo: true
-      };
+      } as InsertionEdit));
 
-      return [...edits, edit];
+      return [...edits, ...insertions];
     }
 
     return edits;
