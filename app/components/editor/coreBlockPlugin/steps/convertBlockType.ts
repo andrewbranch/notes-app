@@ -49,7 +49,11 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
           return {
             content: Modifier.setBlockType(
               Modifier.replaceText(
-                content,
+                Modifier.removeInlineStyle(
+                  content,
+                  createSelectionWithBlock(block!),
+                  'core.block.decorator'
+                ),
                 createSelectionWithRange(block!, match.index, match[match[1] ? 1 : 0].length),
                 newBlockDefinition.expandable ? match[1] || match[0] : '',
                 OrderedSet(['core.block.decorator'])

@@ -127,7 +127,7 @@ describe('coreBlockPlugin', () => {
       expect(await getState()).toMatchSnapshot();
     });
 
-    test.skip('unstyles decorator characters when they get stripped off and are no longer decorator characters', async () => {
+    test('unstyles decorator characters when they get stripped off and are no longer decorator characters', async () => {
       await typeText('## ');
       await pressKey('ArrowLeft', 2);
       await typeText(' ');
