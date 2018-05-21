@@ -11,5 +11,10 @@
   :global(.public-DraftEditor-content) {
     height: 100%;
     padding: $space-m;
+    blockquote {
+      padding-left: 1em;
+      margin: 1em;
+      box-shadow: -2px 0 0 0 rgba(0, 0, 0, 0.3);
+    }
   }
 }
