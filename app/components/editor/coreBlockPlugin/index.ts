@@ -18,7 +18,7 @@ export const createCoreBlockPlugin = (getEditorState: () => EditorState): Plugin
   handleKeyCommand: (command, editorState, { setEditorState }) => {
     const selection = editorState.getSelection();
     const isBackspace = command === 'backspace' || command === 'backspace-word' || command === 'backspace-to-start-of-line';
-    if (isBackspace && selection.getStartOffset() === 0) {
+    if (isBackspace && selection.isCollapsed() && selection.getStartOffset() === 0) {
       const content = editorState.getCurrentContent();
       const block = content.getBlockForKey(selection.getStartKey());
       const blockDefinition = blocks[block.getType()];
