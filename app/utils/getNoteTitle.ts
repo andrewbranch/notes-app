@@ -18,8 +18,8 @@ export const getNoteTitle = (content: ContentState | RawDraftContentState): stri
       performDependentEdits(dummyEditorState, collapseInlineStylesInBlock(firstNonEmptyBlock)),
       [firstNonEmptyBlock.getKey()],
       true
-    ).getCurrentContent().getFirstBlock().getText();
+    ).getCurrentContent().getFirstBlock().getText().trim() || defaultNoteTitle;
   }
 
-  return firstNonEmptyBlock ? getBlockText(firstNonEmptyBlock) : defaultNoteTitle;
+  return firstNonEmptyBlock ? getBlockText(firstNonEmptyBlock).trim() || defaultNoteTitle : defaultNoteTitle;
 };

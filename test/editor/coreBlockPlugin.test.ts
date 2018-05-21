@@ -1,4 +1,4 @@
-import { loadApp, typeText, getState, pressKey } from './transport';
+import { loadApp, typeText, getState, pressKey, withShift } from './transport';
 
 const assertBlockType = async (blockType: string) => expect((await getState()).content.getFirstBlock().getType()).toBe(blockType);
 
@@ -52,6 +52,14 @@ describe('coreBlockPlugin', () => {
       await typeText('x');
       await assertBlockType('unstyled');
     });
+
+    test('resets block type if the heading sequence becomes invalid by splitting the block', async () => {
+      await typeText('## ');
+      await pressKey('ArrowLeft', 2);
+      await pressKey('Enter');
+      await pressKey('Enter');
+      expect(await getState()).toMatchSnapshot();
+    });
   });
 
   describe('unordered lists', () => {
@@ -59,6 +67,47 @@ describe('coreBlockPlugin', () => {
       await typeText('- ');
       await assertBlockType('unordered-list-item');
       expect((await getState()).content.getPlainText()).toBe('');
+    });
+
+    test('places the selection in the right place when creating a list item', async () => {
+      await pressKey('Enter');
+      await typeText('- ');
+      expect(await getState()).toMatchSnapshot();
+    });
+
+    test('backspacing resets the list item and inserts the control sequence minus one character', async () => {
+      await typeText('- ');
+      await pressKey('Backspace');
+      await assertBlockType('unstyled');
+      expect((await getState()).content.getPlainText()).toBe('-');
+    });
+
+    test('backspacing a range including the first character of a list item works normally', async () => {
+      await typeText('- x');
+      await withShift('ArrowLeft');
+      await pressKey('Backspace');
+      await assertBlockType('unordered-list-item');
+      expect((await getState()).content.getPlainText()).toBe('');
+    });
+
+    test('pressing enter after a filled list item adds another list item', async () => {
+      await typeText('- one');
+      await pressKey('Enter');
+      await assertBlockType('unordered-list-item');
+      expect(await getState()).toMatchSnapshot();      
+    });
+
+    test('pressing enter after an empty list item converts the list item to an unstyled block', async () => {
+      await typeText('- ');
+      await pressKey('Enter');
+      await assertBlockType('unstyled');
+      expect((await getState()).content.getPlainText()).toBe('');
+    });
+
+    test('can’t convert a list item directly to another block type', async () => {
+      await typeText('- # ');
+      await assertBlockType('unordered-list-item');
+      expect((await getState()).content.getPlainText()).toBe('# ');
     });
   });
 
@@ -83,6 +132,13 @@ describe('coreBlockPlugin', () => {
       await typeText('## Hello');
       await pressKey('Enter');
       await pressKey('Backspace');
+      expect(await getState()).toMatchSnapshot();
+    });
+
+    test('unstyles decorator characters when they get stripped off and are no longer decorator characters', async () => {
+      await typeText('## ');
+      await pressKey('ArrowLeft', 2);
+      await typeText(' ');
       expect(await getState()).toMatchSnapshot();
     });
   });
