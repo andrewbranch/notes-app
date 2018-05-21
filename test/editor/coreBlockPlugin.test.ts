@@ -53,7 +53,7 @@ describe('coreBlockPlugin', () => {
       await assertBlockType('unstyled');
     });
 
-    test.skip('resets block type if the heading sequence becomes invalid by splitting the block', async () => {
+    test('resets block type if the heading sequence becomes invalid by splitting the block', async () => {
       await typeText('## ');
       await pressKey('ArrowLeft', 2);
       await pressKey('Enter');

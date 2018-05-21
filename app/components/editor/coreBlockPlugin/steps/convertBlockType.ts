@@ -19,8 +19,9 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
   }
 
   const selection = editorState.getSelection();
+  const prevSelection = prevEditorState.getSelection();
   const { content: nextContent, adjustSelection } = content.getBlockMap()
-    .skipUntil((_, key) => key === selection.getStartKey())
+    .skipUntil((_, key) => key === selection.getStartKey() || key === prevSelection.getStartKey())
     .takeUntil((_, key) => {
       const firstNonMatchingBlock = content.getBlockAfter(selection.getEndKey());
       return firstNonMatchingBlock && firstNonMatchingBlock.getKey() === key;
