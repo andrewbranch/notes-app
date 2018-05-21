@@ -1,4 +1,4 @@
-import { loadApp, typeText, getState, pressKey } from './transport';
+import { loadApp, typeText, getState, pressKey, withShift } from './transport';
 
 const assertBlockType = async (blockType: string) => expect((await getState()).content.getFirstBlock().getType()).toBe(blockType);
 
@@ -80,6 +80,14 @@ describe('coreBlockPlugin', () => {
       await pressKey('Backspace');
       await assertBlockType('unstyled');
       expect((await getState()).content.getPlainText()).toBe('-');
+    });
+
+    test('backspacing a range including the first character of a list item works normally', async () => {
+      await typeText('- x');
+      await withShift('ArrowLeft');
+      await pressKey('Backspace');
+      await assertBlockType('unordered-list-item');
+      expect((await getState()).content.getPlainText()).toBe('');
     });
 
     test('pressing enter after a filled list item adds another list item', async () => {
