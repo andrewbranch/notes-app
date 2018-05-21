@@ -44,6 +44,13 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
       const blockText = block!.getText();
       const currentBlockType = block!.getType();
       const currentBlockDefinition = blocks[currentBlockType];
+      // Non-expandable blocks have to be undone by backspacing before
+      // being converted to other kinds of blocks, e.g. you can’t
+      // convert a list item to a header by typing “# ” in the list item.
+      if (currentBlockDefinition && !currentBlockDefinition.expandable) {
+        return { content, adjustSelection };
+      }
+
       const [newBlockDefinition, match] = matchBlock(blockText);
       if (newBlockDefinition && match) {
         if (currentBlockType !== newBlockDefinition.type) {
