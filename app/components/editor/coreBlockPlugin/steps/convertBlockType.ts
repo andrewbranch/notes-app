@@ -1,4 +1,4 @@
-import { EditorState, ContentState, Modifier, ContentBlock } from 'draft-js';
+import { EditorState, ContentState, Modifier, ContentBlock, SelectionState } from 'draft-js';
 import { blockValues, blocks, CoreBlockDefinition } from '../blocks';
 import { createSelectionWithBlock, performUnUndoableEdits, createSelectionWithRange, createSelectionWithSelection } from '../../../../utils/draftUtils';
 import { OrderedSet } from 'immutable';
@@ -11,6 +11,17 @@ const matchBlock = (text: string): [CoreBlockDefinition, RegExpExecArray] | [nul
   return [null, null];
 }
 
+const didCompleteList = (prevEditorState: EditorState, editorState: EditorState) => {
+  const selection = editorState.getSelection();
+  const prevSelection = prevEditorState.getSelection();
+  const prevBlock = prevEditorState.getCurrentContent().getBlockForKey(prevSelection.getStartKey());
+  return editorState.getLastChangeType() === 'split-block'
+    && selection.isCollapsed()
+    && prevSelection.isCollapsed()
+    && ['unordered-list-item', 'ordered-list-item'].includes(prevBlock.getType())
+    && prevBlock.getText() === '';
+};
+
 export const convertBlockType = (editorState: EditorState, prevEditorState: EditorState): EditorState => {
   const content = editorState.getCurrentContent();
   const prevContent = prevEditorState.getCurrentContent();
@@ -18,8 +29,33 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
     return editorState;
   }
 
+  // Special case for lists, pressing enter on an empty list item ends the list
   const selection = editorState.getSelection();
   const prevSelection = prevEditorState.getSelection();
+  if (didCompleteList(prevEditorState, editorState)) {
+    const blockToConvert = content.getBlockForKey(prevSelection.getStartKey());
+    const blockToDelete = content.getBlockForKey(selection.getStartKey());
+    const contentWithDeletedBlock = Modifier.removeRange(
+      content,
+      SelectionState.createEmpty(blockToConvert.getKey()).merge({
+        focusKey: blockToDelete.getKey()
+      }) as SelectionState,
+      'backward'
+    );
+    const contentWithConvertedBlock = Modifier.setBlockType(
+      contentWithDeletedBlock,
+      createSelectionWithBlock(blockToConvert),
+      'unstyled'
+    );
+
+    return performUnUndoableEdits(editorState, disabledUndoEditorState => (
+      EditorState.forceSelection(
+        EditorState.push(disabledUndoEditorState, contentWithConvertedBlock, 'change-block-type'),
+        createSelectionWithBlock(blockToConvert)
+      )
+    ));
+  }
+
   const { content: nextContent, adjustSelection } = content.getBlockMap()
     .skipUntil((_, key) => key === selection.getStartKey() || key === prevSelection.getStartKey())
     .takeUntil((_, key) => {
