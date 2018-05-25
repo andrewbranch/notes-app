@@ -76,13 +76,9 @@ export const blocks: { [K in DraftBlockType]?: CoreStaticBlockDefinition | CoreE
   },
   'blockquote': {
     type: 'blockquote',
-    pattern: /^(>) /,
+    pattern: /^> /,
     expandable: false,
     canonicalPattern: '> '
-    // canonicalPattern: [
-    //   { text: '>', style: OrderedSet(['core.block.decorator']) },
-    //   { text: ' ' }
-    // ]
   },
   'unordered-list-item': {
     type: 'unordered-list-item',
