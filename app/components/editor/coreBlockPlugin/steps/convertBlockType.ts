@@ -56,7 +56,7 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
     ));
   }
 
-  const { content: nextContent, adjustSelection } = content.getBlockMap()
+  const result = content.getBlockMap()
     .skipUntil((_, key) => key === selection.getStartKey() || key === prevSelection.getStartKey())
     .takeUntil((_, key) => {
       const firstNonMatchingBlock = content.getBlockAfter(selection.getEndKey());
@@ -69,7 +69,8 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
         return { content, adjustSelection };
       }
 
-      if (prevBlock && prevBlock.getText() === "" && editorState.getLastChangeType() === 'delete-character') {
+      const prevBlockText = prevBlock && prevBlock.getText();
+      if (prevBlock && prevBlockText === "" && editorState.getLastChangeType() === 'delete-character') {
         const prevBlockNowInCurrentBlock = prevContent.getBlockAfter(prevBlock.getKey());
         return {
           content: Modifier.setBlockType(content, createSelectionWithBlock(block!), prevBlockNowInCurrentBlock.getType()),
@@ -84,6 +85,12 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
       // being converted to other kinds of blocks, e.g. you can’t
       // convert a list item to a header by typing “# ” in the list item.
       if (currentBlockDefinition && !currentBlockDefinition.expandable) {
+        if (!prevBlock && !currentBlockDefinition.continues) {
+          return {
+            content: Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled'),
+            adjustSelection
+          };
+        }
         return { content, adjustSelection };
       }
 
@@ -111,7 +118,15 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
             }
           };
         }
-      } else if (currentBlockType !== 'unstyled' && (!currentBlockDefinition || currentBlockDefinition.expandable)) {
+      } else if (
+        !prevBlock // If prevBlock doesn’t exist, the block is brand new and should be made unstyled
+        || currentBlockType !== 'unstyled' // If block is already unstyled there’s nothing to do
+          && (!currentBlockDefinition || currentBlockDefinition.expandable)
+          // TODO: memoize `matchBlock` with length of 1
+          // If the old block content doesn’t register as a match for its block definition,
+          // then we’re about to expand it, so we shouldn’t convert it to unstyled.
+          && matchBlock(prevBlockText || '')[0] === currentBlockDefinition
+      ) {
         return {
           content: Modifier.removeInlineStyle(
             Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled'),
@@ -125,11 +140,11 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
       return { content, adjustSelection };
     }, { content: editorState.getCurrentContent(), adjustSelection: {} });
   
-  if (nextContent !== content) {
+  if (result.content !== content) {
     return performUnUndoableEdits(editorState, disabledUndoEditorState => {
-      const adjustSelectionForBlock = -(adjustSelection[selection.getStartKey()] || 0);
+      const adjustSelectionForBlock = -(result.adjustSelection[selection.getStartKey()] || 0);
       return EditorState.forceSelection(
-        EditorState.push(disabledUndoEditorState, nextContent, 'change-block-type'),
+        EditorState.push(disabledUndoEditorState, result.content, 'change-block-type'),
         createSelectionWithSelection(selection, adjustSelectionForBlock, adjustSelectionForBlock)
       );
     });

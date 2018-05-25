@@ -1,6 +1,9 @@
 import { loadApp, typeText, getState, pressKey, withShift } from './transport';
 
-const assertBlockType = async (blockType: string) => expect((await getState()).content.getFirstBlock().getType()).toBe(blockType);
+const assertBlockType = async (blockType: string) => {
+  const { content, selection } = await getState();
+  expect(content.getBlockForKey(selection.getStartKey()).getType()).toBe(blockType);
+};
 
 beforeEach(async () => {
   await loadApp();
@@ -111,6 +114,28 @@ describe('coreBlockPlugin', () => {
     });
   });
 
+  describe('blockquotes', async () => {
+    test('creates a blockquote after typing the control sequence', async () => {
+      await typeText('> Hello');
+      await assertBlockType('blockquote');
+      expect((await getState()).content.getPlainText()).toBe('Hello');
+    });
+
+    test('pressing enter at the end of a blockquote creates an unstyled block', async () => {
+      await typeText('> Four score and seven years ago');
+      await pressKey('Enter');
+      await assertBlockType('unstyled');
+    });
+
+    test('pressing enter in the middle of a blockquote creates an unstyled block', async () => {
+      await typeText('> Four score and seven years ago');
+      await pressKey('ArrowLeft', 3);
+      await pressKey('Enter');
+      await assertBlockType('unstyled');
+      expect((await getState()).content.getLastBlock().getText()).toBe('ago');
+    });
+  });
+
   describe('decorator sequence styles', () => {
     test('styles decorator characters when a block is created', async () => {
       await typeText('## ');
@@ -143,7 +168,7 @@ describe('coreBlockPlugin', () => {
     });
   });
 
-  describe('general editing', () => {
+  describe('expandable blocks', () => {
     test('Maintains/expands block when forward-deleting the preceding block', async () => {
       await pressKey('Enter');
       await typeText('# Hello');
@@ -160,6 +185,20 @@ describe('coreBlockPlugin', () => {
       await pressKey('Backspace');
       await assertBlockType('header-one');
       expect(await getState()).toMatchSnapshot();
+    });
+
+    test('Expands blocks with inline styles in them', async () => {
+      await typeText('# `Title`');
+      await pressKey('Enter');
+      await pressKey('ArrowUp');
+      await assertBlockType('header-one');
+      expect((await getState()).content.getPlainText()).toContain('# `Title`');
+    });
+
+    test('Pressing enter after an expandable block starts an unstyled block', async () => {
+      await typeText('# Hello');
+      await pressKey('Enter');
+      await assertBlockType('unstyled');
     });
   });
 });

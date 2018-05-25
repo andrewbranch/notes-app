@@ -309,7 +309,7 @@ Object {
 }
 `;
 
-exports[`coreBlockPlugin general editing Maintains block when backspacing the beginning of the block into an empty preceding block 1`] = `
+exports[`coreBlockPlugin expandable blocks Maintains block when backspacing the beginning of the block into an empty preceding block 1`] = `
 Object {
   "content": Immutable.Record {
     "entityMap": Object {},
@@ -366,7 +366,7 @@ Object {
 }
 `;
 
-exports[`coreBlockPlugin general editing Maintains/expands block when forward-deleting the preceding block 1`] = `
+exports[`coreBlockPlugin expandable blocks Maintains/expands block when forward-deleting the preceding block 1`] = `
 Object {
   "content": Immutable.Record {
     "entityMap": Object {},
