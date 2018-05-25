@@ -1,6 +1,9 @@
 import { loadApp, typeText, getState, pressKey, withShift } from './transport';
 
-const assertBlockType = async (blockType: string) => expect((await getState()).content.getFirstBlock().getType()).toBe(blockType);
+const assertBlockType = async (blockType: string) => {
+  const { content, selection } = await getState();
+  expect(content.getBlockForKey(selection.getStartKey()).getType()).toBe(blockType);
+};
 
 beforeEach(async () => {
   await loadApp();
