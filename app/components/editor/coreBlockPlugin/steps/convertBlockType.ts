@@ -85,6 +85,12 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
       // being converted to other kinds of blocks, e.g. you can’t
       // convert a list item to a header by typing “# ” in the list item.
       if (currentBlockDefinition && !currentBlockDefinition.expandable) {
+        if (!prevBlock && !currentBlockDefinition.continues) {
+          return {
+            content: Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled'),
+            adjustSelection
+          };
+        }
         return { content, adjustSelection };
       }
 

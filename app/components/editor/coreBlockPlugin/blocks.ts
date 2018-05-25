@@ -12,6 +12,8 @@ export interface CoreBlockDefinition {
 export interface CoreStaticBlockDefinition extends CoreBlockDefinition {
   expandable?: false;
   canonicalPattern: string;
+  /** Whether the new block type created after pressing Enter should be the same type as the current block. */
+  continues: boolean;
 }
 
 export interface CoreExpandableBlockDefinition extends CoreBlockDefinition {
@@ -78,13 +80,15 @@ export const blocks: { [K in DraftBlockType]?: CoreStaticBlockDefinition | CoreE
     type: 'blockquote',
     pattern: /^> /,
     expandable: false,
-    canonicalPattern: '> '
+    canonicalPattern: '> ',
+    continues: false
   },
   'unordered-list-item': {
     type: 'unordered-list-item',
     pattern: /^- /,
     expandable: false,
-    canonicalPattern: '- '
+    canonicalPattern: '- ',
+    continues: true
   }
 };
 
