@@ -111,6 +111,28 @@ describe('coreBlockPlugin', () => {
     });
   });
 
+  describe('blockquotes', async () => {
+    test('creates a blockquote after typing the control sequence', async () => {
+      await typeText('> Hello');
+      await assertBlockType('blockquote');
+      expect((await getState()).content.getPlainText()).toBe('Hello');
+    });
+
+    test('pressing enter at the end of a blockquote creates an unstyled block', async () => {
+      await typeText('> Four score and seven years ago');
+      await pressKey('Enter');
+      await assertBlockType('unstyled');
+    });
+
+    test('pressing enter in the middle of a blockquote creates an unstyled block', async () => {
+      await typeText('> Four score and seven years ago');
+      await pressKey('ArrowLeft', 3);
+      await pressKey('Enter');
+      await assertBlockType('unstyled');
+      expect((await getState()).content.getLastBlock().getText()).toBe('ago');
+    });
+  });
+
   describe('decorator sequence styles', () => {
     test('styles decorator characters when a block is created', async () => {
       await typeText('## ');
@@ -168,6 +190,12 @@ describe('coreBlockPlugin', () => {
       await pressKey('ArrowUp');
       await assertBlockType('header-one');
       expect((await getState()).content.getPlainText()).toContain('# `Title`');
+    });
+
+    test('Pressing enter after an expandable block starts an unstyled block', async () => {
+      await typeText('# Hello');
+      await pressKey('Enter');
+      await assertBlockType('unstyled');
     });
   });
 });
