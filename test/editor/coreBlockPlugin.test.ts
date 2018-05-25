@@ -143,7 +143,7 @@ describe('coreBlockPlugin', () => {
     });
   });
 
-  describe('general editing', () => {
+  describe('expandable blocks', () => {
     test('Maintains/expands block when forward-deleting the preceding block', async () => {
       await pressKey('Enter');
       await typeText('# Hello');
@@ -160,6 +160,14 @@ describe('coreBlockPlugin', () => {
       await pressKey('Backspace');
       await assertBlockType('header-one');
       expect(await getState()).toMatchSnapshot();
+    });
+
+    test('Expands blocks with inline styles in them', async () => {
+      await typeText('# `Title`');
+      await pressKey('Enter');
+      await pressKey('ArrowUp');
+      await assertBlockType('header-one');
+      expect((await getState()).content.getPlainText()).toContain('# `Title`');
     });
   });
 });

@@ -56,7 +56,7 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
     ));
   }
 
-  const { content: nextContent, adjustSelection } = content.getBlockMap()
+  const x = content.getBlockMap()
     .skipUntil((_, key) => key === selection.getStartKey() || key === prevSelection.getStartKey())
     .takeUntil((_, key) => {
       const firstNonMatchingBlock = content.getBlockAfter(selection.getEndKey());
@@ -69,7 +69,8 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
         return { content, adjustSelection };
       }
 
-      if (prevBlock && prevBlock.getText() === "" && editorState.getLastChangeType() === 'delete-character') {
+      const prevBlockText = prevBlock && prevBlock.getText();
+      if (prevBlock && prevBlockText === "" && editorState.getLastChangeType() === 'delete-character') {
         const prevBlockNowInCurrentBlock = prevContent.getBlockAfter(prevBlock.getKey());
         return {
           content: Modifier.setBlockType(content, createSelectionWithBlock(block!), prevBlockNowInCurrentBlock.getType()),
@@ -111,7 +112,12 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
             }
           };
         }
-      } else if (currentBlockType !== 'unstyled' && (!currentBlockDefinition || currentBlockDefinition.expandable)) {
+      } else if (
+        !prevBlock
+        || currentBlockType !== 'unstyled'
+          && (!currentBlockDefinition || currentBlockDefinition.expandable)
+          && matchBlock(prevBlockText || '')[0] === currentBlockDefinition
+      ) {
         return {
           content: Modifier.removeInlineStyle(
             Modifier.setBlockType(content, createSelectionWithBlock(block!), 'unstyled'),
@@ -125,11 +131,11 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
       return { content, adjustSelection };
     }, { content: editorState.getCurrentContent(), adjustSelection: {} });
   
-  if (nextContent !== content) {
+  if (x.content !== content) {
     return performUnUndoableEdits(editorState, disabledUndoEditorState => {
-      const adjustSelectionForBlock = -(adjustSelection[selection.getStartKey()] || 0);
+      const adjustSelectionForBlock = -(x.adjustSelection[selection.getStartKey()] || 0);
       return EditorState.forceSelection(
-        EditorState.push(disabledUndoEditorState, nextContent, 'change-block-type'),
+        EditorState.push(disabledUndoEditorState, x.content, 'change-block-type'),
         createSelectionWithSelection(selection, adjustSelectionForBlock, adjustSelectionForBlock)
       );
     });
