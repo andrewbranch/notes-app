@@ -41,6 +41,12 @@ module.exports = merge(baseConfig, {
           }]
         })
       },
+      {
+        test: /\.css$/,
+        use: ExtractTextPlugin.extract({
+          use: 'css-loader'
+        })
+      },
 
       // WOFF Font
       {
