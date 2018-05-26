@@ -89,6 +89,18 @@ export const blocks: { [K in DraftBlockType]?: CoreStaticBlockDefinition | CoreE
     expandable: false,
     canonicalPattern: '- ',
     continues: true
+  },
+  'ordered-list-item': {
+    type: 'ordered-list-item',
+    pattern: /1[.)] /,
+    expandable: false,
+    // TODO: there is no canonical pattern for ordered list items,
+    // so maybe this is a bad paradigm. We should possibly store what
+    // the user types in blockData and use that, or in the case of
+    // ordered list items, adjust the numeric portion of the pattern
+    // to reflect the actual number rendered.
+    canonicalPattern: '',
+    continues: true
   }
 };
 
