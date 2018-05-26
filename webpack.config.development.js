@@ -25,7 +25,7 @@ module.exports = merge(baseConfig, {
   module: {
     loaders: [
       {
-        test: /\.global\.css$/,
+        test: /(\.global|node_modules.*)\.css$/,
         loaders: [
           'style-loader',
           'css-loader?sourceMap'
@@ -34,6 +34,7 @@ module.exports = merge(baseConfig, {
 
       {
         test: /^((?!\.global).)*\.css$/,
+        exclude: /node_modules/,
         loaders: [
           'style-loader',
           {

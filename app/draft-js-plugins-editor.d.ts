@@ -42,7 +42,7 @@ declare module 'draft-js-plugins-editor' {
     blockRendererFn?(block: Draft.ContentBlock, pluginProvider: PluginProvider): any;
     blockStyleFn?(block: Draft.ContentBlock, pluginProvider: PluginProvider): string;
     customStyleFn?(style: Draft.DraftInlineStyle): Object;
-    keyBindingFn?(e: React.KeyboardEvent<{}>, pluginProvider: PluginProvider): Draft.DraftEditorCommand | null;
+    keyBindingFn?(e: React.KeyboardEvent<{}>, pluginProvider: PluginProvider): Draft.DraftEditorCommand | string | null;
     handleReturn?(e: React.KeyboardEvent<{}>, editorState: Draft.EditorState, pluginProvider: PluginProvider): Draft.DraftHandleValue;
     handleKeyCommand?(command: Draft.DraftEditorCommand | string, editorState: Draft.EditorState, pluginProvider: PluginProvider): Draft.DraftHandleValue;
     handleBeforeInput?(chars: string, editorState: Draft.EditorState, pluginProvider: PluginProvider): Draft.DraftHandleValue;
