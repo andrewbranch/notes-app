@@ -8,6 +8,7 @@ import { editorSelector } from './Editor.selectors';
 import * as editorActions from './Editor.actions';
 import { createCoreStylingPlugin } from './coreStylingPlugin';
 import { createCoreBlockPlugin } from './coreBlockPlugin';
+import 'draft-js/dist/Draft.css';
 
 export interface EditorProps {
   editor: EditorState;
