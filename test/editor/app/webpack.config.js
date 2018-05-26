@@ -22,7 +22,7 @@ const config = {
       test: /\.json$/,
       use: 'json-loader'
     }, {
-      test: /\.global\.css$/,
+      test: /(\.global|node_modules.*)\.css$/,
       use: [
         'style-loader',
         'css-loader?sourceMap'
@@ -31,6 +31,7 @@ const config = {
 
     {
       test: /^((?!\.global).)*\.css$/,
+      exclude: /node_modules/,
       use: [
         'style-loader',
         {
