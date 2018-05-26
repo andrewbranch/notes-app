@@ -1,5 +1,5 @@
 import { Plugin } from 'draft-js-plugins-editor';
-import { EditorState, Modifier, RichUtils, KeyBindingUtil, DraftEditorCommand } from 'draft-js';
+import { EditorState, Modifier, RichUtils, KeyBindingUtil, getDefaultKeyBinding } from 'draft-js';
 import { convertBlockType } from './steps/convertBlockType';
 import { collapseBlocks, collapseBlocksAtSelectionEdges } from './steps/collapseBlocks';
 import { expandBlocks } from './steps/expandBlocks';
@@ -63,7 +63,7 @@ export const createCoreBlockPlugin = (getEditorState: () => EditorState): Plugin
       return '@core/increase-depth';
     }
 
-    return null;
+    return getDefaultKeyBinding(event);
   },
 
   onTab: (event, { getEditorState, setEditorState }) => {
