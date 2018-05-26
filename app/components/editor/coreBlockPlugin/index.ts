@@ -1,5 +1,5 @@
 import { Plugin } from 'draft-js-plugins-editor';
-import { EditorState, Modifier, RichUtils } from 'draft-js';
+import { EditorState, Modifier, RichUtils, KeyBindingUtil, DraftEditorCommand } from 'draft-js';
 import { convertBlockType } from './steps/convertBlockType';
 import { collapseBlocks, collapseBlocksAtSelectionEdges } from './steps/collapseBlocks';
 import { expandBlocks } from './steps/expandBlocks';
@@ -16,8 +16,16 @@ export const createCoreBlockPlugin = (getEditorState: () => EditorState): Plugin
     return expandBlocks(editorStateWithCollapsedBlocks);
   },
 
-  // Handle backspacing to unset non-expandable block types
   handleKeyCommand: (command, editorState, { setEditorState }) => {
+    if (command === '@core/increase-depth') {
+      // TODO
+      return 'not-handled';
+    } else if (command === '@core/decrease-depth') {
+      // TODO
+      return 'not-handled';
+    }
+
+    // Handle backspacing to unset non-expandable block types
     const selection = editorState.getSelection();
     const isBackspace = command === 'backspace' || command === 'backspace-word' || command === 'backspace-to-start-of-line';
     if (isBackspace && selection.isCollapsed() && selection.getStartOffset() === 0) {
@@ -45,6 +53,17 @@ export const createCoreBlockPlugin = (getEditorState: () => EditorState): Plugin
       }
     }
     return 'not-handled';
+  },
+
+  keyBindingFn(event) {
+    const isCmd = KeyBindingUtil.hasCommandModifier(event);
+    if (isCmd && event.key === '[') {
+      return '@core/decrease-depth';
+    } else if (isCmd && event.key === ']') {
+      return '@core/increase-depth';
+    }
+
+    return null;
   },
 
   onTab: (event, { getEditorState, setEditorState }) => {
