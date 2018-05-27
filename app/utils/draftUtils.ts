@@ -1,6 +1,6 @@
 import { SelectionState, ContentBlock, Entity, Modifier, EditorState, CharacterMetadata, ContentState } from 'draft-js';
 import { DecoratorStrategyCallback } from 'draft-js-plugins-editor';
-import { constant, sum } from 'lodash';
+import { constant, sum, uniq, compact } from 'lodash';
 import { Map, Set, OrderedSet, Iterable, List } from 'immutable';
 
 // Can be replaced with ReturnType<T> in TS 2.8
@@ -238,6 +238,19 @@ export const getContiguousStyleRangesNearOffset = (block: ContentBlock, offset: 
     }
     return ranges!;
   }, Map<string, Range>());
+};
+
+export const getEntitiesNearOffset = (block: ContentBlock, offset: number): string[] => {
+  const entityAtOffset = block.getEntityAt(offset);
+  const entityAdjacentToOffset = offset > 0 ? block.getEntityAt(offset - 1) : null;
+  return uniq(compact([entityAtOffset, entityAdjacentToOffset]));
+}
+
+export const getEntitiesNearSelectionEdges = (content: ContentState, selection: SelectionState): Map<string, string[]> => {
+  const blocks = selection.isCollapsed() ? [selection.getStartKey()] : [selection.getStartKey(), selection.getEndKey()];
+  return Map(blocks.map((block, index) => (
+    [block, getEntitiesNearOffset(content.getBlockForKey(block), index === 0 ? selection.getStartOffset() : selection.getEndOffset())]
+  )).filter(([, entities]) => entities.length > 0));
 };
 
 export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, OrderedSet<Range>> => {

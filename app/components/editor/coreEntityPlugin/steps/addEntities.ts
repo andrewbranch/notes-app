@@ -51,7 +51,10 @@ export const addEntities = (editorState: EditorState, prevEditorState: EditorSta
 
   if (nextContent !== content) {
     return performUnUndoableEdits(editorState, disabledUndoEditorState => (
-      EditorState.push(disabledUndoEditorState, nextContent, 'apply-entity')
+      EditorState.forceSelection(
+        EditorState.push(disabledUndoEditorState, nextContent, 'apply-entity'),
+        editorState.getSelection()
+      )
     ));
   }
 

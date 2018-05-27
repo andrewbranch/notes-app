@@ -11,3 +11,4 @@ export const expandableEntityValues = values(expandableEntities);
 export const entities = expandableEntities;
 export const entityKeys = expandableEntityKeys;
 export const entityValues = expandableEntityValues;
+export const isExpandableEntityKey = (type: string): type is CoreExpandableEntityType => type in expandableEntities;

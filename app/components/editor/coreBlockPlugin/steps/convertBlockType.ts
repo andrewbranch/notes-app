@@ -140,7 +140,8 @@ export const convertBlockType = (editorState: EditorState, prevEditorState: Edit
       return { content, adjustSelection };
     }, { content: editorState.getCurrentContent(), adjustSelection: {} });
   
-  if (result.content !== content) {
+  // Something in the reducer ends up changing `selectionBefore` and/or `selectionAfter` but not actually the content
+  if (result.content.getBlockMap() !== content.getBlockMap()) {
     return performUnUndoableEdits(editorState, disabledUndoEditorState => {
       const adjustSelectionForBlock = -(result.adjustSelection[selection.getStartKey()] || 0);
       return EditorState.forceSelection(
