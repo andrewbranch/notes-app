@@ -2,6 +2,16 @@ declare module 'draft-js-plugins-editor' {
   import * as Draft from 'draft-js';
   import * as React from 'react';
 
+  export interface DraftDecoratorComponentProps {
+    contentState: Draft.ContentState;
+    decoratedText: string;
+    entityKey: string;
+    offsetKey: string;
+    getEditorState: () => Draft.EditorState;
+    setEditorState: (editorState: Draft.EditorState) => void;
+    children: React.ReactNode;
+  }
+
   export type DecoratorStrategyCallback = (start: number, end: number) => void;
   export type DecoratorStrategy = (block: Draft.ContentBlock, callback: DecoratorStrategyCallback, contentState: Draft.ContentState) => void;
   export interface Decorator {

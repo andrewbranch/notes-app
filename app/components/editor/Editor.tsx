@@ -1,4 +1,5 @@
 /// <reference path="../../draft-js-plugins-editor.d.ts" />
+
 import * as React from 'react';
 import { bindActionCreators } from 'redux';
 import { EditorState } from 'draft-js';
@@ -8,6 +9,7 @@ import { editorSelector } from './Editor.selectors';
 import * as editorActions from './Editor.actions';
 import { createCoreStylingPlugin } from './coreStylingPlugin';
 import { createCoreBlockPlugin } from './coreBlockPlugin';
+import { createCoreEntityPlugin } from './coreEntityPlugin';
 import 'draft-js/dist/Draft.css';
 
 export interface EditorProps {
@@ -16,23 +18,29 @@ export interface EditorProps {
 }
 
 export class Editor extends React.Component<EditorProps & typeof editorActions> {
-  private coreStylingPlugin = createCoreStylingPlugin(() => this.props.editor);
-  private coreBlockPlugin = createCoreBlockPlugin(() => this.props.editor);
-  private editor: DraftEditor | null;
-  private isFocused: boolean = false;
-
   public focus() {
     if (this.editor) {
       this.editor.focus();
     }
   }
 
+  private getEditorState = () => this.props.editor;
+  private plugins = [
+    createCoreStylingPlugin(this.getEditorState),
+    createCoreBlockPlugin(this.getEditorState),
+    createCoreEntityPlugin(this.getEditorState)
+  ];
+  
+  private editor: DraftEditor | null;
+  private isFocused: boolean = false;
+  private saveRef = (ref: DraftEditor) => this.editor = ref;
   private onFocus: React.FocusEventHandler<HTMLElement> = () => this.isFocused = true;
   private onBlur: React.FocusEventHandler<HTMLElement> = () => this.isFocused = false;
 
   private updateEditorState = (editorState: EditorState) => {
     this.props.updateEditor({ noteId: this.props.noteId, editorState, time: Date.now() });
   }
+
 
   // When noteId changes to point at a freshly created EditorState,
   // the SelectionState’s `isFocused` is always false, and causes
@@ -47,10 +55,10 @@ export class Editor extends React.Component<EditorProps & typeof editorActions> 
   render() {
     return (
       <DraftEditor
-        ref={x => this.editor = x}
+        ref={this.saveRef}
         editorState={this.props.editor}
         onChange={this.updateEditorState}
-        plugins={[this.coreStylingPlugin, this.coreBlockPlugin]}
+        plugins={this.plugins}
         onFocus={this.onFocus}
         onBlur={this.onBlur}
       />

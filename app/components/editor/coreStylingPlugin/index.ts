@@ -1,6 +1,5 @@
 import { EditorState, Modifier } from 'draft-js';
 import { Plugin } from 'draft-js-plugins-editor';
-import { decorators } from './decorators';
 import { removeInlineStyles } from './steps/removeInlineStyles';
 import { addInlineStyles } from './steps/addInlineStyles';
 import { collapseInlineStyles, collapseInlineStyleRangesAtSelectionEdges } from './steps/collapseInlineStyles';
@@ -51,8 +50,6 @@ export const createCoreStylingPlugin: (getEditorState: () => EditorState) => Plu
     const expandEdits = expandInlineStyle(editorStateWithAddedStyles);
     return performDependentEdits(editorStateWithAddedStyles, [...collapseEdits, ...expandEdits]);
   },
-
-  decorators,
 
   customStyleMap: styleValues.reduce((map, style) => ({
     ...map,

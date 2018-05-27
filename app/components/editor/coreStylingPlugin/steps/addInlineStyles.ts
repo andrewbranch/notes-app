@@ -24,7 +24,7 @@ export const addInlineStyles = (editorState: EditorState, prevEditorState: Edito
   const affectedBlocks = changeType === 'split-block' ? [focusKey, prevSelection.getStartKey()] : [focusKey];
   let nextContent = content;
 
-  // Go through each styling entity and reapply
+  // Go through each style definition and reapply
   affectedBlocks.forEach(blockKey => {
     const newText = nextContent.getBlockForKey(blockKey).getText();
     expandableStyleValues.forEach(style => {
