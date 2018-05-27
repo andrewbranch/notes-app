@@ -247,10 +247,14 @@ export const getEntitiesNearOffset = (block: ContentBlock, offset: number): stri
 }
 
 export const getEntitiesNearSelectionEdges = (content: ContentState, selection: SelectionState): Map<string, string[]> => {
-  const blocks = selection.isCollapsed() ? [selection.getStartKey()] : [selection.getStartKey(), selection.getEndKey()];
-  return Map(blocks.map((block, index) => (
-    [block, getEntitiesNearOffset(content.getBlockForKey(block), index === 0 ? selection.getStartOffset() : selection.getEndOffset())]
-  )).filter(([, entities]) => entities.length > 0));
+  const selectionEdges: [string, number][] = selection.isCollapsed()
+    ? [[selection.getStartKey(), selection.getStartOffset()]]
+    : [[selection.getStartKey(), selection.getStartOffset()], [selection.getEndKey(), selection.getEndOffset()]];
+
+  return Map(selectionEdges.reduce((blockMap, [block, offset], index) => {
+    const entities = getEntitiesNearOffset(content.getBlockForKey(block), offset);
+    return entities.length ? { ...blockMap, [block]: uniq((blockMap[block] || []).concat(entities)) } : blockMap;
+  }, {} as { [key: string]: string[] }));
 };
 
 export const getContiguousStyleRangesNearSelectionEdges = (content: ContentState, selection: SelectionState, styleKeyFilter: (styleKey: string) => boolean = constant(true)): Map<string, OrderedSet<Range>> => {
