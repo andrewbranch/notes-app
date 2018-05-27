@@ -33,7 +33,7 @@ export const addEntities = (editorState: EditorState, prevEditorState: EditorSta
         const block = nextContent.getBlockForKey(blockKey);
         // Entities aren’t nestable
         if (block.getEntityAt(match.index)) {
-          return;
+          continue;
         }
 
         nextContent = nextContent.createEntity(
