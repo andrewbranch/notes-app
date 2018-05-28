@@ -105,8 +105,15 @@ const config = {
     new webpack.NormalModuleReplacementPlugin(
       /generateRandomKey/,
       path.resolve(__dirname, 'generateCounterKey.ts')
-    )
-  ]
+    ),
+    new webpack.NormalModuleReplacementPlugin(
+      /node_modules[\\/]electron/,
+      path.resolve(__dirname, 'electron.ts')
+    ),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('development')
+    }),
+  ],
 };
 
 module.exports = config;
