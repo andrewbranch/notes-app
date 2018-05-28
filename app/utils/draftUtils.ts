@@ -251,9 +251,10 @@ export const getEntitiesNearSelectionEdges = (content: ContentState, selection: 
     ? [[selection.getStartKey(), selection.getStartOffset()]]
     : [[selection.getStartKey(), selection.getStartOffset()], [selection.getEndKey(), selection.getEndOffset()]];
 
-  return Map(selectionEdges.reduce((blockMap, [block, offset], index) => {
-    const entities = getEntitiesNearOffset(content.getBlockForKey(block), offset);
-    return entities.length ? { ...blockMap, [block]: uniq((blockMap[block] || []).concat(entities)) } : blockMap;
+  return Map(selectionEdges.reduce((blockMap, [blockKey, offset], index) => {
+    const block = content.getBlockForKey(blockKey);
+    const entities = block ? getEntitiesNearOffset(block, offset) : [];
+    return entities.length ? { ...blockMap, [blockKey]: uniq((blockMap[blockKey] || []).concat(entities)) } : blockMap;
   }, {} as { [key: string]: string[] }));
 };
 
@@ -291,6 +292,7 @@ export type InsertionEdit = {
   offset: number;
   deletionLength?: number;
   style?: OrderedSet<string>;
+  entity?: string;
   disableUndo?: true;
 }
 
@@ -319,7 +321,7 @@ export const performDependentEdits = (editorState: EditorState, edits: Edit[]) =
         const insertOffset = edit.offset + sum(insertions[edit.blockKey].slice(0, edit.offset + 1)) - sum(deletions[edit.blockKey].slice(0, edit.offset + 1));
         insertions[edit.blockKey][edit.offset] = (insertions[edit.blockKey][edit.offset] || 0) + edit.text.length;
         deletions[edit.blockKey][edit.offset] = (deletions[edit.blockKey][edit.offset] || 0) + (edit.deletionLength || 0);
-        const nextContent = Modifier.replaceText(content, createSelectionWithRange(edit.blockKey, insertOffset, insertOffset + (edit.deletionLength || 0)), edit.text, edit.style);
+        const nextContent = Modifier.replaceText(content, createSelectionWithRange(edit.blockKey, insertOffset, insertOffset + (edit.deletionLength || 0)), edit.text, edit.style, edit.entity);
         const changeType = edit.text.length ? 'insert-characters' : 'remove-range';
         return edit.disableUndo ? performUnUndoableEdits(
           nextEditorState,
@@ -347,3 +349,8 @@ export const performDependentEdits = (editorState: EditorState, edits: Edit[]) =
     }
   }, editorState);
 };
+
+// TODO: PR Draft for safely checking entity keys
+export const getEntity = (content: ContentState, entityKey: string) => {
+  try { return content.getEntity(entityKey); } catch { return null; }
+}

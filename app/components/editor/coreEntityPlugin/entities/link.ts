@@ -11,5 +11,6 @@ export const linkEntityDefinition: LinkEntityDefinition = {
   type: 'link',
   pattern: /\[([^\]]+)\]\(([^)]+)\)/g,
   getData: match => ({ text: match[1], href: match[2] }),
+  getCollapsedText: data => data.text,
   mutability: 'MUTABLE'
 };

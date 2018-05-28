@@ -15,4 +15,7 @@ export type CoreEntityDefinition<T extends CoreEntityType, DataT extends EntityD
 export type CoreExpandableEntityDefinition<
   T extends CoreExpandableEntityType,
   DataT extends EntityData = EntityData
-> = CoreEntityDefinition<T, DataT>;
+> = CoreEntityDefinition<T, DataT> & {
+  getCollapsedText: (data: DataT) => string;
+  updateDataOnCollapse?: (data: DataT) => Partial<DataT>;
+};

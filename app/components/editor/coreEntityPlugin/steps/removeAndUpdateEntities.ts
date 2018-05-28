@@ -1,7 +1,8 @@
-import { EditorState, Modifier, Entity } from 'draft-js';
-import { uniq, compact } from 'lodash';
+import { EditorState, Modifier } from 'draft-js';
+import { uniq } from 'lodash';
 import { expandableEntities, isExpandableEntityKey } from '../entities';
-import { createSelectionWithRange, performUnUndoableEdits, getEntitiesNearSelectionEdges } from '../../../../utils/draftUtils';
+import { createSelectionWithRange, performUnUndoableEdits, getEntitiesNearSelectionEdges, getEntity } from '../../../../utils/draftUtils';
+import { EntityData } from '../entities/types';
 
 export const removeEntities = (editorState: EditorState, prevEditorState: EditorState): EditorState => {
   const content = editorState.getCurrentContent();
@@ -40,14 +41,18 @@ export const removeEntities = (editorState: EditorState, prevEditorState: Editor
         return;
       }
 
-      // TODO: PR Draft for safely checking entity keys
-      const entity = (() => { try { return nextContent.getEntity(entityKey); } catch { return; } })();
+      const entity = getEntity(nextContent, entityKey);
       if (!entity) {
         return;
       }
 
       const type = entity.getType();
       if (!isExpandableEntityKey(type)) {
+        return;
+      }
+
+      const entityData: EntityData = entity.getData();
+      if (!entityData.expanded) {
         return;
       }
 
