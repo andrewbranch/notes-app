@@ -59,8 +59,6 @@ export const expandEntities = (editorState: EditorState): EditorState => {
           if (relativeAnchorOffset !== false) {
             selectionEdit = {
               ...selectionEdit,
-              type: 'selection',
-              isBackward,
               anchorKey: isBackward ? selection.getEndKey() : selection.getEndKey(),
               anchorOffset: isBackward ? selection.getEndOffset() : selection.getStartOffset(),
               adjustAnchorForInsertions: 'leading',
@@ -71,8 +69,6 @@ export const expandEntities = (editorState: EditorState): EditorState => {
           if (relativeFocusOffset !== false) {
             selectionEdit = {
               ...selectionEdit,
-              type: 'selection',
-              isBackward,
               focusKey: isBackward ? selection.getStartKey() : selection.getStartKey(),
               focusOffset: isBackward ? selection.getStartOffset() : selection.getEndOffset(),
               adjustFocusForInsertions: 'leading',
@@ -92,7 +88,18 @@ export const expandEntities = (editorState: EditorState): EditorState => {
       EditorState.push(disabledUndoEditorState, nextContent, 'apply-entity')
     ));
 
-    return performDependentEdits(editorStateWithNewEntities, [...edits, selectionEdit as SelectionEdit]);
+    return performDependentEdits(editorStateWithNewEntities, [
+      ...edits,
+      {
+        type: 'selection',
+        isBackward,
+        anchorKey,
+        focusKey,
+        anchorOffset,
+        focusOffset,
+        ...selectionEdit
+      }
+    ]);
   }
 
   return editorState;
