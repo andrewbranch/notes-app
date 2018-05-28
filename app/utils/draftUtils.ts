@@ -305,6 +305,8 @@ export type SelectionEdit = {
   isBackward: boolean;
   adjustFocusForInsertions?: 'leading' | 'trailing';
   adjustAnchorForInsertions?: 'leading' | 'trailing';
+  adjustFocus?: number;
+  adjustAnchor?: number;
 }
 
 export type Edit = InsertionEdit | SelectionEdit;
@@ -334,8 +336,8 @@ export const performDependentEdits = (editorState: EditorState, edits: Edit[]) =
         deletions[edit.focusKey] = deletions[edit.focusKey] || [0];
         const adjustFocusForInsertions = edit.adjustFocusForInsertions === 'leading' ? 0 : 1;
         const adjustAnchorForInsertions = edit.adjustAnchorForInsertions === 'leading' ? 0 : 1;
-        const anchorDelta = sum(insertions[edit.anchorKey].slice(0, edit.anchorOffset + adjustAnchorForInsertions)) - sum(deletions[edit.anchorKey].slice(0, edit.anchorOffset + adjustAnchorForInsertions));
-        const focusDelta = sum(insertions[edit.focusKey].slice(0, edit.focusOffset + adjustFocusForInsertions)) - sum(deletions[edit.focusKey].slice(0, edit.focusOffset + adjustFocusForInsertions));
+        const anchorDelta = sum(insertions[edit.anchorKey].slice(0, edit.anchorOffset + adjustAnchorForInsertions)) - sum(deletions[edit.anchorKey].slice(0, edit.anchorOffset + adjustAnchorForInsertions)) + (edit.adjustAnchor || 0);
+        const focusDelta = sum(insertions[edit.focusKey].slice(0, edit.focusOffset + adjustFocusForInsertions)) - sum(deletions[edit.focusKey].slice(0, edit.focusOffset + adjustFocusForInsertions)) + (edit.adjustFocus || 0);
         return EditorState.forceSelection(
           nextEditorState,
           SelectionState.createEmpty(edit.anchorKey).merge({

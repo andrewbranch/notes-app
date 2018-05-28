@@ -1,4 +1,4 @@
-import { EditorState, Modifier } from 'draft-js';
+import { EditorState } from 'draft-js';
 import { getEntitiesNearSelectionEdges, hasEdgeWithin, getEntity, InsertionEdit, performDependentEdits, performUnUndoableEdits } from '../../../../utils/draftUtils';
 import { isExpandableEntityKey, expandableEntities } from '../entities';
 import { EntityData } from '../entities/types';
@@ -31,6 +31,7 @@ export const collapseEntities = (editorState: EditorState, prevEditorState: Edit
       block.findEntityRanges(
         character => character.getEntity() === entityKey,
         (start, end) => {
+          // TODO: I don’t think I need to check hasEdgeWithin
           if (!hasEdgeWithin(selection, blockKey, start, end)) {
             const dataUpdate = entityDefinition.updateDataOnCollapse ? entityDefinition.updateDataOnCollapse(entityData) : null;
             const newData: EntityData = { ...dataUpdate, expanded: false };
