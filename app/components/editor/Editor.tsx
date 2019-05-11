@@ -27,8 +27,8 @@ export class Editor extends React.Component<EditorProps & typeof editorActions> 
   private getEditorState = () => this.props.editor;
   private plugins = [
     createCoreStylingPlugin(this.getEditorState),
-    createCoreBlockPlugin(this.getEditorState),
-    createCoreEntityPlugin(this.getEditorState)
+    createCoreEntityPlugin(this.getEditorState),
+    createCoreBlockPlugin(this.getEditorState)
   ];
   
   private editor: DraftEditor | null;

@@ -36,16 +36,7 @@ export const collapseEntities = (editorState: EditorState, prevEditorState: Edit
             const dataUpdate = entityDefinition.updateDataOnCollapse ? entityDefinition.updateDataOnCollapse(entityData) : null;
             const newData: EntityData = { ...dataUpdate, expanded: false };
             nextContent = content.mergeEntityData(entityKey, newData);
-
-            edits.push({
-              type: 'insertion',
-              blockKey,
-              offset: start,
-              deletionLength: end - start,
-              text: entityDefinition.getCollapsedText(entityData),
-              disableUndo: true,
-              entity: entityKey
-            });
+            edits.push(...entityDefinition.getCollapseEdits(entityData, start, end - start, { blockKey, disableUndo: true }));
           }
         }
       );

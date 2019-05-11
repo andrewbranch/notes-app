@@ -67,14 +67,16 @@ export const expandInlineStyle = (editorState: EditorState): Edit[] => {
           offset: start,
           style: block.getInlineStyleAt(start).add('core.styling.decorator'),
           text: style.pattern,
-          ownStyle: styleKey
+          ownStyle: styleKey,
+          entity: block.getEntityAt(start)
         }, {
           type: 'insertion',
           blockKey,
           offset: start + collapsedText.length,
           style: block.getInlineStyleAt(start).add('core.styling.decorator'),
           text: style.pattern,
-          ownStyle: styleKey
+          ownStyle: styleKey,
+          entity: block.getEntityAt(start + collapsedText.length - 1)
         }]);
 
         const selectionOffset = rangeIndex === 0 ? selection.getStartOffset() : selection.getEndOffset();
